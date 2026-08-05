@@ -5,7 +5,7 @@ node_modules/
 # Next.js
 .next/
 out/
-build/
+/build/
 dist/
 
 # Environment
