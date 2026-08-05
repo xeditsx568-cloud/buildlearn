@@ -10,6 +10,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   ci:
     name: Lint, Typecheck, Test, Build
@@ -47,5 +50,6 @@ jobs:
       - name: Build
         run: pnpm build
         env:
+          # Dummy values for compile-time env validation only (no DB connection in CI)
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
           NEXT_PUBLIC_APP_URL: http://localhost:3000
