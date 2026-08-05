@@ -32,5 +32,5 @@
 
 - **Planning:** Approved (2026-08-05)
 - **Phase 1:** Complete — tagged `v0.1.0-foundation`
-- **UX specification:** Draft pending stakeholder approval
+- **UX specification:** v1.1 — Roadmap-centric revision (pending approval)
 - **Phase 2:** Awaiting approval to begin

@@ -105,14 +105,15 @@ The AI escalation ladder for help:
 └────────────────────────────┬────────────────────────────────────┘
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  PATH → Personalized roadmap (curated nodes, AI-ordered)        │
+│  PATH → Personalized ROADMAP (visual journey, `/roadmap`)      │
 └────────────────────────────┬────────────────────────────────────┘
                              ▼
         ┌────────────────────┴────────────────────┐
         ▼                                         ▼
 ┌───────────────┐                       ┌─────────────────┐
 │  LEARN        │                       │  BUILD MODE     │
-│  Lesson cycle │◄──────────────────────│  Feature goals  │
+│  Active node  │◄──────────────────────│  Feature goals  │
+│  (player)     │                       │                 │
 └───────┬───────┘                       └────────┬────────┘
         ▼                                          │
 ┌───────────────┐                                  │
@@ -134,11 +135,40 @@ The AI escalation ladder for help:
 
 ### Session loop (15–25 minutes ideal)
 
-1. **Learn** (5–8 min): short explanation + interactive example
-2. **Practice** (5–10 min): 1–2 exercises
-3. **Check** (2–3 min): quick quiz or challenge
-4. **Apply** (optional): project milestone progress
-5. **Reflect**: AI summarizes what was learned, what's next
+1. **Orient** (30 sec): check Roadmap or Dashboard — see where you are
+2. **Learn** (5–8 min): short explanation + interactive example (active node player)
+3. **Practice** (5–10 min): 1–2 exercises or a challenge node
+4. **Check** (2–3 min): quick quiz or challenge pass
+5. **Apply** (optional): project milestone progress
+6. **Reflect**: AI summarizes what was learned; return to Roadmap to see progress
+
+---
+
+## 4.1 The Roadmap — Core product surface
+
+The **Roadmap** (`/roadmap`) is BuildLearn's primary learning experience and key differentiator vs static course catalogs.
+
+**What it is:**
+- A vertical visual journey from Start → Finish, grouped into sections (HTML Basics, CSS Basics, etc.)
+- Personalized to the user's stated goal ("Build a Personal Portfolio Website")
+- Shows every node — completed, current, locked — so users always know what's ahead
+
+**What it is not:**
+- A flat list of lessons (Codecademy-style)
+- The Dashboard (which is a quick overview only)
+- The Learn page (which opens only the active lesson/challenge player)
+
+**User questions answered on every visit:**
+
+| Question | Roadmap answer |
+| -------- | -------------- |
+| What am I building? | Goal title in header |
+| Where am I now? | Highlighted current node |
+| What have I completed? | ✓ on completed nodes |
+| What comes next? | Next unlocked node visible |
+| How far from finishing? | Progress % + time remaining + Finish node |
+
+See [UX_SPECIFICATION.md](UX_SPECIFICATION.md) §5.8 for full Roadmap specification.
 
 ---
 

@@ -40,14 +40,21 @@
 | FR-2.4 | Goal refinement via AI (clarifying questions, max 2 turns) | Yes | P1 |
 | FR-2.5 | Generate initial learning path | Yes | P0 |
 
-### FR-3: Learning Paths
+### FR-3: Learning Paths & Roadmap
 | ID | Requirement | MVP | Priority |
 |----|-------------|-----|----------|
-| FR-3.1 | Display personalized roadmap with progress | Yes | P0 |
-| FR-3.2 | Skip nodes based on placement / demonstrated mastery | Yes | P0 |
-| FR-3.3 | Insert remedial nodes on failure patterns | Yes | P1 |
-| FR-3.4 | Path adapts when user enters Build Mode feature requests | Partial | P1 |
-| FR-3.5 | Multiple concurrent goals | No | P3 |
+| FR-3.1 | Visual **Roadmap** (`/roadmap`) showing personalized journey with progress | Yes | P0 |
+| FR-3.2 | Roadmap displays: goal title, current node, completed nodes, locked upcoming nodes, completion % | Yes | P0 |
+| FR-3.3 | Roadmap shows estimated time remaining and current project milestone | Yes | P0 |
+| FR-3.4 | Roadmap shows learning streak (simple day counter) | Yes | P1 |
+| FR-3.5 | Milestone nodes visually distinct and larger than lesson nodes | Yes | P0 |
+| FR-3.6 | Users may only open unlocked nodes; locked nodes visible but disabled | Yes | P0 |
+| FR-3.7 | Skip nodes based on placement / demonstrated mastery | Yes | P0 |
+| FR-3.8 | Insert remedial nodes on failure patterns | Yes | P1 |
+| FR-3.9 | Path adapts when user enters Build Mode feature requests | Partial | P1 |
+| FR-3.10 | Section groupings on roadmap (e.g., HTML Basics, CSS Basics) | Yes | P0 |
+| FR-3.11 | Multiple concurrent goals | No | P3 |
+| FR-3.12 | Side quests, bonus challenges, AI branches, community nodes | No | Post-MVP (schema-ready) |
 
 ### FR-4: Lessons
 | ID | Requirement | MVP | Priority |
@@ -114,11 +121,13 @@
 ### FR-10: Progress & Dashboard
 | ID | Requirement | MVP | Priority |
 |----|-------------|-----|----------|
-| FR-10.1 | Dashboard: current path, next lesson, project status | Yes | P0 |
-| FR-10.2 | Lesson/challenge completion history | Yes | P0 |
-| FR-10.3 | Streak counter (days with activity) | Yes | P2 |
-| FR-10.4 | XP and levels | No | P3 |
-| FR-10.5 | Achievements | No | P3 |
+| FR-10.1 | **Dashboard:** quick overview — continue CTA, progress snapshot, project status (not full path) | Yes | P0 |
+| FR-10.2 | **Roadmap:** primary learning journey surface (see FR-3) | Yes | P0 |
+| FR-10.3 | Continue Learning CTA opens current roadmap node (lesson/challenge player) | Yes | P0 |
+| FR-10.4 | Lesson/challenge completion history (visible on roadmap) | Yes | P0 |
+| FR-10.5 | Streak counter (days with activity) displayed on roadmap + dashboard | Yes | P1 |
+| FR-10.6 | XP and levels | No | P3 |
+| FR-10.7 | Achievements | No | P3 |
 
 ---
 
@@ -134,14 +143,15 @@
 1. **Auth:** Email + Google
 2. **Onboarding:** Goal capture, experience level, optional placement quiz
 3. **AI path generation:** From curated graph + goal template + user signals
-4. **Curriculum:** 12 lessons covering web fundamentals through basic JS DOM
-5. **Challenges:** 8 auto-graded coding challenges
-6. **Lesson player:** Monaco + live preview + quizzes + exercises
-7. **Skill tracking:** Mastery scores for 24 concepts
-8. **Project:** Single multi-file static site project with 4 milestones
-9. **Build Mode:** 5 feature recipes (dark mode, responsive nav, hero section, image grid, contact form styling)
-10. **AI tutor:** Sidebar with hints, error help, concept explanation (30 messages/month quota)
-11. **Dashboard:** Path progress, continue learning CTA, project status
+4. **Roadmap:** Visual goal-connected learning journey (`/roadmap`) — core product differentiator
+5. **Curriculum:** 12 lessons covering web fundamentals through basic JS DOM
+6. **Challenges:** 8 auto-graded coding challenges
+7. **Lesson player:** Monaco + live preview + quizzes + exercises (via `/learn/*` — no list view)
+8. **Skill tracking:** Mastery scores for 24 concepts
+9. **Project:** Single multi-file static site project with 4 milestones
+10. **Build Mode:** 5 feature recipes (dark mode, responsive nav, hero section, image grid, contact form styling)
+11. **AI tutor:** Sidebar with hints, error help, concept explanation (30 messages/month quota)
+12. **Dashboard:** Quick overview with Continue Learning CTA → current roadmap node
 
 ### Explicitly OUT of MVP
 
@@ -222,7 +232,7 @@
 ## 5. Feature Prioritization (Full Product)
 
 ### P0 — MVP launch blockers
-Auth, onboarding, path generation, lessons, challenges, editor, preview, project, basic AI tutor, mastery tracking
+Auth, onboarding, path generation, **roadmap**, lessons, challenges, editor, preview, project, basic AI tutor, mastery tracking
 
 ### P1 — MVP polish (launch + 4 weeks)
 Password reset, placement quiz, Build Mode micro-paths, AI levels 4–5, project review, streak counter, debugging challenges

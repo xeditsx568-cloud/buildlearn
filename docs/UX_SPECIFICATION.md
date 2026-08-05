@@ -1,8 +1,8 @@
 # UX Specification — BuildLearn MVP
 
 > **Status:** Draft for stakeholder approval  
-> **Version:** 1.0  
-> **Date:** 2026-08-05  
+> **Version:** 1.1  
+> **Date:** 2026-08-05 (Roadmap revision)  
 > **Scope:** MVP only (Phases 2–15 UI)  
 > **Related:** [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md), [ARCHITECTURE.md](ARCHITECTURE.md), [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)
 
@@ -13,9 +13,10 @@
 This document defines every user-facing screen, navigation pattern, state, and design token for the BuildLearn MVP. It aligns with the Phase 1 route structure (`(marketing)` and `(app)` groups) and extends it with nested routes required by later phases.
 
 **Design principles:**
+- **Roadmap-first:** the visual learning journey is the core experience — not a lesson list
 - Goal-first: every screen connects back to what the user wants to build
 - Teacher-not-builder: AI assists via sidebar, never replaces the editor
-- Progressive disclosure: beginners see simple paths; complexity reveals as they advance
+- Progressive disclosure: beginners see their full journey; detail reveals on interaction
 - One primary action per screen
 - Mobile-responsive web (not native app)
 
@@ -29,7 +30,8 @@ This document defines every user-facing screen, navigation pattern, state, and d
 | ----- | ----- | ------ |
 | `/` | `(marketing)` | Placeholder |
 | `/dashboard` | `(app)` | Placeholder |
-| `/learn` | `(app)` | Placeholder |
+| `/roadmap` | `(app)` | **Planned — central learning journey** |
+| `/learn` | `(app)` | Placeholder → redirects to active node player |
 | `/project` | `(app)` | Placeholder |
 | `/build` | `(app)` | Placeholder |
 
@@ -37,13 +39,16 @@ This document defines every user-facing screen, navigation pattern, state, and d
 
 | Route | Group | Phase | Notes |
 | ----- | ----- | ----- | ----- |
+| `/roadmap` | `(app)` | 6 | **Primary learning journey UI** |
 | `/sign-in`, `/sign-up` | `(auth)` or root | 2 | Outside `(app)` — Clerk hosted UI |
 | `/onboarding/*` | `(onboarding)` | 4 | New group: no app nav, stepper only |
-| `/learn/lessons/[lessonId]` | `(app)` | 7 | Lesson player |
-| `/learn/challenges/[challengeId]` | `(app)` | 8 | Challenge player |
+| `/learn/lessons/[lessonId]` | `(app)` | 7 | Lesson player (active learning only) |
+| `/learn/challenges/[challengeId]` | `(app)` | 8 | Challenge player (active learning only) |
 | `/build/recipes/[recipeId]` | `(app)` | 11 | Recipe-guided build flow |
 | `/settings` | `(app)` | 2+ | Profile & account |
 | `/privacy`, `/terms` | `(marketing)` | 2 | GDPR-ready (P1) |
+
+**`/learn` index behavior:** Redirects to the user's current in-progress node player URL. If no active node, redirects to `/roadmap`. **No list view at `/learn`.**
 
 ### Screens that are **not** routes (overlays/panels)
 
@@ -74,8 +79,9 @@ buildlearn.app
 │   └── /path                  Step 4: Path preview + confirm
 │
 └── (authenticated app shell)
-    ├── /dashboard             Home hub — continue learning
-    ├── /learn                 Learning path overview
+    ├── /dashboard             Quick overview — stats & continue CTA
+    ├── /roadmap               ★ Primary learning journey (visual path)
+    ├── /learn                 Redirect → active node player
     │   ├── /lessons/[id]      Lesson player
     │   └── /challenges/[id]   Challenge player
     ├── /project               Multi-file project workspace
@@ -94,20 +100,19 @@ buildlearn.app
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ [Logo → /dashboard]   Dashboard  Learn  Project  Build      │
+│ [Logo → /dashboard]  Dashboard  Roadmap  Project  Build      │
 │                                        [AI quota] [Avatar ▾] │
 ├─────────────────────────────────────────────────────────────┤
-│                                                             │
 │                      {page content}                         │
-│                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-- **Primary nav:** Dashboard, Learn, Project, Build — always visible on desktop
-- **Mobile:** Hamburger menu collapses nav; bottom tab bar optional enhancement (P1)
+- **Primary nav:** Dashboard, **Roadmap**, Project, Build — always visible on desktop
+- **Roadmap** is the primary learning destination; **Learn** is not a top-level nav item
+- **Mobile:** Bottom tab bar recommended — Dashboard | Roadmap | Project | Build
 - **Avatar menu:** Settings, Sign out
 - **Active state:** underline + `aria-current="page"` on current nav item
-- **Logo click:** returns to `/dashboard` when authenticated
+- **Logo click:** returns to `/dashboard`
 
 ### Marketing shell (`(marketing)` layout)
 
@@ -130,11 +135,13 @@ buildlearn.app
 | Sign up success (new user) | Auto | `/onboarding/goal` |
 | Sign in success (returning, onboarding done) | Auto | `/dashboard` |
 | Sign in success (returning, onboarding incomplete) | Auto | resume onboarding step |
-| Onboarding complete | Confirm path | `/dashboard` |
-| Dashboard | Continue learning | `/learn/lessons/[nextLessonId]` or `/learn` |
+| Onboarding complete | Confirm path | `/roadmap` (first visit) |
+| Dashboard | Continue learning | Current node player (`/learn/lessons/[id]` or `/learn/challenges/[id]`) |
+| Dashboard | View full journey | `/roadmap` |
 | Dashboard | Open project | `/project` |
-| Learn path | Click step | `/learn/lessons/[id]` or `/learn/challenges/[id]` |
-| Lesson complete | Next step | next path item or `/learn` |
+| Roadmap | Click unlocked node | Respective node player URL |
+| Roadmap | Click locked node | Tooltip only — no navigation |
+| Lesson/challenge complete | Next step | Next unlocked node player, or `/roadmap` if returning |
 | Build hub | Select recipe | `/build/recipes/[id]` |
 | Build recipe | Apply to project | `/project` (with recipe context) |
 
@@ -334,84 +341,261 @@ Goal: Clothing business landing page
 
 ### 5.7 Dashboard (`/dashboard`)
 
-**Purpose:** Home hub — orient user, drive next action (FR-10.1).
+**Purpose:** Quick overview and re-entry point — **not** the primary learning surface (FR-10.1). Answers "what's my status?" in under 10 seconds.
+
+**Does NOT duplicate Roadmap:** No full path list, no node-by-node journey. Shows summary stats only.
 
 **Components:**
-- Welcome header with goal reminder ("Building: [goal summary]")
-- **Continue learning** card (primary): next path step, progress bar, CTA
-- **Project status** card: milestone progress (0–4), thumbnail preview, "Open project"
-- **Path overview** mini-list: next 3 steps
-- **Weak areas** callout (P1, after mastery data exists)
-- AI message quota indicator (e.g., "24 of 30 messages left")
+- Welcome header with goal title ("Building: Personal Portfolio Website")
+- **Continue Learning** primary CTA → opens current roadmap node player (not `/roadmap`)
+- Progress snapshot: completion %, estimated time remaining, current streak
+- Project milestone card: "Milestone 2 of 4 — Styled layout"
+- AI message quota indicator
+- Secondary link: "View full roadmap →" → `/roadmap`
 
 **Wireframe:**
 ```
 Welcome back, Alex
+Building: Personal Portfolio Website
 
-┌─ Continue learning ─────────────────────────────┐
-│ Next: CSS Box Model & Spacing    [====··] 67% │
-│                              [ Continue → ]     │
+┌─ Continue Learning ─────────────────────────────┐
+│ Up next: CSS Box Model                          │
+│ 67% complete · ~4h remaining · 🔥 3-day streak   │
+│                    [ Continue Learning → ]      │
 └─────────────────────────────────────────────────┘
 
-┌─ Your project ──────┐  ┌─ Up next ─────────────┐
-│ StyleShop           │  │ 4. Links & Forms      │
-│ Milestone 2 of 4    │  │ 5. CSS Basics         │
-│ [ Open project ]    │  │ 6. Box Model          │
-└─────────────────────┘  └───────────────────────┘
+┌─ Project ───────────┐  ┌─ Quick stats ──────────┐
+│ Milestone 2 of 4    │  │ 18 / 27 nodes done     │
+│ [ Open project ]    │  │ [ View full roadmap → ]│
+└─────────────────────┘  └────────────────────────┘
 ```
 
-**Empty state (new user, path just created):**
+**Empty state (path just created):**
 ```
-Welcome! Your path is ready.
-[ Start your first lesson → ]
+Your roadmap is ready!
+[ Continue Learning → ]   [ View roadmap ]
 ```
 
-**Loading:** Skeleton cards for each section.
+**Loading:** Skeleton cards.
 
 **Error:** "Couldn't load your progress. [ Retry ]"
 
-**Mobile:** Cards stack single column; continue card pinned near top.
+**Mobile:** Single column; Continue Learning CTA full-width and pinned below header.
 
 ---
 
-### 5.8 Learning Path (`/learn`)
+### 5.8 Roadmap (`/roadmap`) — ★ Core experience
 
-**Purpose:** Full roadmap with step states (FR-3.1, Phase 6).
+**Purpose:** Visual, goal-connected learning journey — the product differentiator (FR-3.1). Answers all five user questions:
 
-**Components:**
-- Page title + overall progress (e.g., "8 of 24 steps complete")
-- Filter tabs: All | Lessons | Challenges | Milestones
-- Vertical timeline / step list
-- Step card states:
-  - **Locked:** greyed, lock icon, prerequisite tooltip
-  - **Available:** accent border, "Start" button
-  - **In progress:** progress indicator
-  - **Completed:** checkmark, muted
-  - **Skipped:** dashed border, "Skipped" badge
-- Legend for step types
+| Question | Roadmap element |
+| -------- | --------------- |
+| What am I building? | Goal title header |
+| Where am I now? | Highlighted current node |
+| What have I completed? | Checkmarks on completed nodes |
+| What comes next? | Next unlocked node(s) |
+| How far am I from finishing? | Progress % + time remaining + Finish node |
 
-**Wireframe:**
+**This replaces the former `/learn` list view.** The Roadmap is the single source of truth for path navigation.
+
+#### Node types & visual hierarchy
+
+| Type | Visual | Size | Icon |
+| ---- | ------ | ---- | ---- |
+| **Lesson** | Circle node + label | Standard (48px) | Book |
+| **Challenge** | Diamond node + label | Standard (48px) | Code brackets |
+| **Mini project** | Rounded square + label | Medium (56px) | Puzzle |
+| **Milestone** | Star/hex node + label | **Large (72px)** | Flag |
+| **Finish** | Celebration node | Large (80px) | 🎉 |
+| **Section header** | Non-interactive label | — | — |
+
+#### Node states
+
+| State | Appearance | Interaction |
+| ----- | ---------- | ----------- |
+| **Completed** | Filled primary color + ✓ badge | Click → replay (optional) or view summary |
+| **Current** | Pulsing ring / bold border + "You are here" | Click → open node player |
+| **Available** | Solid outline, full opacity | Click → open node player |
+| **Locked** | 40% opacity + lock icon | Click disabled; tooltip shows prerequisite |
+| **Skipped** | Dashed outline + "Skipped" badge | Click → open if user chooses to revisit |
+
+**Rule:** Users may only open **unlocked** nodes (available, current, or completed). Locked nodes are visible but not navigable.
+
+#### Section grouping
+
+Roadmap nodes are grouped into labeled sections (phases) derived from goal template:
+
 ```
-Your learning path                    8 / 24 complete
-[All] [Lessons] [Challenges] [Milestones]
+Build a Personal Portfolio Website
 
-  ✓  How Websites Work          completed
-  ✓  Your First HTML Page       completed
-  →  CSS Box Model              [ Continue ]
-  🔒 Responsive Design           locked — complete Box Model first
-  ○  JavaScript Basics           available
-  ...
+Start ●
+│
+├── HTML Basics ─────────────────
+│   ├── HTML Basics          ✓
+│   ├── HTML Structure       ✓
+│   ├── Headings & Paragraphs →  ← current
+│   ├── Links                🔒
+│   ├── Images               🔒
+│   ├── Lists                🔒
+│   └── Mini Project ★       🔒
+│
+├── CSS Basics ──────────────────
+│   ├── CSS Basics           🔒
+│   ...
+│
+├── JavaScript Basics ───────────
+│   ...
+│
+└── Finish 🎉                  🔒
 ```
 
-**Empty:** Should not occur post-onboarding.
+Sections collapse/expand on mobile; expanded by default on desktop for current section.
 
-**Loading:** Skeleton timeline.
+#### Header stats bar
 
-**Error:** Full-page error with retry.
+Fixed below page title:
+
+```
+67% complete  ·  ~4 hours left  ·  🔥 3-day streak  ·  Project: Milestone 2/4
+[=========>          ] 18 of 27 nodes
+```
+
+- **Completion %:** completed nodes / total nodes (excluding skipped-from-count option: count skipped as complete)
+- **Time remaining:** sum of `estimated_minutes` on incomplete nodes
+- **Streak:** consecutive days with meaningful activity (lesson, challenge, or milestone — P1 simple counter; full logic P2)
+- **Project milestone:** current project checkpoint from path
+
+#### Wireframe (desktop)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ Roadmap                                                         │
+│ Build a Personal Portfolio Website                              │
+│ 67% · ~4h left · 🔥 3-day streak · Project milestone 2/4        │
+│ [===================>                    ] 18/27              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  START ●                                                        │
+│    │                                                            │
+│    ├─ HTML Basics ─────────────────────────────────────────    │
+│    │   (✓) HTML Basics                                         │
+│    │   (✓) HTML Structure                                      │
+│    │   (→) Headings & Paragraphs     ← You are here              │
+│    │   (🔒) Links                                              │
+│    │   (🔒) Images                                             │
+│    │   (★) Mini Project                                        │
+│    │                                                            │
+│    ├─ CSS Basics ──────────────────────────────────────────    │
+│    │   (🔒) CSS Basics                                         │
+│    │   ...                                                      │
+│    │                                                            │
+│    └─ Finish 🎉                                                 │
+│                                                                 │
+│  [ Continue Learning → ]                                        │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Wireframe (mobile)
+
+```
+┌─────────────────────────┐
+│ Roadmap          67%    │
+│ Portfolio Website       │
+│ 🔥 3 · ~4h · M2/4      │
+├─────────────────────────┤
+│ ▼ HTML Basics (2/7)    │
+│   ✓ HTML Basics        │
+│   ✓ HTML Structure     │
+│   → Headings ← HERE    │
+│   🔒 Links             │
+│   🔒 Images            │
+│ ▶ CSS Basics (0/8)     │  ← collapsed
+│ ▶ JavaScript (0/9)     │
+├─────────────────────────┤
+│ [ Continue Learning ]  │
+└─────────────────────────┘
+```
+
+#### Empty state
+
+Should not occur post-onboarding. Fallback:
+```
+Your roadmap is being prepared.
+[ Refresh ]
+```
+
+#### Loading state
+
+Skeleton vertical path — 8 pulsing nodes with connecting line.
+
+#### Error state
+
+```
+We couldn't load your roadmap.
+[ Try again ]   [ Go to dashboard ]
+```
+
+#### Completion state (all nodes done)
+
+Finish node illuminated; confetti animation (respect `prefers-reduced-motion`):
+```
+🎉 You did it!
+You completed your journey to build a Personal Portfolio Website.
+[ View project ]  [ Explore Build Mode ]
+```
+
+#### Design rationale
+
+| Decision | Rationale |
+| -------- | --------- |
+| Vertical journey, not grid | Matches linear progression; mobile-native scroll |
+| Visible locked nodes | Motivation — users see what's ahead |
+| Section headers | Cognitive chunking; mirrors how teachers structure courses |
+| Milestones visually larger | Signals application checkpoints tied to project |
+| Goal in page title | Constant reminder of *why* they're learning |
+| Roadmap replaces lesson list | Unique identity vs Codecademy-style catalogs |
+
+#### Accessibility
+
+- Roadmap rendered as `<ol>` ordered list within each section `<section aria-labelledby="...">`
+- Each node is `<li>` with `aria-disabled="true"` when locked
+- Current node: `aria-current="step"`
+- Progress bar: `role="progressbar"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`
+- Locked node tooltip announced via `aria-describedby` on focus
+- Keyboard: Tab through unlocked nodes; Enter opens node; locked nodes skipped in tab order
+- Section collapse: `aria-expanded` on mobile accordion headers
+- Color not sole indicator — icons + text labels for all states
+- Minimum contrast 4.5:1 on all node labels
+
+#### Future-proofing (not MVP — architecture only)
+
+| Future feature | Extension point |
+| -------------- | --------------- |
+| Multiple goals | Tab switcher above roadmap; `learning_paths` already per-user |
+| Side quests | Optional nodes with `is_optional: true` in step metadata; rendered as dashed branch |
+| Bonus challenges | Node type `bonus_challenge`; visually distinct badge |
+| AI-generated branches | Sub-path fork UI from a node; `parent_step_id` in metadata |
+| Advanced paths | Separate roadmap tab after completing fundamentals |
+| Community challenges | Node type `community` with participant count badge |
+
+MVP renders a **single linear path** with section groupings. Metadata schema supports extensions without UI changes.
 
 ---
 
-### 5.9 Lesson Player (`/learn/lessons/[lessonId]`)
+### 5.9 Learn — Active node entry (`/learn`)
+
+**Purpose:** Entry redirect only — **not** a browsable list. Opens the user's current lesson or challenge player.
+
+**Behavior:**
+- `/learn` → HTTP redirect to current in-progress node URL
+- If no in-progress node → redirect to `/roadmap`
+- Deep links `/learn/lessons/[id]` and `/learn/challenges/[id]` always work when node is unlocked
+
+**Does NOT duplicate Roadmap:** No path overview, no step list, no filters.
+
+---
+
+### 5.10 Lesson Player (`/learn/lessons/[lessonId]`)
 
 **Purpose:** Deliver lesson content blocks (FR-4.1–4.6).
 
@@ -459,14 +643,14 @@ Your learning path                    8 / 24 complete
 🎉 Lesson complete!
 You learned: CSS Box Model, margin, padding
 
-[ Next lesson → ]  [ Back to path ]
+[ Next lesson → ]  [ Back to roadmap ]
 ```
 
 **A11y:** Monaco aria-label; preview iframe title="Code output"; keyboard nav between blocks; tutor sidebar focus trap when open on mobile.
 
 ---
 
-### 5.10 Challenge Player (`/learn/challenges/[challengeId]`)
+### 5.11 Challenge Player (`/learn/challenges/[challengeId]`)
 
 **Purpose:** Standalone coding challenge with auto-grading (FR-5.1–5.3).
 
@@ -506,7 +690,7 @@ Challenge: Build a profile card          Attempt 2 of ∞
 
 ---
 
-### 5.11 Project Workspace (`/project`)
+### 5.12 Project Workspace (`/project`)
 
 **Purpose:** Persistent multi-file project (FR-7.1–7.3).
 
@@ -549,7 +733,7 @@ We've created starter files based on your goal.
 
 ---
 
-### 5.12 Build Mode Hub (`/build`)
+### 5.13 Build Mode Hub (`/build`)
 
 **Purpose:** Catalog of 5 feature recipes (FR-8.1, FR-8.5).
 
@@ -575,7 +759,7 @@ Add features to your project — we'll teach you how.
 
 ---
 
-### 5.13 Build Mode Recipe Flow (`/build/recipes/[recipeId]`)
+### 5.14 Build Mode Recipe Flow (`/build/recipes/[recipeId]`)
 
 **Purpose:** Guided feature implementation (FR-8.3–8.4).
 
@@ -597,7 +781,7 @@ Before adding dark mode, let's learn:
 
 ---
 
-### 5.14 Settings (`/settings`)
+### 5.15 Settings (`/settings`)
 
 **Purpose:** Profile and account management (FR-1.4, FR-1.5 P1).
 
@@ -628,7 +812,7 @@ Account
 
 ---
 
-### 5.15 System screens
+### 5.16 System screens
 
 | Screen | Route / trigger | Purpose |
 | ------ | --------------- | ------- |
@@ -652,31 +836,30 @@ Account
 3. ONBOARDING /onboarding/goal → /experience → [/quiz] → /path
    └─ Enter goal → Select experience → [Optional quiz]
    └─ AI generates path (loading 10–20s)
-   └─ Review path → "Start learning"
+   └─ Review path preview → "Start learning"
    └─ System auto-creates project (StyleShop)
 
-4. DASHBOARD /dashboard
-   └─ See "Continue learning" + empty project card
-   └─ Click "Start your first lesson"
+4. ROADMAP /roadmap (first authenticated learning view)
+   └─ See full visual journey with goal title
+   └─ Current node highlighted; locked nodes visible ahead
+   └─ Click first available node OR dashboard "Continue Learning"
 
 5. LESSON 1 /learn/lessons/how-websites-work
    └─ Complete blocks: objective → explain → interact → exercise → quiz → bridge
    └─ Use AI hint (level 1) if stuck — quota decrements
-   └─ Lesson complete modal → Next lesson
+   └─ Lesson complete modal → Next node or back to roadmap
 
-6. LESSONS 2–4 (path continues)
-   └─ User completes HTML fundamentals lessons
-   └─ Interleaved: Challenge 1 (profile card) after lesson 3
+6. ROADMAP /roadmap (return visits)
+   └─ Progress updated; completed nodes show ✓
+   └─ Continue through lessons 2–N; challenges appear as diamond nodes
+   └─ Milestone nodes (★) link to /project
 
 7. PROJECT /project
-   └─ Milestone 1 unlocked: "Static page structure"
-   └─ User edits index.html in project editor
-   └─ Preview updates live
-   └─ Checklist item complete → Milestone 1 done 🎉
+   └─ Complete milestone 1 → roadmap milestone node marked complete 🎉
 
-8. RETURN /dashboard
-   └─ Project card shows "Milestone 1 of 4 complete"
-   └─ Continue learning → next path step
+8. DASHBOARD /dashboard (quick re-entry)
+   └─ "Continue Learning" → current node player
+   └─ "View full roadmap" → /roadmap
 ```
 
 **Estimated time to Milestone 1:** 2–4 hours of learning spread over 1–3 sessions.
@@ -819,19 +1002,32 @@ Tailwind default (4px base): `1=4px`, `2=8px`, `3=12px`, `4=16px`, `6=24px`, `8=
 
 ### Screens that fit current structure ✅
 
-All MVP screens map to `(marketing)`, `(app)`, `(onboarding)`, or `(auth)` route groups. AI tutor is a shared layout component, not a route — matches ARCHITECTURE client model.
+All MVP screens map to `(marketing)`, `(app)`, `(onboarding)`, or `(auth)` route groups. **`/roadmap` fits `(app)` alongside existing placeholders.** AI tutor is a shared layout component, not a route.
+
+### Responsibility split (no duplication)
+
+| Concern | Owner screen |
+| ------- | ------------ |
+| Full journey visualization | **Roadmap** |
+| Quick status + continue CTA | **Dashboard** |
+| Active lesson/challenge content | **Learn** (player routes only) |
+| Multi-file editing | **Project** |
+| Feature recipes | **Build** |
 
 ### Missing routes to add (recommended before Phase 2 UI)
 
 | Route | Priority | Rationale |
 | ----- | -------- | --------- |
-| `/sign-in`, `/sign-up` | P0 | TASK-101 already planned |
-| `/onboarding/*` (4 steps) | P0 | Phase 4; needs `(onboarding)` group |
+| **`/roadmap`** | **P0** | **Core learning journey — Phase 6** |
+| `/sign-in`, `/sign-up` | P0 | TASK-101 |
+| `/onboarding/*` (4 steps) | P0 | Phase 4 |
 | `/learn/lessons/[id]` | P0 | Phase 7 |
 | `/learn/challenges/[id]` | P0 | Phase 8 |
 | `/build/recipes/[id]` | P0 | Phase 11 |
 | `/settings` | P1 | Profile FR-1.4 |
 | `/privacy`, `/terms` | P1 | GDPR FR-1.5 |
+
+**Removed from plan:** `/learn` as list/overview page — superseded by `/roadmap`.
 
 ### Screens to defer (not MVP) ❌
 
@@ -849,30 +1045,33 @@ All MVP screens map to `(marketing)`, `(app)`, `(onboarding)`, or `(auth)` route
 ### Recommended architecture doc updates (no code)
 
 1. Add `(onboarding)` route group to ARCHITECTURE.md § folder structure
-2. Document nested `/learn/lessons/` and `/learn/challenges/` routes
-3. Update `(app)/README.md` route table with nested routes
-4. Add `(auth)` routes note outside `(app)` shell
+2. Document `/roadmap` route and Roadmap data mapping (see ARCHITECTURE.md § Roadmap UI)
+3. Document nested `/learn/lessons/` and `/learn/challenges/` as player-only routes
+4. Update `(app)/README.md` route table — add `/roadmap`, demote `/learn` to redirect
 
 ---
 
 ## 11. Open questions for stakeholder
 
-1. **Bottom tab bar on mobile?** Recommended for faster nav between Dashboard/Learn/Project/Build.
-2. **Onboarding quiz skippable by default?** Recommended yes for P1 launch.
-3. **Challenge list:** tab on `/learn` vs separate `/challenges` route? **Recommend:** tab on `/learn` to avoid nav clutter.
-4. **Dark mode for app shell?** Defer to post-MVP; dark mode recipe teaches CSS approach in project.
-5. **Legal pages before beta?** Recommend minimal `/privacy` and `/terms` before public beta.
+1. **Replay completed lessons?** Recommend: allow from roadmap click on completed nodes (review mode).
+2. **Onboarding quiz skippable by default?** Recommend yes for P1 launch.
+3. **Streak on roadmap:** simple day counter for MVP; full streak-freeze logic post-MVP.
+4. **Legal pages before beta?** Recommend minimal `/privacy` and `/terms` before public beta.
+5. **Roadmap scroll-to-current on load?** Recommend yes — auto-scroll to current node.
 
 ---
 
 ## 12. Implementation readiness checklist
 
 - [x] Every MVP screen identified and mapped to routes
+- [x] **Roadmap specified as core learning experience**
+- [x] Dashboard / Roadmap / Learn responsibilities separated (no duplication)
 - [x] Navigation flows documented
 - [x] Empty, loading, error states defined per screen
-- [x] Mobile and accessibility requirements specified
+- [x] Mobile and accessibility requirements specified for Roadmap
 - [x] Design system tokens defined (extends shadcn/Tailwind)
 - [x] End-to-end user flow documented
+- [x] Future-proofing extension points documented
 - [x] Architecture gaps identified with recommendations
 - [ ] Stakeholder approval (pending)
 - [ ] Figma/high-fidelity mockups (optional; text wireframes sufficient to start)

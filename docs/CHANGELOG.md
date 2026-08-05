@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+### Changed (UX v1.1 — Roadmap revision)
+- **Roadmap (`/roadmap`)** designated as primary learning journey — replaces `/learn` list view
+- Dashboard refactored to quick overview; Continue Learning → current node player
+- Learn routes (`/learn/*`) scoped to active lesson/challenge player only
+- Updated: UX_SPECIFICATION.md, PROJECT_CONTEXT.md, PRODUCT_REQUIREMENTS.md, ARCHITECTURE.md
+
 ---
 
 ## [0.1.0-foundation] — 2026-08-05

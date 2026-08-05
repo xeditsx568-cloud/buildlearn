@@ -165,24 +165,24 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 
 ---
 
-### PHASE 6 — Learning Path UI
-**Objective:** User sees and navigates their personalized roadmap.
+### PHASE 6 — Roadmap & Dashboard UI
+**Objective:** User sees and navigates their personalized visual learning journey.
 
 **Features:**
-- Path visualization (vertical step list)
-- Step states: locked, available, in_progress, completed, skipped
-- Continue learning CTA
-- Progress percentages
+- **Roadmap page (`/roadmap`)** — vertical journey with section groupings, node states, progress stats
+- Dashboard quick overview with Continue Learning → current node
+- `/learn` redirect to active player (no list view)
+- Streak, time remaining, project milestone on roadmap header
 
 **Dependencies:** Phase 5
 
 **Agent assignments:**
 | Agent | Work |
 |-------|------|
-| Programmer 1 | Path UI components |
-| Programmer 2 | Path API, step state management |
+| Programmer 1 | Roadmap UI, Dashboard refactor, node components |
+| Programmer 2 | Path API, step state, roadmap data aggregation |
 
-**DoD:** Dashboard shows path; clicking step navigates to lesson/challenge
+**DoD:** Roadmap renders full path; clicking unlocked node opens lesson/challenge; Dashboard CTA opens current node
 
 ---
 

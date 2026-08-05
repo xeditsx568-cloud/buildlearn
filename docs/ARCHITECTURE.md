@@ -370,10 +370,71 @@ GoalTemplate ─── GoalTemplateConcept[] (M:N)
 | id | UUID PK | |
 | path_id | UUID FK | |
 | order_index | INT | |
-| step_type | ENUM | lesson, challenge, project_milestone, review |
+| step_type | ENUM | lesson, challenge, project_milestone, mini_project, review |
 | reference_id | VARCHAR | lesson/challenge/milestone ID |
 | status | ENUM | locked, available, in_progress, completed, skipped |
+| metadata | JSONB | See Roadmap UI mapping below |
 | UNIQUE | (path_id, order_index) | |
+
+**Roadmap UI mapping (`/roadmap`):**
+
+The Roadmap screen renders `learning_path_steps` for the user's active `learning_paths` row. Section groupings (e.g., "HTML Basics", "CSS Basics") are stored in `learning_paths.metadata`:
+
+```json
+{
+  "goal_display_title": "Build a Personal Portfolio Website",
+  "sections": [
+    { "id": "html-basics", "title": "HTML Basics", "start_order": 0, "end_order": 6 },
+    { "id": "css-basics", "title": "CSS Basics", "start_order": 7, "end_order": 14 }
+  ]
+}
+```
+
+**Node type → Roadmap visual:**
+
+| `step_type` | Roadmap visual | Size |
+| ----------- | -------------- | ---- |
+| `lesson` | Circle + label | Standard |
+| `challenge` | Diamond + label | Standard |
+| `mini_project` | Rounded square + label | Medium |
+| `project_milestone` | Star/hex + label | **Large** |
+| `review` | Circle (dotted) | Standard |
+
+**Per-step `metadata` (JSONB) — future-proofing (not all used in MVP):**
+
+| Field | Type | MVP | Purpose |
+| ----- | ---- | --- | ------- |
+| `section_id` | string | Yes | Links step to section header |
+| `display_title` | string | Yes | Override title on roadmap |
+| `is_optional` | boolean | No | Side quest nodes (post-MVP) |
+| `branch_id` | string | No | AI-generated branch grouping |
+| `parent_step_id` | UUID | No | Fork point for branches |
+| `node_flags` | string[] | No | `bonus`, `community`, `advanced` |
+
+**Computed fields (API, not stored):**
+- `completion_percent` — completed steps / total steps
+- `estimated_minutes_remaining` — sum of incomplete lesson/challenge estimates
+- `current_streak_days` — from activity log (P1)
+
+**MVP constraint:** Single active path per user; linear render only. Fork/optional UI deferred.
+
+#### App Router — authenticated routes (`(app)`)
+
+| Route | Purpose | Phase |
+| ----- | ------- | ----- |
+| `/dashboard` | Quick overview, Continue Learning CTA | 6 |
+| `/roadmap` | **Primary visual learning journey** | 6 |
+| `/learn` | Redirect → active node player | 7 |
+| `/learn/lessons/[lessonId]` | Lesson player | 7 |
+| `/learn/challenges/[challengeId]` | Challenge player | 8 |
+| `/project` | Multi-file project workspace | 10 |
+| `/build` | Build Mode recipe catalog | 11 |
+| `/build/recipes/[recipeId]` | Guided recipe flow | 11 |
+| `/settings` | Profile & account | 2+ |
+
+**Navigation:** Primary nav = Dashboard · **Roadmap** · Project · Build. Learn is not top-level nav.
+
+**Responsibility split:** Roadmap owns path visualization; Dashboard owns summary; Learn owns active content only.
 
 #### lessons
 | Column | Type | Notes |
