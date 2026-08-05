@@ -15,6 +15,9 @@
   - Phase 3 backlog: TASK-103, TASK-104 (content)
 - Planning approved (P-002); ADR-013 (Clerk String ID), ADR-014 (Phase 1 boundary)
 
+### Added (TASK-006)
+- Phase 1 gate review APPROVED — foundation complete
+
 ### Added (TASK-005)
 - t3-env validation for `DATABASE_URL` and `NEXT_PUBLIC_APP_URL`
 - Unit tests for env schema accept/reject behavior
@@ -40,8 +43,9 @@
 - Removed CODEOWNERS (placeholder usernames), repositories layer, pre-created component/content subdirs
 - Simplified FILE_OWNERSHIP.md; worktrees now documented as optional
 
-### Pending
-- TASK-001: Next.js scaffold (first development task)
+### Phase 1 complete (2026-08-05)
+- TASK-001 through TASK-005 merged; TASK-006 gate APPROVED
+- Foundation: Next.js 15, Prisma users/profiles, CI, route groups, t3-env
 
 ---
 

@@ -42,7 +42,7 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 **Features:**
 - Next.js 15 + TypeScript + Tailwind + shadcn/ui scaffold
 - Prisma + Neon connection
-- ESLint, Prettier, Vitest, Playwright setup
+- ESLint, Vitest (Prettier and Playwright deferred to later phases)
 - GitHub Actions CI (lint, typecheck, test, build)
 - Environment variable template
 - Folder structure per ARCHITECTURE.md

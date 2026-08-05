@@ -2,7 +2,7 @@
 
 AI-powered coding education platform — goal-driven learning with a teacher-not-builder AI philosophy.
 
-> **Status:** Phase 1 development ready (scaffold not yet initialized).
+> **Status:** Phase 1 foundation complete (2026-08-05). Phase 2 (Authentication) ready to begin pending approval.
 
 ## Quick links
 
@@ -24,14 +24,16 @@ AI-powered coding education platform — goal-driven learning with a teacher-not
 - **AI:** Vercel AI SDK (provider abstraction)
 - **Hosting:** Vercel
 
-## Getting started (after Phase 1 tasks)
+## Getting started
 
 ```bash
 pnpm install
-cp .env.example .env.local   # fill in values
-pnpm db:migrate
+cp .env.example .env.local   # edit DATABASE_URL for Neon when ready
+pnpm db:generate
 pnpm dev
 ```
+
+For lint/build/test, `.env.local` must contain valid `DATABASE_URL` and `NEXT_PUBLIC_APP_URL` (dummy values from `.env.example` work for local development).
 
 ## Development workflow
 

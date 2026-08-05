@@ -6,11 +6,11 @@
 
 ---
 
-## Current Sprint: Phase 1 — Project Foundation
+## Current Sprint: Phase 1 — Project Foundation ✅ COMPLETE
 
 **Goal:** Runnable monorepo skeleton with CI, database schema stub, and verified folder layout. No product features.
 
-**Unblocked:** Planning approved (P-002). Development prep complete (PREP-001).
+**Status:** All implementation tasks merged. Gate review TASK-006 APPROVED (2026-08-05). Awaiting stakeholder approval to begin Phase 2.
 
 ### Parallel execution after TASK-001 merges
 
@@ -145,7 +145,7 @@ Description: |
   placeholder structure. Add minimal placeholder pages so routes resolve.
   Verify all READMEs still accurate.
 Owner: Programmer 1
-Status: review
+Status: done
 Priority: P0
 Phase: 1
 Dependencies: [TASK-001]
@@ -181,7 +181,7 @@ Description: |
   Add @t3-oss/env-nextjs for type-safe environment variables.
   Create .env.example with documented variables.
 Owner: Programmer 2
-Status: review
+Status: done
 Priority: P0
 Phase: 1
 Dependencies: [TASK-001]
@@ -213,7 +213,7 @@ Description: |
   Verify structure, CI, schema, env handling, and file ownership compliance.
   Produce review report in docs/reviews/TASK-006.md.
 Owner: Checker
-Status: pending
+Status: done
 Priority: P0
 Phase: 1
 Dependencies: [TASK-001, TASK-002, TASK-003, TASK-004, TASK-005]
@@ -245,7 +245,7 @@ TASK-ID: TASK-101
 Title: Integrate Clerk authentication
 Phase: 2
 Owner: Programmer 1
-Status: blocked
+Status: pending
 Dependencies: [TASK-006]
 Priority: P0
 Branch: feature/TASK-101-clerk-auth
@@ -364,6 +364,12 @@ Reviewer: Checker
 
 | Task ID | Title | Completed | Owner |
 | ------- | ----- | --------- | ----- |
+| TASK-001 | Next.js scaffold | 2026-08-05 | Programmer 1 |
+| TASK-002 | Prisma users/profiles | 2026-08-05 | Programmer 2 |
+| TASK-003 | GitHub Actions CI | 2026-08-05 | Programmer 2 |
+| TASK-004 | Route layout wiring | 2026-08-05 | Programmer 1 |
+| TASK-005 | t3-env validation | 2026-08-05 | Programmer 2 |
+| TASK-006 | Phase 1 gate review | 2026-08-05 | Checker |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -375,11 +381,12 @@ Reviewer: Checker
 
 | Metric | Count |
 | ------ | ----- |
-| Phase 1 pending | 5 |
+| Phase 1 pending | 0 |
 | Phase 1 in progress | 0 |
-| Phase 1 in review | 1 |
+| Phase 1 in review | 0 |
+| Phase 1 complete | 6 |
 | Backlog (Phase 2+) | 14 |
-| Completed | 2 |
+| Completed (all phases) | 8 |
 
 ---
 
@@ -391,9 +398,9 @@ Reviewer: Checker
 | TASK-002 | 1 | Prisma + users/profiles | P2 | done |
 | TASK-003 | 1 | CI pipeline | P2 | done |
 | TASK-004 | 1 | Route layout wiring | P1 | done |
-| TASK-005 | 1 | t3-env validation | P2 | review |
-| TASK-006 | 1 | Phase 1 Checker gate | Checker | pending |
-| TASK-101 | 2 | Clerk auth | P1 | blocked |
-| TASK-102 | 2 | Clerk webhook | P2 | blocked |
+| TASK-005 | 1 | t3-env validation | P2 | done |
+| TASK-006 | 1 | Phase 1 Checker gate | Checker | done |
+| TASK-101 | 2 | Clerk auth | P1 | pending |
+| TASK-102 | 2 | Clerk webhook | P2 | pending |
 | TASK-103 | 3 | Concept graph seed | P2 | blocked |
 | TASK-104 | 3 | Lesson schema + L1 | P2 | blocked |

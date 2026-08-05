@@ -17,7 +17,8 @@ Full details: [docs/AGENT_WORKFLOW.md](docs/AGENT_WORKFLOW.md)
 ## Before you start
 
 1. Read [docs/PROJECT_CONTEXT.md](docs/PROJECT_CONTEXT.md) (first session) or [docs/TASK_QUEUE.md](docs/TASK_QUEUE.md)
-2. Claim a task — set `Status: in_progress` and `Owner` in TASK_QUEUE.md
+2. Copy `.env.example` to `.env.local` before running lint, build, or dev (required by t3-env)
+3. Claim a task — set `Status: in_progress` and `Owner` in TASK_QUEUE.md
 3. Check [docs/FILE_OWNERSHIP.md](docs/FILE_OWNERSHIP.md) — do not edit files owned by another agent's active task
 4. Create a branch: `feature/TASK-XXX-short-description`
 
