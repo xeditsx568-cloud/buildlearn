@@ -2,7 +2,7 @@
 
 AI-powered coding education platform — goal-driven learning with a teacher-not-builder AI philosophy.
 
-> **Status:** Phase 1 foundation complete (2026-08-05). Phase 2 (Authentication) ready to begin pending approval.
+> **Status:** Phase 1 foundation complete — tagged `v0.1.0-foundation` (2026-08-05). Phase 2 (Authentication) ready to begin pending approval.
 
 ## Quick links
 

@@ -1,51 +1,28 @@
 ## [Unreleased]
 
+---
+
+## [0.1.0-foundation] — 2026-08-05
+
+Phase 1 — Project Foundation complete. Gate review TASK-006 APPROVED.
+
 ### Added
-- **PREP-001:** Development environment preparation (2026-08-05)
-  - Complete folder structure with READMEs in all major directories
-  - Git workflow: PR template, CODEOWNERS, ci.yml.example, worktree scripts
-  - `docs/FILE_OWNERSHIP.md` — file ownership matrix for parallel agents
-  - `docs/GIT_WORKFLOW.md` — branch, worktree, and merge process
-  - `docs/README.md` — documentation index
-  - `.env.example`, `.gitignore`, `.editorconfig`, `.node-version`, `.npmrc`
-  - Root `README.md` and `CONTRIBUTING.md`
-- Restructured `docs/TASK_QUEUE.md`:
-  - Phase 1: TASK-001 through TASK-006 (foundation only)
-  - Phase 2 backlog: TASK-101, TASK-102 (auth)
-  - Phase 3 backlog: TASK-103, TASK-104 (content)
-- Planning approved (P-002); ADR-013 (Clerk String ID), ADR-014 (Phase 1 boundary)
+- **TASK-001:** Next.js 15, React 19, TypeScript strict, Tailwind v4, shadcn/ui Button, Vitest
+- **TASK-002:** Prisma ORM — `users` and `profiles` schema, initial migration, db client singleton
+- **TASK-003:** GitHub Actions CI (lint, typecheck, test, build)
+- **TASK-004:** App Router route groups — `(marketing)` at `/`, `(app)` at `/dashboard`, `/learn`, `/project`, `/build`
+- **TASK-005:** t3-env validation for `DATABASE_URL` and `NEXT_PUBLIC_APP_URL`
+- **TASK-006:** Phase 1 gate review APPROVED
 
-### Added (TASK-006)
-- Phase 1 gate review APPROVED — foundation complete
+### Infrastructure
+- Environment template (`.env.example`) with documented Phase 2+ placeholders
+- Five-agent workflow docs, task queue, file ownership matrix
+- Checker review reports for TASK-001 through TASK-006
 
-### Added (TASK-005)
-- t3-env validation for `DATABASE_URL` and `NEXT_PUBLIC_APP_URL`
-- Unit tests for env schema accept/reject behavior
-
-### Added (TASK-004)
-- App Router route groups: `(marketing)` home at `/`, `(app)` shell with `/dashboard`, `/learn`, `/project`, `/build` placeholders
-- Marketing page component smoke test
-
-### Added (TASK-003)
-- GitHub Actions CI workflow (lint, typecheck, test, build)
-
-### Added (TASK-002)
-- Prisma ORM with `users` and `profiles` schema, initial migration, db client singleton
-- ADR-016 in DECISIONS.md
-
-### Added (TASK-001)
-- Next.js 15 foundation: TypeScript strict, Tailwind v4, shadcn/ui Button, Vitest smoke test
-- ADR-015 in DECISIONS.md
-
-### Changed (audit 2026-08-05)
-- Lean repo audit: removed 24 leaf READMEs, 17 premature empty directories
-- Merged GIT_WORKFLOW.md into AGENT_WORKFLOW.md §4; deleted redundant files
-- Removed CODEOWNERS (placeholder usernames), repositories layer, pre-created component/content subdirs
-- Simplified FILE_OWNERSHIP.md; worktrees now documented as optional
-
-### Phase 1 complete (2026-08-05)
-- TASK-001 through TASK-005 merged; TASK-006 gate APPROVED
-- Foundation: Next.js 15, Prisma users/profiles, CI, route groups, t3-env
+### Planning (included in repository)
+- PREP-001 development environment preparation
+- Phase 0 planning documentation
+- ADR-013 through ADR-016
 
 ---
 
