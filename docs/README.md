@@ -10,6 +10,7 @@
 | [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md) | Features, MVP scope, FR-* requirements | Before implementing features |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Tech stack, DB schema, AI, security | Before any code task |
 | [UX_SPECIFICATION.md](UX_SPECIFICATION.md) | MVP screens, flows, design system, wireframes | Before Phase 2+ UI work |
+| [MVP_DESIGN_FREEZE.md](MVP_DESIGN_FREEZE.md) | Design freeze confirmation | Before Phase 2 |
 | [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Phased roadmap, risks, dependencies | Master Agent planning |
 | [DECISIONS.md](DECISIONS.md) | ADRs and pending approvals | Before architectural choices |
 
@@ -32,5 +33,5 @@
 
 - **Planning:** Approved (2026-08-05)
 - **Phase 1:** Complete — tagged `v0.1.0-foundation`
-- **UX specification:** v1.1 — Roadmap-centric revision (pending approval)
-- **Phase 2:** Awaiting approval to begin
+- **UX specification:** v1.2 — **MVP Design Freeze approved** (2026-08-05)
+- **Phase 2:** Ready to begin — **awaiting final go-ahead**

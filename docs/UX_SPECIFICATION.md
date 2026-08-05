@@ -1,8 +1,8 @@
 # UX Specification — BuildLearn MVP
 
-> **Status:** Draft for stakeholder approval  
-> **Version:** 1.1  
-> **Date:** 2026-08-05 (Roadmap revision)  
+> **Status:** ✅ Finalized — MVP Design Freeze (2026-08-05)  
+> **Version:** 1.2  
+> **Date:** 2026-08-05 (Design freeze)  
 > **Scope:** MVP only (Phases 2–15 UI)  
 > **Related:** [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md), [ARCHITECTURE.md](ARCHITECTURE.md), [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md)
 
@@ -413,7 +413,7 @@ Your roadmap is ready!
 
 | State | Appearance | Interaction |
 | ----- | ---------- | ----------- |
-| **Completed** | Filled primary color + ✓ badge | Click → replay (optional) or view summary |
+| **Completed** | Filled primary color + ✓ badge | Click → open in **replay mode** (review only) |
 | **Current** | Pulsing ring / bold border + "You are here" | Click → open node player |
 | **Available** | Solid outline, full opacity | Click → open node player |
 | **Locked** | 40% opacity + lock icon | Click disabled; tooltip shows prerequisite |
@@ -462,8 +462,27 @@ Fixed below page title:
 
 - **Completion %:** completed nodes / total nodes (excluding skipped-from-count option: count skipped as complete)
 - **Time remaining:** sum of `estimated_minutes` on incomplete nodes
-- **Streak:** consecutive days with meaningful activity (lesson, challenge, or milestone — P1 simple counter; full logic P2)
+- **Streak:** consecutive calendar days with at least one completed learning session (lesson, challenge, or project milestone). Simple counter only — no freezes, XP, or rewards (see ADR-019)
 - **Project milestone:** current project checkpoint from path
+
+#### Replay mode (completed nodes)
+
+When a user clicks a **completed** lesson or challenge node on the Roadmap:
+
+- Opens the lesson/challenge player in **replay mode** (`?replay=true` or equivalent session flag)
+- Banner at top: "Review mode — your progress won't change"
+- **Must NOT modify:** mastery scores, path step status, completion percentage, streaks, unlocks, or attempt counts
+- User may exit replay at any time → returns to Roadmap
+- AI tutor remains available (messages count toward quota)
+
+#### Auto-scroll to current node
+
+On Roadmap load (and when navigating to `/roadmap`):
+
+- Automatically scroll the viewport to the **current active node**
+- **Default:** smooth scroll animation to center current node in viewport
+- **`prefers-reduced-motion: reduce`:** instant scroll (no animation); disable pulse ring on current node
+- If current node is in a collapsed mobile section, expand that section before scrolling
 
 #### Wireframe (desktop)
 
@@ -597,12 +616,14 @@ MVP renders a **single linear path** with section groupings. Metadata schema sup
 
 ### 5.10 Lesson Player (`/learn/lessons/[lessonId]`)
 
-**Purpose:** Deliver lesson content blocks (FR-4.1–4.6).
+**Purpose:** Deliver lesson content blocks (FR-4.1–4.6, FR-4.10 replay).
+
+**Replay mode (`?replay=true`):** When opened from a completed Roadmap node, displays banner "Review mode — your progress won't change." No progress saves, grading writes, or streak updates. Exit returns to `/roadmap`.
 
 **Layout (desktop):**
 ```
 ┌──────────────────────────────────────┬──────────────────┐
-│ [← Back to path]  Lesson 5 of 12     │   AI Tutor       │
+│ [← Back to roadmap]  Lesson 5 of 12  │   AI Tutor       │
 │                                      │   [sidebar]      │
 │  {block content scroll area}         │                  │
 │  - Objective                         │   Ask a question │
@@ -1051,13 +1072,17 @@ All MVP screens map to `(marketing)`, `(app)`, `(onboarding)`, or `(auth)` route
 
 ---
 
-## 11. Open questions for stakeholder
+## 11. Resolved design decisions (stakeholder approved 2026-08-05)
 
-1. **Replay completed lessons?** Recommend: allow from roadmap click on completed nodes (review mode).
-2. **Onboarding quiz skippable by default?** Recommend yes for P1 launch.
-3. **Streak on roadmap:** simple day counter for MVP; full streak-freeze logic post-MVP.
-4. **Legal pages before beta?** Recommend minimal `/privacy` and `/terms` before public beta.
-5. **Roadmap scroll-to-current on load?** Recommend yes — auto-scroll to current node.
+| Decision | Resolution |
+| -------- | ---------- |
+| Replay completed lessons/challenges | **Yes** — review-only replay from Roadmap; no progress/mastery/streak changes |
+| Auto-scroll to current node | **Yes** — on Roadmap load; respect `prefers-reduced-motion` |
+| Streak system | **Yes** — simple daily streak; one session/day maintains streak; no freezes/XP/rewards in MVP |
+| Onboarding quiz skippable | Recommend yes for P1 launch (unchanged) |
+| Legal pages before beta | Recommend `/privacy` and `/terms` before public beta (unchanged) |
+
+See [DECISIONS.md](DECISIONS.md) ADR-017, ADR-018, ADR-019 and [MVP_DESIGN_FREEZE.md](MVP_DESIGN_FREEZE.md).
 
 ---
 
@@ -1066,6 +1091,7 @@ All MVP screens map to `(marketing)`, `(app)`, `(onboarding)`, or `(auth)` route
 - [x] Every MVP screen identified and mapped to routes
 - [x] **Roadmap specified as core learning experience**
 - [x] Dashboard / Roadmap / Learn responsibilities separated (no duplication)
+- [x] Replay mode, auto-scroll, and streak rules finalized
 - [x] Navigation flows documented
 - [x] Empty, loading, error states defined per screen
 - [x] Mobile and accessibility requirements specified for Roadmap
@@ -1073,5 +1099,5 @@ All MVP screens map to `(marketing)`, `(app)`, `(onboarding)`, or `(auth)` route
 - [x] End-to-end user flow documented
 - [x] Future-proofing extension points documented
 - [x] Architecture gaps identified with recommendations
-- [ ] Stakeholder approval (pending)
+- [x] **Stakeholder approval — MVP Design Freeze (2026-08-05)**
 - [ ] Figma/high-fidelity mockups (optional; text wireframes sufficient to start)

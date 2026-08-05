@@ -1,5 +1,12 @@
 ## [Unreleased]
 
+### Changed (UX v1.2 — Design Freeze)
+- **Replay mode** approved — review-only from Roadmap; no progress changes (ADR-017)
+- **Auto-scroll** approved — Roadmap scrolls to current node; respects `prefers-reduced-motion` (ADR-018)
+- **Simple daily streak** approved — ≥1 session/day; no freezes/XP/rewards (ADR-019)
+- MVP Design Freeze report: `docs/MVP_DESIGN_FREEZE.md`
+- Stakeholder approval P-013
+
 ### Changed (UX v1.1 — Roadmap revision)
 - **Roadmap (`/roadmap`)** designated as primary learning journey — replaces `/learn` list view
 - Dashboard refactored to quick overview; Continue Learning → current node player

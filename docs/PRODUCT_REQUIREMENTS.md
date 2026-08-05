@@ -46,15 +46,17 @@
 | FR-3.1 | Visual **Roadmap** (`/roadmap`) showing personalized journey with progress | Yes | P0 |
 | FR-3.2 | Roadmap displays: goal title, current node, completed nodes, locked upcoming nodes, completion % | Yes | P0 |
 | FR-3.3 | Roadmap shows estimated time remaining and current project milestone | Yes | P0 |
-| FR-3.4 | Roadmap shows learning streak (simple day counter) | Yes | P1 |
-| FR-3.5 | Milestone nodes visually distinct and larger than lesson nodes | Yes | P0 |
-| FR-3.6 | Users may only open unlocked nodes; locked nodes visible but disabled | Yes | P0 |
-| FR-3.7 | Skip nodes based on placement / demonstrated mastery | Yes | P0 |
-| FR-3.8 | Insert remedial nodes on failure patterns | Yes | P1 |
-| FR-3.9 | Path adapts when user enters Build Mode feature requests | Partial | P1 |
-| FR-3.10 | Section groupings on roadmap (e.g., HTML Basics, CSS Basics) | Yes | P0 |
-| FR-3.11 | Multiple concurrent goals | No | P3 |
-| FR-3.12 | Side quests, bonus challenges, AI branches, community nodes | No | Post-MVP (schema-ready) |
+| FR-3.4 | Roadmap shows learning streak (simple daily counter) | Yes | P0 |
+| FR-3.5 | Roadmap auto-scrolls to current node on load; respects `prefers-reduced-motion` | Yes | P0 |
+| FR-3.6 | Replay completed lessons/challenges from Roadmap (review-only; no progress changes) | Yes | P0 |
+| FR-3.7 | Milestone nodes visually distinct and larger than lesson nodes | Yes | P0 |
+| FR-3.8 | Users may only open unlocked nodes; locked nodes visible but disabled | Yes | P0 |
+| FR-3.9 | Skip nodes based on placement / demonstrated mastery | Yes | P0 |
+| FR-3.10 | Insert remedial nodes on failure patterns | Yes | P1 |
+| FR-3.11 | Path adapts when user enters Build Mode feature requests | Partial | P1 |
+| FR-3.12 | Section groupings on roadmap (e.g., HTML Basics, CSS Basics) | Yes | P0 |
+| FR-3.13 | Multiple concurrent goals | No | P3 |
+| FR-3.14 | Side quests, bonus challenges, AI branches, community nodes | No | Post-MVP (schema-ready) |
 
 ### FR-4: Lessons
 | ID | Requirement | MVP | Priority |
@@ -67,7 +69,7 @@
 | FR-4.6 | AI hint button with escalation levels 1–3 | Yes | P0 |
 | FR-4.7 | AI hint levels 4–5 | Yes | P1 |
 | FR-4.8 | Debugging challenges | Yes | P1 |
-| FR-4.9 | Short-answer AI-graded questions | No | P2 |
+| FR-4.10 | Replay mode for completed lessons (review-only; no progress/mastery/streak changes) | Yes | P0 |
 
 ### FR-5: Challenges
 | ID | Requirement | MVP | Priority |
@@ -76,6 +78,7 @@
 | FR-5.2 | Visible test cases (some hidden for anti-gaming) | Yes | P1 |
 | FR-5.3 | Multiple attempts with mastery impact | Yes | P0 |
 | FR-5.4 | Challenge hints via AI tutor | Yes | P1 |
+| FR-5.5 | Replay mode for completed challenges (review-only; no progress/mastery/streak changes) | Yes | P0 |
 
 ### FR-6: Skill Mastery
 | ID | Requirement | MVP | Priority |
@@ -125,9 +128,10 @@
 | FR-10.2 | **Roadmap:** primary learning journey surface (see FR-3) | Yes | P0 |
 | FR-10.3 | Continue Learning CTA opens current roadmap node (lesson/challenge player) | Yes | P0 |
 | FR-10.4 | Lesson/challenge completion history (visible on roadmap) | Yes | P0 |
-| FR-10.5 | Streak counter (days with activity) displayed on roadmap + dashboard | Yes | P1 |
-| FR-10.6 | XP and levels | No | P3 |
-| FR-10.7 | Achievements | No | P3 |
+| FR-10.5 | Streak counter: ≥1 learning session/day maintains streak; displayed on roadmap + dashboard | Yes | P0 |
+| FR-10.6 | Streak freezes, XP bonuses, multipliers, rewards | No | Post-MVP |
+| FR-10.7 | XP and levels | No | P3 |
+| FR-10.8 | Achievements | No | P3 |
 
 ---
 
@@ -235,7 +239,7 @@
 Auth, onboarding, path generation, **roadmap**, lessons, challenges, editor, preview, project, basic AI tutor, mastery tracking
 
 ### P1 — MVP polish (launch + 4 weeks)
-Password reset, placement quiz, Build Mode micro-paths, AI levels 4–5, project review, streak counter, debugging challenges
+Password reset, placement quiz, Build Mode micro-paths, AI levels 4–5, project review, debugging challenges
 
 ### P2 — Post-MVP (months 2–4)
 Spaced review, skill visualization, short-answer grading, open Build Mode (limited), second project template, CSS Grid deep dive, local storage lessons
@@ -285,7 +289,7 @@ Social features, leaderboards, mobile app, Python track, AI integrations track, 
 
 **Achievements:** Milestone-based ("First DOM manipulation", "Built without level-5 help")
 
-**Do NOT build for MVP** except optional simple streak counter.
+**Do NOT build for MVP:** streak freezes, XP, achievements, leaderboards, or premium streak mechanics. A simple daily streak counter is IN (FR-10.5).
 
 ---
 

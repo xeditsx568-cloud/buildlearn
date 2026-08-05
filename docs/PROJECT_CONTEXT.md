@@ -1,6 +1,6 @@
 # Project Context — BuildLearn
 
-> **Status:** Planning phase complete. No production code yet.  
+> **Status:** Planning phase complete. MVP Design Freeze approved 2026-08-05.  
 > **Working codename:** BuildLearn (final product name TBD — see DECISIONS.md)  
 > **Last updated:** 2026-08-04
 
@@ -167,6 +167,14 @@ The **Roadmap** (`/roadmap`) is BuildLearn's primary learning experience and key
 | What have I completed? | ✓ on completed nodes |
 | What comes next? | Next unlocked node visible |
 | How far from finishing? | Progress % + time remaining + Finish node |
+
+**Approved behaviors (Design Freeze 2026-08-05):**
+
+| Behavior | Rule |
+| -------- | ---- |
+| **Replay** | Completed nodes open in review-only replay; no mastery, progress, streak, or unlock changes |
+| **Auto-scroll** | Roadmap scrolls to current node on load; instant scroll when `prefers-reduced-motion` |
+| **Streak** | Simple daily streak — ≥1 learning session per calendar day; no freezes, XP, or rewards in MVP |
 
 See [UX_SPECIFICATION.md](UX_SPECIFICATION.md) §5.8 for full Roadmap specification.
 

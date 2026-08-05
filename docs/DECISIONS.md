@@ -29,6 +29,7 @@
 | ID | Decision | Approved | Notes |
 |----|----------|----------|-------|
 | **P-002** | **Proceed with development** | 2026-08-05 | Planning approved; Phase 1 unblocked |
+| **P-013** | **MVP Design Freeze** | 2026-08-05 | UX v1.2 finalized; Phase 2 unblocked pending final go-ahead |
 
 ---
 
@@ -179,6 +180,59 @@ Phase 1: scaffold, Prisma users/profiles, CI, env validation, route placeholders
 4. **Profiles 1:1 with users** — `profiles.user_id` is PK and FK with `onDelete: Cascade`.
 5. **Minimal Phase 1 schema** — only `users` and `profiles`; no concepts, paths, or content tables yet.
 6. **Migration generated offline** — `prisma migrate diff` SQL committed; apply with `pnpm db:migrate` when Neon is configured.
+
+---
+
+### ADR-017: Roadmap Replay Mode (Review-Only)
+
+**Status:** ACCEPTED  
+**Date:** 2026-08-05
+
+**Decision:** Users may replay any completed lesson or challenge from the Roadmap.
+
+**Rules:**
+- Replay is for review only
+- Must not modify mastery, progress, completion %, streaks, unlocks, or attempt counts
+- Player shows "Review mode" banner; API rejects progress writes in replay context
+
+---
+
+### ADR-018: Roadmap Auto-Scroll to Current Node
+
+**Status:** ACCEPTED  
+**Date:** 2026-08-05
+
+**Decision:** Roadmap auto-scrolls to the current active node when opened.
+
+**Rules:**
+- Default: smooth scroll to center current node
+- `prefers-reduced-motion: reduce`: instant scroll, no pulse animation on current node
+- Expand collapsed mobile section containing current node before scroll
+
+---
+
+### ADR-019: Simple Daily Streak (MVP)
+
+**Status:** ACCEPTED  
+**Date:** 2026-08-05
+
+**Decision:** MVP implements a simple daily streak counter displayed on Roadmap and Dashboard.
+
+**Rules:**
+- Completing ≥1 learning session per calendar day maintains the streak
+- Qualifying activity: lesson completion, challenge pass, or project milestone (not replay, not login alone)
+- **Excluded from MVP:** streak freezes, XP bonuses, multipliers, rewards, premium mechanics
+
+**Storage:** `profiles.current_streak_days`, `profiles.last_activity_date` (see ARCHITECTURE.md)
+
+---
+
+### ADR-020: Roadmap as Primary Learning Surface
+
+**Status:** ACCEPTED  
+**Date:** 2026-08-05
+
+**Decision:** `/roadmap` is the core learning journey UI. Dashboard is quick overview only. `/learn` is player-only (redirect).
 
 ---
 

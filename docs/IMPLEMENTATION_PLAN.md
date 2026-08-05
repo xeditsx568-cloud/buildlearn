@@ -173,6 +173,8 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 - Dashboard quick overview with Continue Learning → current node
 - `/learn` redirect to active player (no list view)
 - Streak, time remaining, project milestone on roadmap header
+- Replay mode for completed nodes (review-only)
+- Auto-scroll to current node on Roadmap load
 
 **Dependencies:** Phase 5
 

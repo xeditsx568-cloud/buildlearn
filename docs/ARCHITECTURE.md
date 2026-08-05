@@ -1,7 +1,7 @@
 # Architecture — BuildLearn
 
-> **Status:** Planning — pending approval  
-> **Last updated:** 2026-08-04
+> **Status:** Finalized — MVP Design Freeze (2026-08-05)  
+> **Last updated:** 2026-08-05
 
 ---
 
@@ -414,7 +414,24 @@ The Roadmap screen renders `learning_path_steps` for the user's active `learning
 **Computed fields (API, not stored):**
 - `completion_percent` — completed steps / total steps
 - `estimated_minutes_remaining` — sum of incomplete lesson/challenge estimates
-- `current_streak_days` — from activity log (P1)
+- `current_streak_days` — consecutive calendar days with ≥1 learning session (see ADR-019)
+
+**Replay mode (client + API):**
+
+When `?replay=true` on lesson/challenge player routes:
+- Read-only progress path — **no writes** to `lesson_progress`, `challenge_attempts`, `concept_mastery`, `learning_path_steps`, or streak
+- API middleware rejects mutating requests with `X-Replay-Mode: true` header
+- UI displays persistent "Review mode" banner
+
+**Streak storage (MVP):**
+
+| Column | Table | Notes |
+| ------ | ----- | ----- |
+| `current_streak_days` | `profiles` | Integer; updated on first qualifying session per calendar day |
+| `last_activity_date` | `profiles` | Date (user timezone or UTC — decide at implementation) |
+| `longest_streak_days` | `profiles` | Optional; display only |
+
+Qualifying session = completing a lesson, passing a challenge, or completing a project milestone. **Replay does not qualify.**
 
 **MVP constraint:** Single active path per user; linear render only. Fork/optional UI deferred.
 
