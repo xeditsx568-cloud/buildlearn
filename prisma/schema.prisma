@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ExperienceLevel {
+  beginner
+  some_exposure
+  intermediate
+}
+
+model User {
+  id        String    @id // Clerk user ID (e.g. user_2abc...)
+  email     String    @unique
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+  profile   Profile?
+
+  @@map("users")
+}
+
+model Profile {
+  userId             String           @id @map("user_id")
+  displayName        String?          @map("display_name")
+  experienceLevel    ExperienceLevel? @map("experience_level")
+  learningGoalText   String?          @map("learning_goal_text") @db.Text
+  goalSummary        Json?            @map("goal_summary")
+  onboardingComplete Boolean          @default(false) @map("onboarding_complete")
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}

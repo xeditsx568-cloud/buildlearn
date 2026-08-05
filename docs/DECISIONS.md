@@ -166,6 +166,22 @@ Phase 1: scaffold, Prisma users/profiles, CI, env validation, route placeholders
 
 ---
 
+### ADR-016: TASK-002 Initial Database Schema
+
+**Status:** ACCEPTED  
+**Date:** 2026-08-05
+
+**Decisions:**
+
+1. **`users.id` as `String`** — Clerk user IDs (`user_xxx`), not UUID (supersedes ARCHITECTURE.md UUID wording).
+2. **`ExperienceLevel` enum** — `beginner`, `some_exposure`, `intermediate` per PROJECT_CONTEXT canonical constants.
+3. **Snake_case columns in PostgreSQL** — via Prisma `@map` for SQL; camelCase in TypeScript client.
+4. **Profiles 1:1 with users** — `profiles.user_id` is PK and FK with `onDelete: Cascade`.
+5. **Minimal Phase 1 schema** — only `users` and `profiles`; no concepts, paths, or content tables yet.
+6. **Migration generated offline** — `prisma migrate diff` SQL committed; apply with `pnpm db:migrate` when Neon is configured.
+
+---
+
 ## Override Process
 
 1. Stakeholder requests change

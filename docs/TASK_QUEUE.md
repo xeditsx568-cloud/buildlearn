@@ -36,7 +36,7 @@ Description: |
   adds package.json, Next.js config, root layout, placeholder home page,
   and Vitest configuration.
 Owner: Programmer 1
-Status: review
+Status: done
 Priority: P0
 Phase: 1
 Dependencies: [PREP-001]
@@ -78,8 +78,8 @@ Description: |
   Add Prisma ORM, connect to Neon PostgreSQL, create initial migration
   for users and profiles tables per ARCHITECTURE.md. Add db scripts and
   seed stub.
-Owner: unassigned
-Status: pending
+Owner: Programmer 2
+Status: review
 Priority: P0
 Phase: 1
 Dependencies: [TASK-001]

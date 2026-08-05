@@ -301,7 +301,7 @@ GoalTemplate ─── GoalTemplateConcept[] (M:N)
 #### users
 | Column | Type | Notes |
 |--------|------|-------|
-| id | UUID PK | Matches Clerk user ID |
+| id | String PK | Clerk user ID (`user_xxx`) — see ADR-013 |
 | email | VARCHAR UNIQUE | |
 | created_at | TIMESTAMPTZ | |
 | deleted_at | TIMESTAMPTZ NULL | Soft delete |
@@ -309,9 +309,9 @@ GoalTemplate ─── GoalTemplateConcept[] (M:N)
 #### profiles
 | Column | Type | Notes |
 |--------|------|-------|
-| user_id | UUID PK/FK | |
+| user_id | String PK/FK | References `users.id` |
 | display_name | VARCHAR | |
-| experience_level | ENUM | beginner, some, intermediate |
+| experience_level | ENUM | `beginner`, `some_exposure`, `intermediate` |
 | learning_goal_text | TEXT | Raw user input |
 | goal_summary | JSONB | AI-structured goal |
 | onboarding_complete | BOOLEAN | |

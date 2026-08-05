@@ -6,9 +6,10 @@ Database schema, migrations, and seed scripts.
 
 ```
 prisma/
-  schema.prisma    # Single source of truth for DB schema
-  migrations/      # Generated migrations
-  seed.ts          # Seed concepts, lessons, templates
+  schema.prisma    # users + profiles (Phase 1); expanded in later phases
+  migrations/      # Version-controlled SQL migrations
+  seed.ts          # Seed stub (content in Phase 3)
 ```
 
-`users.id` is a **String** matching Clerk user IDs (e.g. `user_2abc...`), not UUID.
+`users.id` is **String** (Clerk user ID, e.g. `user_2abc...`), not UUID.
+
