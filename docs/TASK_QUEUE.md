@@ -79,7 +79,7 @@ Description: |
   for users and profiles tables per ARCHITECTURE.md. Add db scripts and
   seed stub.
 Owner: Programmer 2
-Status: review
+Status: done
 Priority: P0
 Phase: 1
 Dependencies: [TASK-001]
@@ -113,8 +113,8 @@ Title: Set up GitHub Actions CI pipeline
 Description: |
   Copy ci.yml.example to ci.yml and ensure CI runs lint, typecheck,
   test, and build on pull_request and push to main.
-Owner: unassigned
-Status: pending
+Owner: Programmer 2
+Status: review
 Priority: P0
 Phase: 1
 Dependencies: [TASK-001]
@@ -387,9 +387,9 @@ Reviewer: Checker
 
 | ID | Phase | Title | Owner | Status |
 | -- | ----- | ----- | ----- | ------ |
-| TASK-001 | 1 | Next.js scaffold | P1 | review |
-| TASK-002 | 1 | Prisma + users/profiles | P2 | pending |
-| TASK-003 | 1 | CI pipeline | P2 | pending |
+| TASK-001 | 1 | Next.js scaffold | P1 | done |
+| TASK-002 | 1 | Prisma + users/profiles | P2 | done |
+| TASK-003 | 1 | CI pipeline | P2 | review |
 | TASK-004 | 1 | Route layout wiring | P1 | pending |
 | TASK-005 | 1 | t3-env validation | P2 | pending |
 | TASK-006 | 1 | Phase 1 Checker gate | Checker | pending |

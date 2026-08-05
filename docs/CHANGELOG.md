@@ -15,6 +15,9 @@
   - Phase 3 backlog: TASK-103, TASK-104 (content)
 - Planning approved (P-002); ADR-013 (Clerk String ID), ADR-014 (Phase 1 boundary)
 
+### Added (TASK-003)
+- GitHub Actions CI workflow (lint, typecheck, test, build)
+
 ### Added (TASK-002)
 - Prisma ORM with `users` and `profiles` schema, initial migration, db client singleton
 - ADR-016 in DECISIONS.md
