@@ -9,9 +9,14 @@ export default function MarketingHomePage() {
       <p className="max-w-md text-center text-muted-foreground">
         Goal-driven coding education. Coming soon.
       </p>
-      <Button asChild>
-        <Link href="/dashboard">Get started</Link>
-      </Button>
+      <div className="flex gap-3">
+        <Button asChild>
+          <Link href="/sign-up">Get started</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href="/sign-in">Sign in</Link>
+        </Button>
+      </div>
     </main>
   );
 }
