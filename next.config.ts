@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import "./src/env";
+import "./src/env"; // Validate env vars when Next.js loads config (lint/build/dev)
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 

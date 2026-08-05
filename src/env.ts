@@ -1,3 +1,10 @@
+/**
+ * Validated environment variables for BuildLearn.
+ *
+ * Import `env` from server code; never import in client components except
+ * for `NEXT_PUBLIC_*` keys. Validation runs at build time via next.config.ts
+ * and at runtime on first import.
+ */
 import { createEnv } from "@t3-oss/env-nextjs";
 import * as z from "zod";
 
