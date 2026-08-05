@@ -180,8 +180,8 @@ Title: Environment variable validation with t3-env
 Description: |
   Add @t3-oss/env-nextjs for type-safe environment variables.
   Create .env.example with documented variables.
-Owner: unassigned
-Status: pending
+Owner: Programmer 2
+Status: review
 Priority: P0
 Phase: 1
 Dependencies: [TASK-001]
@@ -390,8 +390,8 @@ Reviewer: Checker
 | TASK-001 | 1 | Next.js scaffold | P1 | done |
 | TASK-002 | 1 | Prisma + users/profiles | P2 | done |
 | TASK-003 | 1 | CI pipeline | P2 | done |
-| TASK-004 | 1 | Route layout wiring | P1 | review |
-| TASK-005 | 1 | t3-env validation | P2 | pending |
+| TASK-004 | 1 | Route layout wiring | P1 | done |
+| TASK-005 | 1 | t3-env validation | P2 | review |
 | TASK-006 | 1 | Phase 1 Checker gate | Checker | pending |
 | TASK-101 | 2 | Clerk auth | P1 | blocked |
 | TASK-102 | 2 | Clerk webhook | P2 | blocked |

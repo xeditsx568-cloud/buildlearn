@@ -15,6 +15,10 @@
   - Phase 3 backlog: TASK-103, TASK-104 (content)
 - Planning approved (P-002); ADR-013 (Clerk String ID), ADR-014 (Phase 1 boundary)
 
+### Added (TASK-005)
+- t3-env validation for `DATABASE_URL` and `NEXT_PUBLIC_APP_URL`
+- Unit tests for env schema accept/reject behavior
+
 ### Added (TASK-004)
 - App Router route groups: `(marketing)` home at `/`, `(app)` shell with `/dashboard`, `/learn`, `/project`, `/build` placeholders
 - Marketing page component smoke test
