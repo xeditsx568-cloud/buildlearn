@@ -438,7 +438,7 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 [ ] Phase 3  — Content
 [ ] Phase 4  — Onboarding
 [ ] Phase 5  — AI paths
-[ ] Phase 6  — Path UI
+[ ] Phase 6  — Roadmap & Dashboard UI
 [ ] Phase 7  — Lessons
 [ ] Phase 8  — Challenges
 [ ] Phase 9  — Mastery
