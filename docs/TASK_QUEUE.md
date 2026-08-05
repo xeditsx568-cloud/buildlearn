@@ -114,7 +114,7 @@ Description: |
   Copy ci.yml.example to ci.yml and ensure CI runs lint, typecheck,
   test, and build on pull_request and push to main.
 Owner: Programmer 2
-Status: review
+Status: done
 Priority: P0
 Phase: 1
 Dependencies: [TASK-001]
@@ -144,8 +144,8 @@ Description: |
   Connect the TASK-001 scaffold to the pre-created route groups and
   placeholder structure. Add minimal placeholder pages so routes resolve.
   Verify all READMEs still accurate.
-Owner: unassigned
-Status: pending
+Owner: Programmer 1
+Status: review
 Priority: P0
 Phase: 1
 Dependencies: [TASK-001]
@@ -389,8 +389,8 @@ Reviewer: Checker
 | -- | ----- | ----- | ----- | ------ |
 | TASK-001 | 1 | Next.js scaffold | P1 | done |
 | TASK-002 | 1 | Prisma + users/profiles | P2 | done |
-| TASK-003 | 1 | CI pipeline | P2 | review |
-| TASK-004 | 1 | Route layout wiring | P1 | pending |
+| TASK-003 | 1 | CI pipeline | P2 | done |
+| TASK-004 | 1 | Route layout wiring | P1 | review |
 | TASK-005 | 1 | t3-env validation | P2 | pending |
 | TASK-006 | 1 | Phase 1 Checker gate | Checker | pending |
 | TASK-101 | 2 | Clerk auth | P1 | blocked |
