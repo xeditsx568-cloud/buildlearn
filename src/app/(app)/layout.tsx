@@ -15,7 +15,7 @@ export default function AppLayout({
   return (
     <div className="min-h-screen">
       <header className="border-b px-6 py-4">
-        <nav className="flex items-center gap-6">
+        <nav aria-label="Main navigation" className="flex items-center gap-6">
           <Link href="/" className="font-semibold">
             BuildLearn
           </Link>
