@@ -33,5 +33,5 @@
 
 - **Planning:** Approved (2026-08-05)
 - **Phase 1:** Complete — tagged `v0.1.0-foundation`
+- **Phase 2:** In progress — TASK-101 merged (2026-08-06); TASK-102 next
 - **UX specification:** v1.2 — **MVP Design Freeze approved** (2026-08-05)
-- **Phase 2:** Ready to begin — **awaiting final go-ahead**

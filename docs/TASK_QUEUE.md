@@ -1,24 +1,24 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-05  
+> **Last updated:** 2026-08-06  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
-## Current Sprint: Phase 1 — Project Foundation ✅ COMPLETE
+## Current Sprint: Phase 2 — Authentication (in progress)
 
-**Goal:** Runnable monorepo skeleton with CI, database schema stub, and verified folder layout. No product features.
+**Goal:** Clerk authentication foundation — sign-in/sign-up, middleware, env validation. User sync (TASK-102) next.
 
-**Status:** All implementation tasks merged. Gate review TASK-006 APPROVED (2026-08-05). Awaiting stakeholder approval to begin Phase 2.
+**Status:** TASK-101 merged (2026-08-06). TASK-102 ready to begin.
 
-### Parallel execution after TASK-001 merges
+### Parallel execution after TASK-101 merges
 
 | Wave | Tasks | Agents |
 | ---- | ----- | ------ |
-| 1 | TASK-001 | Programmer 1 |
-| 2 | TASK-002, TASK-003, TASK-004, TASK-005 | P2, P2, P1, P2 (parallel in separate worktrees) |
-| 3 | TASK-006 | Checker |
+| 1 | TASK-101 | Programmer 1 |
+| 2 | TASK-102 | Programmer 2 |
+| 3 | — | Checker (after TASK-102) |
 
 See [AGENT_WORKFLOW.md](AGENT_WORKFLOW.md) §4 and [FILE_OWNERSHIP.md](FILE_OWNERSHIP.md).
 
@@ -245,7 +245,7 @@ TASK-ID: TASK-101
 Title: Integrate Clerk authentication
 Phase: 2
 Owner: Programmer 1
-Status: pending
+Status: done
 Dependencies: [TASK-006]
 Priority: P0
 Branch: feature/TASK-101-clerk-auth
@@ -270,7 +270,7 @@ TASK-ID: TASK-102
 Title: Clerk webhook for user sync
 Phase: 2
 Owner: Programmer 2
-Status: blocked
+Status: pending
 Dependencies: [TASK-101]
 Priority: P0
 Branch: feature/TASK-102-clerk-webhook
@@ -370,6 +370,7 @@ Reviewer: Checker
 | TASK-004 | Route layout wiring | 2026-08-05 | Programmer 1 |
 | TASK-005 | t3-env validation | 2026-08-05 | Programmer 2 |
 | TASK-006 | Phase 1 gate review | 2026-08-05 | Checker |
+| TASK-101 | Clerk authentication | 2026-08-06 | Programmer 1 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -385,8 +386,10 @@ Reviewer: Checker
 | Phase 1 in progress | 0 |
 | Phase 1 in review | 0 |
 | Phase 1 complete | 6 |
-| Backlog (Phase 2+) | 14 |
-| Completed (all phases) | 8 |
+| Phase 2 complete | 1 |
+| Phase 2 pending | 1 |
+| Backlog (Phase 3+) | 12 |
+| Completed (all phases) | 9 |
 
 ---
 
@@ -400,7 +403,7 @@ Reviewer: Checker
 | TASK-004 | 1 | Route layout wiring | P1 | done |
 | TASK-005 | 1 | t3-env validation | P2 | done |
 | TASK-006 | 1 | Phase 1 Checker gate | Checker | done |
-| TASK-101 | 2 | Clerk auth | P1 | pending |
+| TASK-101 | 2 | Clerk auth | P1 | done |
 | TASK-102 | 2 | Clerk webhook | P2 | pending |
 | TASK-103 | 3 | Concept graph seed | P2 | blocked |
 | TASK-104 | 3 | Lesson schema + L1 | P2 | blocked |

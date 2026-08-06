@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+### Added (Phase 2 — TASK-101)
+- **TASK-101:** Clerk authentication — `@clerk/nextjs`, `ClerkProvider`, `/sign-in`, `/sign-up`, middleware protecting `(app)` routes
+- Phase 2 env validation: `CLERK_*` keys via t3-env
+- Route classification helper (`src/lib/auth-routes.ts`) and unit tests
+- Checker review: `docs/reviews/TASK-101.md`
+
 ### Changed (UX v1.2 — Design Freeze)
 - **Replay mode** approved — review-only from Roadmap; no progress changes (ADR-017)
 - **Auto-scroll** approved — Roadmap scrolls to current node; respects `prefers-reduced-motion` (ADR-018)
