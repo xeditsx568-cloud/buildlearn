@@ -97,7 +97,7 @@ TASK-101 delivers Clerk authentication for the BuildLearn MVP foundation: `@cler
 | Return to home link | ✅ Below widget |
 | Landing → Get started → `/sign-up` | ✅ |
 | Landing → Sign in → `/sign-in` | ✅ |
-| Sign-in success → `/dashboard` | ✅ via `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` |
+| Sign-in success → `/dashboard` | ✅ via `forceRedirectUrl` (BUG-101-001; Clerk v7 `NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL`) |
 | Sign-up success → `/onboarding/goal` | ⏸ Temporarily `/dashboard` — approved exception |
 
 Clerk components provide built-in sign-in ↔ sign-up navigation when env URLs are configured.
@@ -116,7 +116,7 @@ Clerk components provide built-in sign-in ↔ sign-up navigation when env URLs a
 - `CLERK_SECRET_KEY` (server)
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_CLERK_SIGN_IN_URL`, `NEXT_PUBLIC_CLERK_SIGN_UP_URL`
-- `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL`, `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL`
+- `NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL`, `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL` (Clerk v7; supersedes deprecated `AFTER_SIGN_*` — see BUG-101-001)
 
 **Security:**
 - No real secrets in repository (grep clean)
@@ -172,7 +172,7 @@ TASK_QUEUE lists an integration test for middleware redirects. Implementation pr
 | -- | ---- |
 | I-101-01 | Google OAuth must be enabled manually in Clerk Dashboard |
 | I-101-02 | No `UserButton` / sign-out in app shell — acceptable for minimal TASK-101 scope |
-| I-101-03 | Phase 4 (TASK-201) should update `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` to `/onboarding/goal` |
+| I-101-03 | Phase 4 (TASK-201) should update `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL` and SignUp `forceRedirectUrl` to `/onboarding/goal` |
 | I-101-04 | Phase 4 should add `/onboarding/*` to middleware protection when routes exist |
 | I-101-05 | Developer must copy `.env.example` → `.env.local` with real Clerk keys for local auth testing |
 

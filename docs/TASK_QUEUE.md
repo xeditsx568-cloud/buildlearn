@@ -10,7 +10,7 @@
 
 **Goal:** Clerk authentication foundation — sign-in/sign-up, middleware, env validation. User sync (TASK-102) next.
 
-**Status:** TASK-101 merged (2026-08-06). TASK-102 ready to begin.
+**Status:** TASK-101 merged (2026-08-06). BUG-101-001 post-sign-in redirect fixed (2026-08-06). TASK-102 ready to begin.
 
 ### Parallel execution after TASK-101 merges
 

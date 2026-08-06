@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Fixed (Phase 2 — BUG-101-001)
+- **Post-sign-in redirect:** Clerk v7 `forceRedirectUrl` on SignIn/SignUp; migrated env validation to `NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL` / `SIGN_UP_FORCE_REDIRECT_URL` (supersedes deprecated `AFTER_SIGN_*` vars)
+- Reviews: `docs/reviews/BUG-101-001-post-sign-in-redirect.md`, `docs/reviews/BUG-101-001-checker-review.md`
+
 ### Added (Phase 2 — TASK-101)
 - **TASK-101:** Clerk authentication — `@clerk/nextjs`, `ClerkProvider`, `/sign-in`, `/sign-up`, middleware protecting `(app)` routes
 - Phase 2 env validation: `CLERK_*` keys via t3-env
