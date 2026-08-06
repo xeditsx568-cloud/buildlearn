@@ -31,8 +31,8 @@ const validPhase2Env = {
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ci_dummy_key_for_build_only",
   NEXT_PUBLIC_CLERK_SIGN_IN_URL: "/sign-in",
   NEXT_PUBLIC_CLERK_SIGN_UP_URL: "/sign-up",
-  NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: "/dashboard",
-  NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: "/dashboard",
+  NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: "/dashboard",
+  NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: "/dashboard",
 } as const;
 
 describe("env schema", () => {
