@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-06  
+> **Last updated:** 2026-08-08  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -10,7 +10,7 @@
 
 **Goal:** Clerk authentication foundation — sign-in/sign-up, middleware, env validation. User sync (TASK-102) next.
 
-**Status:** TASK-101 merged (2026-08-06). BUG-101-001 post-sign-in redirect fixed (2026-08-06). TASK-102 ready to begin.
+**Status:** TASK-101 merged (2026-08-06). BUG-101-001 post-sign-in redirect fixed (2026-08-06). Prisma–Neon configuration merged (2026-08-08). **TASK-102 ready to begin.**
 
 ### Parallel execution after TASK-101 merges
 
@@ -237,6 +237,42 @@ Notes: |
 
 ---
 
+## Infrastructure — Prisma–Neon (complete)
+
+```yaml
+TASK-ID: CONFIG-PRISMA-NEON
+Title: Prisma–Neon environment configuration
+Description: |
+  Wire pooled DATABASE_URL and direct DIRECT_URL for Prisma + Neon.
+  Add dotenv-cli prisma:* scripts, update .env.example, document local
+  Prisma CLI P1001 follow-up before first migration.
+Owner: Programmer 2
+Status: done
+Priority: P0
+Phase: 2 (infrastructure)
+Dependencies: [TASK-101]
+Branch: config/prisma-neon-env
+Files:
+  - prisma/schema.prisma  # directUrl only — no model changes
+  - .env.example
+  - package.json
+  - pnpm-lock.yaml
+  - docs/notes/prisma-neon-connectivity.md
+  - docs/reviews/config-prisma-neon-env.md
+Acceptance Criteria:
+  - datasource uses url + directUrl per Prisma + Neon docs
+  - prisma:* scripts load .env.local via dotenv-cli
+  - No secrets committed; no migration files added; no model changes
+  - prisma:generate, lint, typecheck, test pass
+  - Technical note records local db pull P1001 as pre-migration follow-up
+Reviewer: Checker (APPROVED FOR MERGE 2026-08-08)
+Notes: |
+  Merged to main 2026-08-08. Re-test prisma:pull before first migration.
+  TASK-102 may proceed after merge workflow complete.
+```
+
+---
+
 ## Backlog — Phase 2 (Authentication)
 
 ### TASK-101
@@ -370,6 +406,7 @@ Reviewer: Checker
 | TASK-004 | Route layout wiring | 2026-08-05 | Programmer 1 |
 | TASK-005 | t3-env validation | 2026-08-05 | Programmer 2 |
 | TASK-006 | Phase 1 gate review | 2026-08-05 | Checker |
+| CONFIG-PRISMA-NEON | Prisma–Neon env config | 2026-08-08 | Programmer 2 |
 | TASK-101 | Clerk authentication | 2026-08-06 | Programmer 1 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
@@ -387,9 +424,10 @@ Reviewer: Checker
 | Phase 1 in review | 0 |
 | Phase 1 complete | 6 |
 | Phase 2 complete | 1 |
+| Phase 2 infra complete | 1 |
 | Phase 2 pending | 1 |
 | Backlog (Phase 3+) | 12 |
-| Completed (all phases) | 9 |
+| Completed (all phases) | 10 |
 
 ---
 

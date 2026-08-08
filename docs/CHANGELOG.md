@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+### Added (Infrastructure — Prisma–Neon configuration)
+- **Prisma–Neon env wiring:** `directUrl = env("DIRECT_URL")` for Prisma CLI; pooled `DATABASE_URL` for runtime
+- **`dotenv-cli`** and `prisma:pull` / `prisma:migrate` / `prisma:generate` scripts loading `.env.local`
+- `.env.example` documents pooled `DATABASE_URL` and direct `DIRECT_URL` placeholders
+- Technical note: `docs/notes/prisma-neon-connectivity.md` (local Prisma `db pull` P1001 follow-up before first migration)
+- Checker review: `docs/reviews/config-prisma-neon-env.md`
+- Branch: `config/prisma-neon-env` merged 2026-08-08
+
 ### Fixed (Phase 2 — BUG-101-001)
 - **Post-sign-in redirect:** Clerk v7 `forceRedirectUrl` on SignIn/SignUp; migrated env validation to `NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL` / `SIGN_UP_FORCE_REDIRECT_URL` (supersedes deprecated `AFTER_SIGN_*` vars)
 - Reviews: `docs/reviews/BUG-101-001-post-sign-in-redirect.md`, `docs/reviews/BUG-101-001-checker-review.md`
