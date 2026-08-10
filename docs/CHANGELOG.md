@@ -1,5 +1,12 @@
 ## [Unreleased]
 
+### Planning (Phase 4 — TASK-202 task definition)
+- **TASK-202 full task definition added** to `docs/TASK_QUEUE.md` — Placement quiz (Programmer 1, Phase 4, P1, status `pending`)
+- Question content under `src/lib/onboarding/` (P1-owned); client-side scoring only; placement signals reserved for Phase 5
+- Profile persistence and placement quiz backend remain separate P2 Phase 4 work
+- `.env.example` / deployment sign-up redirect alignment remains pre-production follow-up (not a TASK-202 blocker)
+- Implementation not started; awaiting Checker review of task definition
+
 ### Added (Phase 4 — TASK-201)
 - **Onboarding wizard UI:** `(onboarding)` route group with goal, experience, quiz shell, and path preview screens
 - Client-side wizard state (React Context + `sessionStorage`); stub path preview data

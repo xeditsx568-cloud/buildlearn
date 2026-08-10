@@ -1,16 +1,16 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (TASK-201 merged)  
+> **Last updated:** 2026-08-10 (TASK-202 task definition prepared)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
 ## Current Sprint: Phase 4 — User Onboarding & Goal Selection
 
-**Goal:** Phase 4 onboarding — TASK-201 UI complete; profile persistence and placement quiz content remain (TASK-202+, P2 profile API).
+**Goal:** Phase 4 onboarding — TASK-201 complete; TASK-202 placement quiz UI next; profile persistence remains separate P2 work.
 
-**Status:** **TASK-201 merged (2026-08-10).** Onboarding wizard UI live on `main`. **TASK-202 not started.**
+**Status:** **TASK-201 merged (2026-08-10).** TASK-202 task definition prepared — **status `pending`; implementation not started.**
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
@@ -592,13 +592,98 @@ Notes: |
   no schema migration required for UI-only work.
 ```
 
+### TASK-202
+```yaml
+TASK-ID: TASK-202
+Title: Placement quiz
+Description: |
+  Replace the TASK-201 `/onboarding/quiz` placeholder with a 5-question
+  curated placement quiz UI. One MCQ per screen, progress dots, skip option,
+  and deterministic client-side scoring/signals stored in sessionStorage.
+  Question data lives under src/lib/onboarding/ (P1-owned). No backend,
+  profile persistence, Prisma changes, or path-preview modifications.
+Owner: Programmer 1
+Status: pending
+Priority: P1
+Phase: 4
+Dependencies: [TASK-201]
+Branch: feature/TASK-202-placement-quiz
+Files:
+  - src/components/onboarding/quiz-shell-screen.tsx
+  - src/components/onboarding/onboarding-provider.tsx
+  - src/lib/onboarding/types.ts
+  - src/lib/onboarding/constants.ts
+  - src/lib/onboarding/placement-quiz.ts
+  - src/lib/onboarding/placement-quiz-questions.ts
+  - src/lib/onboarding/placement-scoring.ts
+  - src/app/(onboarding)/onboarding/quiz/page.tsx
+  - tests/unit/onboarding/placement-quiz.test.ts
+  - tests/unit/onboarding/placement-scoring.test.ts
+  - tests/unit/onboarding/quiz-skip.test.tsx
+Acceptance Criteria:
+  - /onboarding/quiz renders exactly 5 curated MCQs aligned with beginner HTML/CSS/JS concept set
+  - One question shown at a time; quiz progress indicator/dots visible
+  - Next cannot advance without a selected answer
+  - User can skip at any point — skip sets quizSkipped true and navigates to /onboarding/path
+  - Completing all five sets quizSkipped false, stores answers in onboarding client state, computes deterministic client-side placement result, navigates to /onboarding/path
+  - Placement result does not modify the stub path preview (Phase 5 consumption)
+  - sessionStorage preserves quiz state within the browser session where practical
+  - No backend, API, or database functionality introduced
+  - Existing TASK-201 onboarding flow remains intact
+Tests Required:
+  - Unit test — exactly 5 questions with deterministic question IDs
+  - Unit test — one-question-at-a-time navigation
+  - Unit test — answer required before advancing
+  - Unit test — progress indicator reflects current question
+  - Unit test — skip from quiz sets quizSkipped and targets /onboarding/path
+  - Unit test — final completion flow stores answers and navigates to /onboarding/path
+  - Unit test — deterministic scoring (totalCorrect, totalQuestions, percentage)
+  - Unit test — scoring boundary cases
+  - Unit test — onboarding provider/sessionStorage quiz state round-trip
+  - Unit test — regression of TASK-201 quiz skip/path behavior
+Reviewer: Checker
+Notes: |
+  **Question content location (Master decision):**
+  Curated question data under `src/lib/onboarding/` (P1-owned). Do NOT create
+  `content/placement-quiz.json` — `content/` is P2-owned per FILE_OWNERSHIP.
+
+  **Scoring boundary (Master decision):**
+  TASK-202 includes deterministic client-side scoring/signals only:
+  totalCorrect, totalQuestions, percentage; optional simple domain/concept
+  summary if clearly useful. No backend scoring, no profile persistence, no
+  Prisma/schema changes, no Neon writes, no concept_mastery models.
+
+  **Placement signals:** Stored in client onboarding state for later Phase 5
+  path generation (TASK-204). TASK-202 does NOT change stub path preview or
+  roadmap nodes (FR-3.9 deferred to Phase 5+).
+
+  **P2 boundary (separate from TASK-202):**
+  Profile persistence, onboarding resume backend logic, and placement quiz
+  backend/API remain Programmer 2 Phase 4 work — not part of this task.
+
+  **Pre-production follow-up (not a TASK-202 blocker):**
+  Align `.env.example` and deployment
+  `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal` with P2.
+  Application SignUp already uses SIGN_UP_REDIRECT from TASK-201.
+
+  **Out of scope (do NOT implement in TASK-202):**
+  profile persistence, onboarding resume backend logic, placement quiz
+  backend/API, Prisma/schema changes, Neon writes, concept_mastery writes,
+  AI/OpenAI, runtime AI-generated questions, real path generation, changing
+  roadmap nodes based on quiz results, /roadmap implementation, lesson/challenge
+  quizzes, TASK-203+.
+
+  **Dependencies satisfied:** TASK-201 merged; /onboarding/quiz shell,
+  onboarding provider, and sessionStorage wizard state exist on main.
+```
+
 ---
 
 ## Backlog — Phase 4+
 
 | Task ID | Title | Owner | Phase | Priority | Status |
 | ------- | ----- | ----- | ----- | -------- | ------ |
-| TASK-202 | Placement quiz | P1 | 4 | P1 | backlog |
+| TASK-202 | Placement quiz | P1 | 4 | P1 | pending |
 | TASK-203 | AI service abstraction | P2 | 5 | P0 |
 | TASK-204 | Path generation pipeline | P2 | 5 | P0 |
 | TASK-205 | Learning path UI | P1 | 6 | P0 |
@@ -648,10 +733,10 @@ Notes: |
 | Phase 2 pending | 0 |
 | Phase 3 pending | 0 |
 | Phase 3 blocked | 0 |
-| Phase 4 pending | 0 |
+| Phase 4 pending | 1 |
 | Phase 4 in progress | 0 |
 | Phase 4 complete | 1 |
-| Backlog (Phase 4+) | 9 |
+| Backlog (Phase 4+) | 8 |
 | Completed (all phases) | 16 |
 
 ---
@@ -671,3 +756,4 @@ Notes: |
 | TASK-103 | 3 | Concept graph seed | P2 | done |
 | TASK-104 | 3 | Lesson schema + L1 | P2 | done |
 | TASK-201 | 4 | Onboarding wizard UI | P1 | done |
+| TASK-202 | 4 | Placement quiz | P1 | pending |
