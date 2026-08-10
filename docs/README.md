@@ -33,5 +33,5 @@
 
 - **Planning:** Approved (2026-08-05)
 - **Phase 1:** Complete — tagged `v0.1.0-foundation`
-- **Phase 2:** In progress — TASK-101 merged; BUG-101-001 redirect fix merged (2026-08-06); Prisma–Neon configuration merged (2026-08-08); **TASK-102 next**
+- **Phase 2:** Auth foundation complete — TASK-101, TASK-102, BUG-101-001, Prisma–Neon config merged (2026-08-10). **Phase 3 (TASK-103) next when directed.**
 - **UX specification:** v1.2 — **MVP Design Freeze approved** (2026-08-05)

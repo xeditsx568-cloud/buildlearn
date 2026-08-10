@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+### Added (Phase 2 — TASK-102)
+- **Clerk webhook user sync:** `POST /api/webhooks/clerk` with Svix verification via `verifyWebhook`
+- Handles `user.created`, `user.updated`, `user.deleted`; Prisma sync to `users` + `profiles`
+- `CLERK_WEBHOOK_SIGNING_SECRET` env validation; idempotent soft-delete and re-signup restore
+- Checker review: `docs/reviews/TASK-102.md`
+- Branch: `feature/TASK-102-clerk-webhook` merged 2026-08-10
+- **Pre-production follow-up:** apply init migration to Neon, register Clerk webhook, live sign-up test (see TASK_QUEUE.md)
+
 ### Added (Infrastructure — Prisma–Neon configuration)
 - **Prisma–Neon env wiring:** `directUrl = env("DIRECT_URL")` for Prisma CLI; pooled `DATABASE_URL` for runtime
 - **`dotenv-cli`** and `prisma:pull` / `prisma:migrate` / `prisma:generate` scripts loading `.env.local`

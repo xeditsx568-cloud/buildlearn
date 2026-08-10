@@ -1,18 +1,25 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-08  
+> **Last updated:** 2026-08-10  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
-## Current Sprint: Phase 2 — Authentication (in progress)
+## Current Sprint: Phase 2 — Authentication (complete)
 
-**Goal:** Clerk authentication foundation — sign-in/sign-up, middleware, env validation. User sync (TASK-102) next.
+**Goal:** Clerk authentication foundation — sign-in/sign-up, middleware, env validation, user sync webhook.
 
-**Status:** TASK-101 merged (2026-08-06). BUG-101-001 post-sign-in redirect fixed (2026-08-06). Prisma–Neon configuration merged (2026-08-08). **TASK-102 ready to begin.**
+**Status:** TASK-101 merged (2026-08-06). BUG-101-001 post-sign-in redirect fixed (2026-08-06). Prisma–Neon configuration merged (2026-08-08). **TASK-102 merged (2026-08-10).** Phase 2 auth foundation complete.
 
-### Parallel execution after TASK-101 merges
+### Operational follow-up (before production use)
+
+- Apply existing `20250805103100_init` migration to Neon (see `docs/notes/prisma-neon-connectivity.md` if local Prisma CLI P1001 persists)
+- Register Clerk webhook endpoint → `POST /api/webhooks/clerk`
+- Add real `CLERK_WEBHOOK_SIGNING_SECRET` to deployment environments
+- Perform live sign-up test; confirm `users` + `profiles` rows are created
+
+### Parallel execution (Phase 2 — complete)
 
 | Wave | Tasks | Agents |
 | ---- | ----- | ------ |
@@ -306,13 +313,14 @@ TASK-ID: TASK-102
 Title: Clerk webhook for user sync
 Phase: 2
 Owner: Programmer 2
-Status: pending
-Dependencies: [TASK-101]
+Status: done
 Priority: P0
 Branch: feature/TASK-102-clerk-webhook
+Merged: 2026-08-10
 Files:
   - src/app/api/webhooks/clerk/route.ts
   - src/server/services/user-service.ts
+  - src/server/services/clerk-webhook-handler.ts
 Acceptance Criteria:
   - user.created creates users + profiles row
   - user.deleted soft-deletes user (deleted_at)
@@ -320,8 +328,11 @@ Acceptance Criteria:
   - Idempotent on duplicate events
 Tests Required:
   - Integration test with mock Clerk/Svix payload
-Reviewer: Checker
-Notes: Security critical — Checker must verify signature validation.
+Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/TASK-102.md)
+Notes: |
+  Security critical — Svix verification via verifyWebhook (@clerk/nextjs/webhooks).
+  Pre-production: apply init migration to Neon, register Clerk webhook, live sign-up test.
+  Local Prisma CLI P1001 documented in docs/notes/prisma-neon-connectivity.md — not a merge blocker.
 ```
 
 ---
@@ -408,6 +419,7 @@ Reviewer: Checker
 | TASK-006 | Phase 1 gate review | 2026-08-05 | Checker |
 | CONFIG-PRISMA-NEON | Prisma–Neon env config | 2026-08-08 | Programmer 2 |
 | TASK-101 | Clerk authentication | 2026-08-06 | Programmer 1 |
+| TASK-102 | Clerk webhook user sync | 2026-08-10 | Programmer 2 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -423,11 +435,11 @@ Reviewer: Checker
 | Phase 1 in progress | 0 |
 | Phase 1 in review | 0 |
 | Phase 1 complete | 6 |
-| Phase 2 complete | 1 |
+| Phase 2 complete | 2 |
 | Phase 2 infra complete | 1 |
-| Phase 2 pending | 1 |
+| Phase 2 pending | 0 |
 | Backlog (Phase 3+) | 12 |
-| Completed (all phases) | 10 |
+| Completed (all phases) | 11 |
 
 ---
 
@@ -442,6 +454,6 @@ Reviewer: Checker
 | TASK-005 | 1 | t3-env validation | P2 | done |
 | TASK-006 | 1 | Phase 1 Checker gate | Checker | done |
 | TASK-101 | 2 | Clerk auth | P1 | done |
-| TASK-102 | 2 | Clerk webhook | P2 | pending |
+| TASK-102 | 2 | Clerk webhook | P2 | done |
 | TASK-103 | 3 | Concept graph seed | P2 | blocked |
 | TASK-104 | 3 | Lesson schema + L1 | P2 | blocked |

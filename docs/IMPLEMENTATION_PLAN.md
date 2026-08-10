@@ -436,7 +436,7 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 [✅] Phase 0  — Planning approved
 [✅] PREP    — Development environment prepared
 [✅] Phase 1  — Foundation (TASK-001–006)
-[ ] Phase 2  — Auth (TASK-101 ✅, TASK-102 pending)
+[ ] Phase 2  — Auth (TASK-101 ✅, TASK-102 ✅)
 [ ] Phase 3  — Content
 [ ] Phase 4  — Onboarding
 [ ] Phase 5  — AI paths
