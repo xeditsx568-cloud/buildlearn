@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+### Operational (Phase 3 — TASK-104 Neon lesson complete)
+- **TASK-104 operational follow-up complete (2026-08-10)**
+- Migration `20260810173000_lessons` deployed to Neon successfully via **Database Migrate Deploy**
+- **Database Seed** workflow completed successfully
+- Neon verified: Lesson 1 **`how-websites-work`** / **How Websites Work**
+- **Phase 3 Content Foundation complete** — TASK-103 and TASK-104 fully operational
+- **TASK-201 not started** — ready in backlog when Master directs
+- Status documentation branch: `docs/task-104-neon-lesson-complete` (pending Checker review)
+
 ### Added (Phase 3 — TASK-104)
 - **Lesson content schema and Lesson 1 seed:** Prisma `Lesson` model; Zod validation for six block types (objective, explain, interact, exercise, quiz, bridge)
 - **Lesson 1:** `how-websites-work` / How Websites Work — curated JSON in `content/lessons/01-how-websites-work.json`

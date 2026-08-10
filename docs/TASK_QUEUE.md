@@ -1,16 +1,16 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (TASK-104 merged)  
+> **Last updated:** 2026-08-10 (TASK-104 operational complete)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
-## Current Sprint: Phase 3 — Content Foundation (in progress)
+## Current Sprint: Phase 3 — Content Foundation (complete)
 
 **Goal:** Curriculum foundation — concept graph, goal templates, Lesson 1 schema and seed (TASK-103, TASK-104).
 
-**Status:** **TASK-104 merged (2026-08-10).** Phase 3 foundation tasks complete in code. **Operational follow-up before any task consumes lesson data:** deploy lessons migration to Neon, run Database Seed, verify Lesson 1 (`how-websites-work`).
+**Status:** **Phase 3 Content Foundation complete (2026-08-10).** TASK-103 and TASK-104 operationally complete in Neon. **TASK-201 not started.**
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
@@ -21,11 +21,13 @@
   - `goal_templates` = **5**
   - `concept_prerequisites` = **36**
 
-### Operational follow-up (before tasks consume lesson data)
+### Operational follow-up (lesson data in Neon) — complete (2026-08-10)
 
-- Deploy migration **`20260810173000_lessons`** to Neon via **Database Migrate Deploy** — **not run yet**
-- Run **Database Seed** workflow (confirmation **`seed`**) — **not run yet** (will seed curriculum + Lesson 1)
-- Verify in Neon: `lessons` row `id = how-websites-work`, title **How Websites Work**, six blocks in `content`
+- ~~Deploy migration **`20260810173000_lessons`** to Neon via **Database Migrate Deploy**~~ — **complete**
+- ~~Run **Database Seed** workflow (confirmation **`seed`**)~~ — **complete**
+- ~~Verify Lesson 1 in Neon~~ — **complete:**
+  - `lessons.id` = **`how-websites-work`**
+  - `lessons.title` = **How Websites Work**
 
 ---
 
@@ -492,9 +494,10 @@ Tests Required:
   - Unit test: schema accepts valid lesson, rejects invalid
 Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/TASK-104.md)
 Notes: |
-  Merged to main 2026-08-10. Code complete; migration + seed reviewed.
-  Operational follow-up before tasks consume lesson data: deploy 20260810173000_lessons
-  to Neon, run Database Seed, verify Lesson 1 id=how-websites-work. Not run during merge.
+  Merged to main 2026-08-10. Operationally complete 2026-08-10.
+  Migration `20260810173000_lessons` deployed to Neon via Database Migrate Deploy.
+  Database Seed workflow completed successfully.
+  Neon verified: lessons.id=how-websites-work, title=How Websites Work.
 ```
 
 ---
