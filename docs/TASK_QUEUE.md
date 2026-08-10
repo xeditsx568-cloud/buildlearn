@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (infra/db-seed-workflow merged)  
+> **Last updated:** 2026-08-10 (TASK-103 operational complete)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -10,13 +10,16 @@
 
 **Goal:** Curriculum foundation — concept graph, goal templates, then lessons (TASK-104).
 
-**Status:** **TASK-103 merged (2026-08-10).** Curriculum migration deployed to Neon. **Database Seed workflow merged (2026-08-10).** **Operational follow-up before TASK-104:** run **Database Seed** (confirmation `seed`), verify 24 concepts + 5 goal templates in Neon.
+**Status:** **TASK-103 operationally complete (2026-08-10).** Migration deployed; Database Seed workflow succeeded; Neon curriculum verified. **TASK-104 unblocked** — status `pending`; implementation not started.
 
-### Operational follow-up (before TASK-104)
+### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
 - ~~Deploy migration **`20260810170000_concept_graph_and_goal_templates`** to Neon via **Database Migrate Deploy**~~ — **complete**
-- Run **Database Seed** workflow (`.github/workflows/db-seed.yml`, confirmation **`seed`**) — **not run yet**
-- Verify: 24 rows in `concepts`, 5 in `goal_templates`, prerequisite edges present
+- ~~Run **Database Seed** workflow (`.github/workflows/db-seed.yml`, confirmation **`seed`**)~~ — **complete**
+- ~~Verify curriculum rows in Neon~~ — **complete:**
+  - `concepts` = **24**
+  - `goal_templates` = **5**
+  - `concept_prerequisites` = **36**
 
 ---
 
@@ -452,9 +455,10 @@ Tests Required:
   - Unit test: concept count equals 24
 Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/TASK-103.md)
 Notes: |
-  Merged to main 2026-08-10. Code complete; migration deployed to Neon.
-  Operational follow-up before TASK-104: run Database Seed workflow (confirmation seed),
-  verify 24 concepts + 5 goal templates. Seed workflow merged; not run yet.
+  Merged to main 2026-08-10. Operationally complete 2026-08-10.
+  Migration `20260810170000_concept_graph_and_goal_templates` deployed to Neon.
+  Database Seed workflow completed successfully.
+  Neon verified: concepts=24, goal_templates=5, concept_prerequisites=36.
 ```
 
 ### TASK-104
@@ -463,7 +467,7 @@ TASK-ID: TASK-104
 Title: Lesson content schema and seed Lesson 1
 Phase: 3
 Owner: Programmer 2
-Status: blocked
+Status: pending
 Dependencies: [TASK-103]
 Priority: P0
 Branch: feature/TASK-104-lesson-schema
@@ -479,8 +483,8 @@ Tests Required:
   - Unit test: schema accepts valid lesson, rejects invalid
 Reviewer: Checker
 Notes: |
-  Blocked until TASK-103 operational follow-up complete: run Database Seed workflow
-  (confirmation seed), verify 24 concepts + 5 goal templates in Neon. Do not start until directed.
+  TASK-103 operational follow-up complete (2026-08-10). Blocker cleared.
+  Ready to begin when directed by Master Agent. Implementation not started.
 ```
 
 ---
@@ -536,8 +540,8 @@ Notes: |
 | Phase 2 complete | 2 |
 | Phase 2 infra complete | 3 |
 | Phase 2 pending | 0 |
-| Phase 3 pending | 0 |
-| Phase 3 blocked | 1 |
+| Phase 3 pending | 1 |
+| Phase 3 blocked | 0 |
 | Backlog (Phase 3+) | 10 |
 | Completed (all phases) | 14 |
 
@@ -556,4 +560,4 @@ Notes: |
 | TASK-101 | 2 | Clerk auth | P1 | done |
 | TASK-102 | 2 | Clerk webhook | P2 | done |
 | TASK-103 | 3 | Concept graph seed | P2 | done |
-| TASK-104 | 3 | Lesson schema + L1 | P2 | blocked |
+| TASK-104 | 3 | Lesson schema + L1 | P2 | pending |

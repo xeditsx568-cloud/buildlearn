@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+### Operational (Phase 3 — TASK-103 Neon curriculum complete)
+- **TASK-103 operational follow-up complete (2026-08-10)**
+- Migration `20260810170000_concept_graph_and_goal_templates` deployed to Neon successfully
+- **Database Seed** workflow (`.github/workflows/db-seed.yml`) completed successfully
+- Neon verified: **24** concepts, **5** goal templates, **36** `concept_prerequisites` edges
+- **TASK-104 blocker cleared** — status moved from `blocked` to `pending`; implementation not started
+- Status documentation branch: `docs/task-103-neon-seed-complete` (pending Checker review)
+
 ### Added (Infrastructure — Neon curriculum seed workflow)
 - **Manual GitHub Actions workflow:** `.github/workflows/db-seed.yml` — runs approved TASK-103 curriculum seed against Neon via `workflow_dispatch` only
 - Requires GitHub Environment **`neon`**, confirmation input **`seed`**, and secrets `DATABASE_URL` + `DIRECT_URL`

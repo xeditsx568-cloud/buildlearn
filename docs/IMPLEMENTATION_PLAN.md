@@ -437,7 +437,7 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 [✅] PREP    — Development environment prepared
 [✅] Phase 1  — Foundation (TASK-001–006)
 [✅] Phase 2  — Auth (TASK-101 ✅, TASK-102 ✅); Neon init migration applied (2026-08-10)
-[ ] Phase 3  — Content (TASK-103 ✅ merged 2026-08-10; Neon curriculum deploy + seed outstanding; TASK-104 blocked)
+[ ] Phase 3  — Content (TASK-103 ✅ operationally complete 2026-08-10; TASK-104 pending — not started)
 [ ] Phase 4  — Onboarding
 [ ] Phase 5  — AI paths
 [ ] Phase 6  — Roadmap & Dashboard UI
