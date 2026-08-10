@@ -2,7 +2,7 @@
 
 > **Purpose:** Record architectural decisions and track pending approvals.  
 > **Format:** ADR (Architecture Decision Record) for resolved; PENDING for awaiting stakeholder input.  
-> **Last updated:** 2026-08-05
+> **Last updated:** 2026-08-10
 
 ---
 
@@ -236,7 +236,120 @@ Phase 1: scaffold, Prisma users/profiles, CI, env validation, route placeholders
 
 ---
 
-## Override Process
+### ADR-021: Phase 4 Onboarding Persistence Model
+
+**Status:** ACCEPTED  
+**Date:** 2026-08-10
+
+**Context:** TASK-201 and TASK-202 delivered client-side onboarding UI with
+`sessionStorage` state. Phase 4 minimum DoD requires goal saved to profile,
+onboarding resume on sign-in, and `onboarding_complete` recorded when the user
+confirms via Start learning. Placement quiz data from TASK-202 remains
+client-side until TASK-204 pre-development inspection. UX §137 requires
+incomplete users to resume the correct onboarding step.
+
+**Decision:** Persist onboarding progress on the existing `profiles` row using
+explicit typed columns. Do not use a generic JSON blob for resume position.
+Do not persist placement quiz answers, scores, or skip state in Phase 4.
+
+**1. Existing profile fields used**
+
+| Field | Prisma / DB | Purpose |
+| ----- | ----------- | ------- |
+| `learningGoalText` | `learning_goal_text` | Raw goal from TASK-201 goal step |
+| `experienceLevel` | `experience_level` | `ExperienceLevel` enum from TASK-201 |
+| `onboardingComplete` | `onboarding_complete` | Set `true` when user confirms via Start learning |
+
+**2. Resume-step persistence**
+
+Add one explicit nullable profile field:
+
+| Field | Prisma / DB | Type |
+| ----- | ----------- | ---- |
+| `onboardingStep` | `onboarding_step` | `OnboardingStep` enum |
+
+**`OnboardingStep` enum values:** `goal`, `experience`, `quiz`, `path`
+
+Maps to routes:
+
+| Value | Route |
+| ----- | ----- |
+| `goal` | `/onboarding/goal` |
+| `experience` | `/onboarding/experience` |
+| `quiz` | `/onboarding/quiz` |
+| `path` | `/onboarding/path` |
+
+**3. Placement quiz persistence (Phase 4)**
+
+**Do NOT persist** in Phase 4 minimum DoD:
+
+- raw quiz answers
+- placement score / `placementResult`
+- quiz skipped state
+- quiz completed state
+
+TASK-202 client/`sessionStorage` remains authoritative for placement quiz
+data until separately formalized (e.g. before TASK-204 if server-side path
+generation requires persisted signals).
+
+**Do NOT** store placement data in `goalSummary` — that field is reserved for
+AI-structured goal refinement (FR-2.4, Phase 5).
+
+**4. Resume inference / fallback**
+
+When determining redirect for an authenticated user with
+`onboardingComplete === false`:
+
+1. If `onboardingStep` is set → use mapped route.
+2. If `onboardingStep` is null/missing → infer safely:
+   - no `learningGoalText` → `/onboarding/goal`
+   - goal exists but no `experienceLevel` → `/onboarding/experience`
+   - otherwise → `/onboarding/quiz`
+3. **Never infer `/onboarding/path`** without explicit stored `onboardingStep = path`.
+
+When `onboardingComplete === true` → authenticated home is `/dashboard`.
+
+**5. Step update policy**
+
+| Event | Profile updates |
+| ----- | --------------- |
+| Goal saved successfully | `learningGoalText` set; `onboardingStep = experience` |
+| Experience saved successfully | `experienceLevel` set; `onboardingStep = quiz` |
+| Quiz skipped or completed and user proceeds to path | `onboardingStep = path` (no placement fields written) |
+| Start learning / onboarding confirmation | `onboardingComplete = true`; `onboardingStep` remains `path` |
+
+**6. Routing policy**
+
+| Scenario | Destination |
+| -------- | ----------- |
+| New sign-up success | `/onboarding/goal` |
+| Sign-in, `onboardingComplete === false` | Stored or inferred onboarding step route |
+| Sign-in, `onboardingComplete === true` | `/dashboard` |
+| Incomplete user hits protected app routes (`/dashboard`, `/learn`, `/project`, `/build`) | Redirect to resume route where practical |
+| Complete user hits `/onboarding/*` | Redirect to `/dashboard` |
+
+Sign-up env redirect: `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal`.
+Sign-in env redirect remains `/dashboard`; dynamic incomplete-user resume is
+implemented in application logic (TASK-212), not via Clerk env alone.
+
+**7. Onboarding completion vs `/roadmap`**
+
+Setting `onboardingComplete = true` occurs when the user confirms onboarding
+via **Start learning** on the path preview step. This is **not blocked** by
+absence of the `/roadmap` page (TASK-205, Phase 6). The Start learning CTA
+may continue targeting `/roadmap` per ADR-020 and TASK-201.
+
+**Consequences:**
+
+- TASK-211 adds `OnboardingStep` enum + `onboardingStep` column and profile API.
+- TASK-212 implements profile-aware resume routing.
+- TASK-213 wires P1 onboarding UI to the profile API.
+- TASK-203 / Phase 5 remain blocked until Phase 4 minimum DoD is complete.
+- Placement signal server persistence deferred; inspect before TASK-204.
+
+**Related tasks:** TASK-211, TASK-212, TASK-213, OPS-PHASE4-001
+
+---
 
 1. Stakeholder requests change
 2. Master Agent documents new ADR with status ACCEPTED

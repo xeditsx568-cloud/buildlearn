@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+### Planning (Phase 4 — backend task definitions)
+- **ADR-021** — Phase 4 onboarding persistence model (`onboardingStep` enum; no placement DB persistence in Phase 4)
+- **TASK-211** — Profile & onboarding persistence API (P2, pending)
+- **TASK-212** — Onboarding resume & auth routing (P2, pending; depends TASK-211)
+- **TASK-213** — Onboarding UI profile integration (P1, pending; depends TASK-211)
+- **OPS-PHASE4-001** — Clerk sign-up redirect alignment (pending)
+- **TASK-203 blocked** until Phase 4 minimum DoD complete
+- Branch: `docs/phase-4-backend-task-definitions` (pending Checker review)
+
 ### Added (Phase 4 — TASK-202)
 - **Placement quiz UI:** 5 curated beginner HTML/CSS/JS MCQs at `/onboarding/quiz`; one question at a time with progress dots
 - Client-side deterministic scoring (`totalCorrect`, `totalQuestions`, `percentage`, lightweight domain summary) in sessionStorage-backed onboarding state

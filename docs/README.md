@@ -35,5 +35,5 @@
 - **Phase 1:** Complete — tagged `v0.1.0-foundation`
 - **Phase 2:** Complete — auth foundation, Neon init migration applied (2026-08-10).
 - **Phase 3:** **Complete (2026-08-10)** — TASK-103 and TASK-104 operationally complete in Neon.
-- **Phase 4:** **TASK-201 and TASK-202 complete (2026-08-10)** — Onboarding wizard UI and placement quiz merged. Profile persistence and placement backend remain outstanding (P2). TASK-203+ not started.
+- **Phase 4:** **P1 complete (TASK-201, TASK-202).** **P2 outstanding (TASK-211–213).** Phase 4 **not yet complete.** TASK-203 **blocked** until Phase 4 minimum DoD. See ADR-021.
 - **UX specification:** v1.2 — **MVP Design Freeze approved** (2026-08-05)

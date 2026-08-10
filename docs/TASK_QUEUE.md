@@ -1,34 +1,45 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (TASK-202 merged)  
+> **Last updated:** 2026-08-10 (Phase 4 backend task definitions prepared)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
 ## Current Sprint: Phase 4 — User Onboarding & Goal Selection
 
-**Goal:** Phase 4 onboarding — TASK-201 and TASK-202 P1 UI complete; profile persistence and placement quiz backend remain separate P2 work.
+**Goal:** Phase 4 onboarding — P1 UI complete (TASK-201, TASK-202); P2 profile persistence and resume outstanding (TASK-211–213).
 
-**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** Phase 4 P1 onboarding UI complete. **Profile persistence API, onboarding resume backend, and placement quiz backend/API remain outstanding (P2).** TASK-203+ not started.
+**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** Phase 4 **P1 UI complete.** Phase 4 **not yet complete** — P2 persistence/resume outstanding (**TASK-211**, **TASK-212**, **TASK-213**). **TASK-203 blocked** until Phase 4 minimum DoD is met (ADR-021).
 
 ### Phase 4 boundary (2026-08-10)
 
-**TASK-202 completed (P1):**
-- 5 curated MCQs under `src/lib/onboarding/`
-- One-question-at-a-time quiz with progress indicator
-- Skip flow → `/onboarding/path`
-- Client-side deterministic scoring + sessionStorage-backed quiz state
-- Path preview remains stub/mock (placement signals reserved for Phase 5)
+**P1 complete (merged):**
+- TASK-201 — onboarding wizard UI
+- TASK-202 — placement quiz UI + client-side scoring
 
-**Still outstanding (outside TASK-202):**
-- Profile persistence API (P2)
-- Onboarding resume backend logic (P2)
-- Placement quiz backend/API (P2)
-- `.env.example` / deployment sign-up redirect alignment (pre-production ops)
-- Real path generation (Phase 5 — TASK-204)
-- AI/OpenAI infrastructure (Phase 5 — TASK-203+)
-- `/roadmap` page implementation (Phase 6 — TASK-205)
+**P2 outstanding (task definitions prepared — ADR-021):**
+- **TASK-211** — Profile & onboarding persistence API (P2, P0, `pending`)
+- **TASK-212** — Onboarding resume & auth routing (P2, P0, `pending`; depends TASK-211)
+- **TASK-213** — Onboarding UI profile integration (P1, P0, `pending`; depends TASK-211)
+- **OPS-PHASE4-001** — Clerk redirect alignment (P2 ops, `pending`)
+
+**Blocked until Phase 4 minimum DoD:**
+- **TASK-203+** — Phase 5 AI infrastructure (TASK-203 explicitly blocked)
+
+**Deferred (not Phase 4 minimum DoD):**
+- Placement quiz server persistence — inspect before TASK-204; not TASK-214 yet
+- Real path generation (TASK-204), AI/OpenAI (TASK-203+), `/roadmap` UI (TASK-205)
+
+**ADR-021 decisions:** `onboardingStep` enum on `profiles`; persist goal, experience,
+completion, and resume step only; placement quiz remains client/sessionStorage
+authoritative for Phase 4.
+
+### Operational follow-up — OPS-PHASE4-001 (pending)
+
+- Align `.env.example` and deployment `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal`
+- Sign-in force redirect remains `/dashboard`; incomplete-user resume handled by TASK-212
+- Application `SignUp` already uses `SIGN_UP_REDIRECT` from TASK-201
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
@@ -700,13 +711,207 @@ Notes: |
   onboarding provider, and sessionStorage wizard state exist on main.
 ```
 
+### TASK-211
+```yaml
+TASK-ID: TASK-211
+Title: Profile & onboarding persistence API
+Description: |
+  Implement authenticated profile read/write for Phase 4 onboarding persistence
+  per ADR-021. Add OnboardingStep enum and onboardingStep column to profiles.
+  Expose GET/PATCH for the authenticated user's own profile onboarding fields
+  only. Webhook remains source of User/Profile row creation.
+Owner: Programmer 2
+Status: pending
+Priority: P0
+Phase: 4
+Dependencies: [TASK-101, TASK-102, TASK-201, TASK-202]
+Branch: feature/TASK-211-profile-onboarding-api
+Files:
+  - prisma/schema.prisma
+  - prisma/migrations/**
+  - src/app/api/profile/route.ts
+  - src/server/services/profile-service.ts
+  - src/lib/onboarding/onboarding-step.ts
+  - tests/unit/profile-service.test.ts
+  - tests/unit/profile-route.test.ts
+Acceptance Criteria:
+  - OnboardingStep enum added — goal, experience, quiz, path
+  - onboardingStep nullable column added to profiles via migration
+  - GET /api/profile returns authenticated user's profile onboarding fields
+  - PATCH /api/profile updates learningGoalText, experienceLevel, onboardingStep, onboardingComplete for own user only
+  - Validates learningGoalText 10–500 characters
+  - Validates experienceLevel against ExperienceLevel enum
+  - Validates onboardingStep against OnboardingStep enum
+  - Validates onboardingComplete boolean
+  - No arbitrary userId input — Clerk session identifies user
+  - User may access/update only own profile (no IDOR)
+  - Webhook remains source of User/Profile creation — API does not create users
+  - Does NOT persist placement quiz answers, scores, skip state, or placementResult
+  - Does NOT write placement data to goalSummary
+Tests Required:
+  - Unit test — GET returns own profile fields
+  - Unit test — PATCH updates allowed onboarding fields
+  - Unit test — goal validation min/max length
+  - Unit test — experience enum validation
+  - Unit test — onboardingStep enum validation
+  - Unit test — rejects unauthenticated requests
+  - Unit test — rejects cross-user access / no arbitrary userId
+  - Unit test — profile row must pre-exist (webhook-created)
+Reviewer: Checker
+Notes: |
+  **Authority:** ADR-021 Phase 4 onboarding persistence model.
+
+  **Persisted fields (Phase 4 minimum):** learningGoalText, experienceLevel,
+  onboardingStep, onboardingComplete. Placement quiz data remains client-only.
+
+  **Out of scope:** onboarding resume routing (TASK-212), P1 UI integration
+  (TASK-213), placement signal persistence, goalSummary AI writes, TASK-203+.
+```
+
+### TASK-212
+```yaml
+TASK-ID: TASK-212
+Title: Onboarding resume & auth routing
+Description: |
+  Implement profile-aware onboarding resume and auth routing per ADR-021.
+  Incomplete users resume stored or inferred onboarding step on sign-in.
+  Completed users route to /dashboard. Guard app routes for incomplete
+  onboarding; prevent completed users re-entering onboarding wizard.
+Owner: Programmer 2
+Status: pending
+Priority: P0
+Phase: 4
+Dependencies: [TASK-211]
+Branch: feature/TASK-212-onboarding-resume-routing
+Files:
+  - src/lib/auth-routes.ts
+  - src/lib/onboarding/onboarding-step.ts
+  - src/lib/onboarding/onboarding-resume.ts
+  - src/middleware.ts
+  - src/app/sign-in/[[...sign-in]]/page.tsx
+  - tests/unit/onboarding-resume.test.ts
+  - tests/unit/auth-routes.test.ts
+Acceptance Criteria:
+  - onboardingComplete true → authenticated home /dashboard
+  - onboardingComplete false → redirect to stored onboardingStep route
+  - onboardingStep null → infer goal if no learningGoalText; experience if no experienceLevel; else /onboarding/quiz
+  - Never infer /onboarding/path without explicit onboardingStep path
+  - Incomplete user accessing protected app routes redirected to resume route where practical
+  - Completed user accessing /onboarding/* redirected to /dashboard
+  - New sign-up continues to /onboarding/goal (unchanged from TASK-201)
+  - Sign-in forceRedirectUrl may remain /dashboard; dynamic resume handled in app logic
+  - No UI redesign
+Tests Required:
+  - Unit test — complete user → /dashboard
+  - Unit test — incomplete user with stored step → correct route
+  - Unit test — inference fallback goal / experience / quiz
+  - Unit test — never infer path without stored step
+  - Unit test — completed user blocked from onboarding routes
+  - Unit test — incomplete user blocked from app routes (where applicable)
+  - Unit test — regression of existing auth-route classification
+Reviewer: Checker
+Notes: |
+  **Authority:** ADR-021 routing and resume inference rules.
+
+  **Depends on TASK-211** profile read API or shared profile service for
+  onboardingComplete and onboardingStep.
+
+  **Out of scope:** profile PATCH implementation (TASK-211), P1 provider
+  integration (TASK-213), placement persistence, TASK-203+.
+```
+
+### TASK-213
+```yaml
+TASK-ID: TASK-213
+Title: Onboarding UI profile integration
+Description: |
+  Connect existing TASK-201/202 onboarding UI to the TASK-211 profile API.
+  Backend becomes source of truth for goal, experience, onboardingStep, and
+  onboardingComplete. sessionStorage remains local convenience/cache only.
+  Preserve TASK-201/202 UX; no new backend endpoints.
+Owner: Programmer 1
+Status: pending
+Priority: P0
+Phase: 4
+Dependencies: [TASK-211]
+Branch: feature/TASK-213-onboarding-profile-integration
+Files:
+  - src/components/onboarding/onboarding-provider.tsx
+  - src/components/onboarding/goal-screen.tsx
+  - src/components/onboarding/experience-screen.tsx
+  - src/components/onboarding/quiz-shell-screen.tsx
+  - src/components/onboarding/path-preview-screen.tsx
+  - src/lib/onboarding/onboarding-client.ts
+  - tests/unit/onboarding/onboarding-profile-integration.test.ts
+  - tests/unit/onboarding/**
+Acceptance Criteria:
+  - Hydrate goal, experience, onboardingStep from profile API on load
+  - Goal saved to profile on successful continue; onboardingStep advances to experience
+  - Experience saved on continue; onboardingStep advances to quiz
+  - Quiz skip or completion proceeding to path sets onboardingStep path (no placement DB writes)
+  - Start learning sets onboardingComplete true; onboardingStep remains path
+  - sessionStorage not source of truth — syncs from API where practical
+  - TASK-201/202 quiz client state (answers, placementResult) remains sessionStorage-only
+  - Existing onboarding UX preserved — no redesign
+  - No new API routes — consumes TASK-211 only
+Tests Required:
+  - Unit test — provider hydrates from profile API
+  - Unit test — goal save advances step
+  - Unit test — experience save advances step
+  - Unit test — quiz proceed advances step to path
+  - Unit test — Start learning sets onboardingComplete
+  - Unit test — sessionStorage subordinate to API hydration
+  - Unit test — TASK-201/202 regression (validation, quiz scoring, path preview)
+Reviewer: Checker
+Notes: |
+  **Authority:** ADR-021 step update policy.
+
+  **Depends on TASK-211.** TASK-212 resume routing should land first or in
+  parallel; P1 integration must not assume resume routing until TASK-212 merged
+  for sign-in flows — coordinate merge order with Master.
+
+  **Out of scope:** backend API (TASK-211), middleware resume (TASK-212),
+  placement server persistence, profile fields beyond ADR-021, TASK-203+.
+```
+
+### OPS-PHASE4-001
+```yaml
+TASK-ID: OPS-PHASE4-001
+Title: Clerk redirect alignment (Phase 4)
+Description: |
+  Align .env.example and deployment Clerk sign-up redirect with Phase 4
+  onboarding entry. Sign-in redirect remains /dashboard; incomplete-user
+  resume is handled by TASK-212 application logic.
+Owner: Programmer 2
+Status: pending
+Priority: P1
+Phase: 4
+Dependencies: []
+Branch: ops/phase-4-clerk-redirect
+Files:
+  - .env.example
+  - docs/TASK_QUEUE.md
+Acceptance Criteria:
+  - NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal in .env.example
+  - Outdated Phase 4 comment updated
+  - Deployment environment documented in TASK_QUEUE or ops notes
+  - NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL remains /dashboard
+  - No application SignUp component regression — aligns with SIGN_UP_REDIRECT
+Tests Required:
+  - Existing auth-redirect.test.tsx continues to pass or updated intentionally
+Reviewer: Checker
+Notes: |
+  Pre-production ops. May merge independently of TASK-211–213 but should
+  complete before production deploy. Not a blocker for TASK-211 development.
+```
+
 ---
 
-## Backlog — Phase 4+
+## Backlog — Phase 4+ (TASK-203 blocked)
 
 | Task ID | Title | Owner | Phase | Priority | Status |
 | ------- | ----- | ----- | ----- | -------- | ------ |
-| TASK-203 | AI service abstraction | P2 | 5 | P0 |
+| TASK-203 | AI service abstraction | P2 | 5 | P0 | **blocked** (Phase 4 DoD) |
 | TASK-204 | Path generation pipeline | P2 | 5 | P0 |
 | TASK-205 | Learning path UI | P1 | 6 | P0 |
 | TASK-206 | Lesson player | P1 | 7 | P0 |
@@ -756,10 +961,11 @@ Notes: |
 | Phase 2 pending | 0 |
 | Phase 3 pending | 0 |
 | Phase 3 blocked | 0 |
-| Phase 4 pending | 0 |
-| Phase 4 in progress | 0 |
-| Phase 4 complete | 2 |
-| Backlog (Phase 4+) | 8 |
+| Phase 4 P1 complete | 2 |
+| Phase 4 P2 pending | 3 |
+| Phase 4 ops pending | 1 |
+| Phase 4 phase complete | 0 |
+| Backlog (Phase 5+) | 8 |
 | Completed (all phases) | 17 |
 
 ---
@@ -780,3 +986,7 @@ Notes: |
 | TASK-104 | 3 | Lesson schema + L1 | P2 | done |
 | TASK-201 | 4 | Onboarding wizard UI | P1 | done |
 | TASK-202 | 4 | Placement quiz | P1 | done |
+| TASK-211 | 4 | Profile & onboarding API | P2 | pending |
+| TASK-212 | 4 | Onboarding resume routing | P2 | pending |
+| TASK-213 | 4 | Onboarding UI profile integration | P1 | pending |
+| TASK-203 | 5 | AI service abstraction | P2 | blocked |
