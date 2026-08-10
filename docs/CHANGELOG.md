@@ -3,7 +3,9 @@
 ### Planning (Phase 4 — TASK-201 task definition)
 - **TASK-201 full task definition added** to `docs/TASK_QUEUE.md` — Onboarding wizard UI (Programmer 1, Phase 4, P0, status `pending`)
 - **IMPLEMENTATION_PLAN.md Phase 4 updated** — authoritative onboarding completion destination is `/roadmap` (UX spec + ADR-020); profile persistence/resume documented as separate P2 Phase 4 backend dependency, not TASK-201
-- Implementation not started; awaiting Checker review of task definition
+- **TASK-201 implementation not started** — definition approved and merged; begin on `feature/TASK-201-onboarding-wizard` when Master directs
+- Checker review: `docs/reviews/TASK-201-task-definition.md` (APPROVED FOR MERGE)
+- Branch: `docs/TASK-201-task-definition` merged 2026-08-10
 
 ### Operational (Phase 3 — TASK-104 Neon lesson complete)
 - **TASK-104 operational follow-up complete (2026-08-10)**

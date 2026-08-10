@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (TASK-201 task definition prepared)  
+> **Last updated:** 2026-08-10 (TASK-201 task definition merged)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -10,7 +10,7 @@
 
 **Goal:** Onboarding wizard UI (TASK-201); profile persistence and placement quiz content follow in separate Phase 4 tasks.
 
-**Status:** **Phase 3 Content Foundation complete (2026-08-10).** TASK-201 task definition prepared — **status `pending`; implementation not started.**
+**Status:** **Phase 3 Content Foundation complete (2026-08-10).** TASK-201 task definition **merged and approved** — **status `pending`; implementation not started.**
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
