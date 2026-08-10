@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+### Added (Phase 4 — TASK-201)
+- **Onboarding wizard UI:** `(onboarding)` route group with goal, experience, quiz shell, and path preview screens
+- Client-side wizard state (React Context + `sessionStorage`); stub path preview data
+- Auth: `/onboarding/*` protected; sign-up redirect → `/onboarding/goal`; Start learning CTA → `/roadmap`
+- Checker review: `docs/reviews/TASK-201.md` (APPROVED FOR MERGE)
+- Branch: `feature/TASK-201-onboarding-wizard` merged 2026-08-10
+- **Pre-production follow-up:** align `.env.example` and deployment `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal` with P2 (not a merge blocker)
+
 ### Planning (Phase 4 — TASK-201 task definition)
 - **TASK-201 full task definition added** to `docs/TASK_QUEUE.md` — Onboarding wizard UI (Programmer 1, Phase 4, P0, status `pending`)
 - **IMPLEMENTATION_PLAN.md Phase 4 updated** — authoritative onboarding completion destination is `/roadmap` (UX spec + ADR-020); profile persistence/resume documented as separate P2 Phase 4 backend dependency, not TASK-201

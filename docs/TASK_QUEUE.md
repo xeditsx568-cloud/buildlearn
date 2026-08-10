@@ -1,16 +1,16 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (TASK-201 task definition merged)  
+> **Last updated:** 2026-08-10 (TASK-201 merged)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
 ## Current Sprint: Phase 4 — User Onboarding & Goal Selection
 
-**Goal:** Onboarding wizard UI (TASK-201); profile persistence and placement quiz content follow in separate Phase 4 tasks.
+**Goal:** Phase 4 onboarding — TASK-201 UI complete; profile persistence and placement quiz content remain (TASK-202+, P2 profile API).
 
-**Status:** **Phase 3 Content Foundation complete (2026-08-10).** TASK-201 task definition **merged and approved** — **status `pending`; implementation not started.**
+**Status:** **TASK-201 merged (2026-08-10).** Onboarding wizard UI live on `main`. **TASK-202 not started.**
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
@@ -514,11 +514,12 @@ Description: |
   stub/mock path data on the path preview step. No profile API, no real AI
   path generation, no roadmap page implementation.
 Owner: Programmer 1
-Status: pending
+Status: done
 Priority: P0
 Phase: 4
 Dependencies: [TASK-101, TASK-102, TASK-103, TASK-104]
 Branch: feature/TASK-201-onboarding-wizard
+Merged: 2026-08-10
 Files:
   - src/app/(onboarding)/layout.tsx
   - src/app/(onboarding)/goal/page.tsx
@@ -549,8 +550,19 @@ Tests Required:
   - Unit test — quiz skip navigation to path step
   - Unit test — path loading, error, and loaded preview states where practical
   - Unit test — sign-up redirect target is /onboarding/goal
-Reviewer: Checker
+Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/TASK-201.md)
 Notes: |
+  Merged to main 2026-08-10. Onboarding wizard UI: `/onboarding/goal`,
+  `/onboarding/experience`, `/onboarding/quiz` (shell), `/onboarding/path`
+  (stub preview). Sign-up redirect → `/onboarding/goal`; Start learning CTA
+  → `/roadmap`. Client-side wizard state via sessionStorage; no profile API.
+
+  **Pre-production follow-up (post-merge, not a merge blocker):**
+  Align `.env.example` and deployment
+  `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal` with P2
+  (FILE_OWNERSHIP). Application SignUp component already uses
+  `SIGN_UP_REDIRECT`.
+
   **Out of scope (do NOT implement in TASK-201):**
   profile persistence API, onboarding resume logic (requires profile read),
   quiz question implementation/scoring (TASK-202), real AI path generation
@@ -586,7 +598,6 @@ Notes: |
 
 | Task ID | Title | Owner | Phase | Priority | Status |
 | ------- | ----- | ----- | ----- | -------- | ------ |
-| TASK-201 | Onboarding wizard UI | P1 | 4 | P0 | pending |
 | TASK-202 | Placement quiz | P1 | 4 | P1 | backlog |
 | TASK-203 | AI service abstraction | P2 | 5 | P0 |
 | TASK-204 | Path generation pipeline | P2 | 5 | P0 |
@@ -616,6 +627,7 @@ Notes: |
 | TASK-102 | Clerk webhook user sync | 2026-08-10 | Programmer 2 |
 | TASK-103 | Concept graph + goal templates | 2026-08-10 | Programmer 2 |
 | TASK-104 | Lesson schema + Lesson 1 | 2026-08-10 | Programmer 2 |
+| TASK-201 | Onboarding wizard UI | 2026-08-10 | Programmer 1 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -636,10 +648,11 @@ Notes: |
 | Phase 2 pending | 0 |
 | Phase 3 pending | 0 |
 | Phase 3 blocked | 0 |
-| Phase 4 pending | 1 |
+| Phase 4 pending | 0 |
 | Phase 4 in progress | 0 |
+| Phase 4 complete | 1 |
 | Backlog (Phase 4+) | 9 |
-| Completed (all phases) | 15 |
+| Completed (all phases) | 16 |
 
 ---
 
@@ -657,4 +670,4 @@ Notes: |
 | TASK-102 | 2 | Clerk webhook | P2 | done |
 | TASK-103 | 3 | Concept graph seed | P2 | done |
 | TASK-104 | 3 | Lesson schema + L1 | P2 | done |
-| TASK-201 | 4 | Onboarding wizard UI | P1 | pending |
+| TASK-201 | 4 | Onboarding wizard UI | P1 | done |

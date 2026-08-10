@@ -119,9 +119,9 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 **Objective:** New users complete onboarding and land on `/roadmap` (first learning view per UX_SPECIFICATION.md §138 and ADR-020).
 
 **Features:**
-- "What do you want to build?" flow (TASK-201)
-- Experience level selection (TASK-201)
-- Optional placement quiz — shell in TASK-201; content/scoring in TASK-202 (5 questions)
+- "What do you want to build?" flow (TASK-201 ✅)
+- Experience level selection (TASK-201 ✅)
+- Optional placement quiz — shell in TASK-201 ✅; content/scoring in TASK-202 (5 questions)
 - Goal stored on profile (profile API — Programmer 2; **not TASK-201**)
 - Onboarding resume on sign-in (profile API — **not TASK-201**)
 
@@ -132,7 +132,7 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 **Agent assignments:**
 | Agent | Work |
 |-------|------|
-| Programmer 1 | Onboarding UI wizard (TASK-201) |
+| Programmer 1 | Onboarding UI wizard (TASK-201 ✅) |
 | Programmer 2 | Profile persistence API + onboarding resume logic; placement quiz backend (parallel Phase 4) |
 | Programmer 1 | Placement quiz UI content (TASK-202) |
 
