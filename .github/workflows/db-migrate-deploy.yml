@@ -1,0 +1,46 @@
+name: Database Migrate Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to apply pending migrations to Neon'
+        required: true
+
+jobs:
+  migrate:
+    name: Apply Prisma migrations to Neon
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: neon
+    permissions:
+      contents: read
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+
+    steps:
+      - name: Confirm manual trigger
+        if: inputs.confirm != 'deploy'
+        run: |
+          echo "Aborted: confirmation input must be exactly 'deploy'."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy pending migrations
+        run: pnpm exec prisma migrate deploy
