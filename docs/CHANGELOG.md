@@ -7,7 +7,8 @@
 - Neon verified: Lesson 1 **`how-websites-work`** / **How Websites Work**
 - **Phase 3 Content Foundation complete** — TASK-103 and TASK-104 fully operational
 - **TASK-201 not started** — ready in backlog when Master directs
-- Status documentation branch: `docs/task-104-neon-lesson-complete` (pending Checker review)
+- Checker review: `docs/reviews/task-104-neon-lesson-complete.md` (APPROVED FOR MERGE)
+- Branch: `docs/task-104-neon-lesson-complete` merged 2026-08-10
 
 ### Added (Phase 3 — TASK-104)
 - **Lesson content schema and Lesson 1 seed:** Prisma `Lesson` model; Zod validation for six block types (objective, explain, interact, exercise, quiz, bridge)
