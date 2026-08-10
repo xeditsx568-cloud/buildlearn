@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+### Added (Phase 3 — TASK-103)
+- **Concept graph and goal templates:** Prisma models `Concept`, `ConceptPrerequisite`, `GoalTemplate`
+- **24 curated concepts** and **5 goal templates** from `content/concepts.json` and `content/goal-templates.json` (frozen MVP scope: HTML/CSS/JS)
+- Prerequisite DAG validation in `src/lib/content/curriculum.ts`; deterministic/idempotent seed in `prisma/seed.ts`
+- Migration: `20260810170000_concept_graph_and_goal_templates`
+- Checker review: `docs/reviews/TASK-103.md` (APPROVED FOR MERGE)
+- Branch: `feature/TASK-103-concept-graph` merged 2026-08-10
+- **Operational follow-up before TASK-104:** deploy curriculum migration to Neon; run `pnpm db:seed`; verify 24 concepts + 5 goal templates — **not run during merge**
+
 ### Operational (Infrastructure — Neon init migration applied)
 - **TASK-002 operational prerequisite complete:** `20250805103100_init` successfully applied to Neon via manual Resolve → Deploy workflow (2026-08-10)
 - Neon verified: `_prisma_migrations`, `users`, `profiles` tables present

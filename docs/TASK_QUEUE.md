@@ -1,16 +1,22 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (TASK-002 Neon migration operational complete)  
+> **Last updated:** 2026-08-10 (TASK-103 merged)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
-## Current Sprint: Phase 3 — Content Foundation (ready)
+## Current Sprint: Phase 3 — Content Foundation (in progress)
 
-**Goal:** Seed concept graph and goal templates (TASK-103).
+**Goal:** Curriculum foundation — concept graph, goal templates, then lessons (TASK-104).
 
-**Status:** TASK-002 operational prerequisite complete (2026-08-10). Init migration `20250805103100_init` successfully applied to Neon (`users`, `profiles`, `_prisma_migrations`). TASK-103 database blocker **cleared** — status **pending**; implementation **not started**.
+**Status:** **TASK-103 merged (2026-08-10).** Code complete: 24 concepts, 5 goal templates, Prisma models, seed, migration `20260810170000_concept_graph_and_goal_templates`. **Operational follow-up before TASK-104:** deploy migration to Neon, run curriculum seed, verify rows.
+
+### Operational follow-up (before TASK-104)
+
+- Deploy migration **`20260810170000_concept_graph_and_goal_templates`** to Neon via **Database Migrate Deploy** (not run yet)
+- Run **`pnpm db:seed`** against Neon to populate concepts and goal templates (not run yet)
+- Verify: 24 rows in `concepts`, 5 in `goal_templates`, prerequisite edges present
 
 ---
 
@@ -423,15 +429,19 @@ TASK-ID: TASK-103
 Title: Seed concept graph and goal templates
 Phase: 3
 Owner: Programmer 2
-Status: pending
+Status: done
 Dependencies: [TASK-002]
 Priority: P0
 Branch: feature/TASK-103-concept-graph
+Merged: 2026-08-10
 Files:
   - prisma/schema.prisma
   - prisma/seed.ts
   - content/concepts.json
   - content/goal-templates.json
+  - src/lib/content/curriculum.ts
+  - prisma/migrations/20260810170000_concept_graph_and_goal_templates/**
+  - tests/unit/concept-graph.test.ts
 Acceptance Criteria:
   - 24 concepts seeded per PRODUCT_REQUIREMENTS.md §4
   - 5 goal templates seeded
@@ -440,10 +450,11 @@ Acceptance Criteria:
 Tests Required:
   - Unit test: DAG has no cycles
   - Unit test: concept count equals 24
-Reviewer: Checker
+Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/TASK-103.md)
 Notes: |
-  Database blocker cleared 2026-08-10: init migration applied to Neon.
-  Ready to begin when directed; implementation not started.
+  Merged to main 2026-08-10. Code complete; migration + seed reviewed.
+  Operational follow-up before TASK-104: deploy 20260810170000_concept_graph_and_goal_templates
+  to Neon, run pnpm db:seed, verify 24 concepts + 5 goal templates. Not run during merge.
 ```
 
 ### TASK-104
@@ -467,6 +478,9 @@ Acceptance Criteria:
 Tests Required:
   - Unit test: schema accepts valid lesson, rejects invalid
 Reviewer: Checker
+Notes: |
+  Blocked until TASK-103 operational follow-up complete: deploy curriculum migration to Neon,
+  run pnpm db:seed, verify concepts and goal templates. Do not start until directed.
 ```
 
 ---
@@ -503,6 +517,7 @@ Reviewer: Checker
 | FIX-INIT-MIGRATION-BOM | Init migration BOM recovery | 2026-08-10 | Programmer 2 |
 | TASK-101 | Clerk authentication | 2026-08-06 | Programmer 1 |
 | TASK-102 | Clerk webhook user sync | 2026-08-10 | Programmer 2 |
+| TASK-103 | Concept graph + goal templates | 2026-08-10 | Programmer 2 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -521,10 +536,10 @@ Reviewer: Checker
 | Phase 2 complete | 2 |
 | Phase 2 infra complete | 3 |
 | Phase 2 pending | 0 |
-| Phase 3 pending | 1 |
+| Phase 3 pending | 0 |
 | Phase 3 blocked | 1 |
-| Backlog (Phase 3+) | 11 |
-| Completed (all phases) | 13 |
+| Backlog (Phase 3+) | 10 |
+| Completed (all phases) | 14 |
 
 ---
 
@@ -540,5 +555,5 @@ Reviewer: Checker
 | TASK-006 | 1 | Phase 1 Checker gate | Checker | done |
 | TASK-101 | 2 | Clerk auth | P1 | done |
 | TASK-102 | 2 | Clerk webhook | P2 | done |
-| TASK-103 | 3 | Concept graph seed | P2 | pending |
+| TASK-103 | 3 | Concept graph seed | P2 | done |
 | TASK-104 | 3 | Lesson schema + L1 | P2 | blocked |

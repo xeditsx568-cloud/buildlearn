@@ -33,6 +33,6 @@
 
 - **Planning:** Approved (2026-08-05)
 - **Phase 1:** Complete — tagged `v0.1.0-foundation`
-- **Phase 2:** Complete — auth foundation, Neon migration infrastructure, init migration applied to Neon (2026-08-10).
-- **Phase 3:** **Ready to begin** — TASK-103 **pending** (database blocker cleared); implementation not started.
+- **Phase 2:** Complete — auth foundation, Neon init migration applied (2026-08-10).
+- **Phase 3:** In progress — **TASK-103 merged (2026-08-10)**; curriculum migration deploy + Neon seed outstanding before TASK-104. **TASK-104 blocked.**
 - **UX specification:** v1.2 — **MVP Design Freeze approved** (2026-08-05)
