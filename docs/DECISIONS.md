@@ -351,6 +351,8 @@ may continue targeting `/roadmap` per ADR-020 and TASK-201.
 
 ---
 
+## Override Process
+
 1. Stakeholder requests change
 2. Master Agent documents new ADR with status ACCEPTED
 3. Superseded ADR marked DEPRECATED
