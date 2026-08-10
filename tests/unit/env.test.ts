@@ -28,6 +28,7 @@ const validPhase1Env = {
 const validPhase2Env = {
   ...validPhase1Env,
   CLERK_SECRET_KEY: "sk_test_ci_dummy_key_for_build_only",
+  CLERK_WEBHOOK_SIGNING_SECRET: "whsec_ci_dummy_secret_for_build_only",
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ci_dummy_key_for_build_only",
   NEXT_PUBLIC_CLERK_SIGN_IN_URL: "/sign-in",
   NEXT_PUBLIC_CLERK_SIGN_UP_URL: "/sign-up",
