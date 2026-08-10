@@ -1,0 +1,49 @@
+name: Database Seed
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "seed" to run the curated curriculum seed against Neon'
+        required: true
+
+jobs:
+  seed:
+    name: Seed curriculum data to Neon
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: neon
+    permissions:
+      contents: read
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+
+    steps:
+      - name: Confirm manual trigger
+        if: inputs.confirm != 'seed'
+        run: |
+          echo "Aborted: confirmation input must be exactly 'seed'."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma:generate
+
+      - name: Seed curriculum data
+        run: pnpm db:seed
