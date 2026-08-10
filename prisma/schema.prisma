@@ -35,3 +35,37 @@ model Profile {
 
   @@map("profiles")
 }
+
+model Concept {
+  id          String   @id
+  name        String
+  description String   @db.Text
+  domain      String
+  difficulty  Int
+  tags        String[]
+
+  prerequisites ConceptPrerequisite[] @relation("ConceptPrerequisites")
+  dependents    ConceptPrerequisite[] @relation("PrerequisiteConcepts")
+
+  @@map("concepts")
+}
+
+model ConceptPrerequisite {
+  conceptId      String @map("concept_id")
+  prerequisiteId String @map("prerequisite_id")
+
+  concept      Concept @relation("ConceptPrerequisites", fields: [conceptId], references: [id], onDelete: Cascade)
+  prerequisite Concept @relation("PrerequisiteConcepts", fields: [prerequisiteId], references: [id], onDelete: Cascade)
+
+  @@id([conceptId, prerequisiteId])
+  @@map("concept_prerequisites")
+}
+
+model GoalTemplate {
+  id               String   @id
+  name             String
+  matchingKeywords String[] @map("matching_keywords")
+  conceptIds       String[] @map("concept_ids")
+
+  @@map("goal_templates")
+}

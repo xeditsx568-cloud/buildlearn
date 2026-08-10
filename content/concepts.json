@@ -1,0 +1,224 @@
+{
+  "concepts": [
+    {
+      "id": "how-web-works",
+      "name": "How Websites Work",
+      "description": "Understand browsers, servers, HTML/CSS/JS roles, and how a page loads.",
+      "domain": "foundations",
+      "difficulty": 1,
+      "tags": ["foundations", "web"],
+      "prerequisites": []
+    },
+    {
+      "id": "html-document-structure",
+      "name": "HTML Document Structure",
+      "description": "Use doctype, html, head, body, and semantic page skeleton correctly.",
+      "domain": "foundations",
+      "difficulty": 1,
+      "tags": ["html", "foundations"],
+      "prerequisites": ["how-web-works"]
+    },
+    {
+      "id": "html-elements",
+      "name": "HTML Elements",
+      "description": "Apply common HTML elements for text, lists, links, images, and sections.",
+      "domain": "foundations",
+      "difficulty": 1,
+      "tags": ["html", "foundations"],
+      "prerequisites": ["html-document-structure"]
+    },
+    {
+      "id": "html-attributes",
+      "name": "HTML Attributes",
+      "description": "Add attributes such as href, src, alt, class, and id to control element behavior.",
+      "domain": "foundations",
+      "difficulty": 1,
+      "tags": ["html", "foundations"],
+      "prerequisites": ["html-elements"]
+    },
+    {
+      "id": "html-semantics",
+      "name": "HTML Semantics",
+      "description": "Choose semantic elements like header, nav, main, section, and footer for meaningful structure.",
+      "domain": "foundations",
+      "difficulty": 2,
+      "tags": ["html", "accessibility", "foundations"],
+      "prerequisites": ["html-elements", "html-document-structure"]
+    },
+    {
+      "id": "html-forms",
+      "name": "HTML Forms",
+      "description": "Build accessible forms with inputs, labels, buttons, and basic validation attributes.",
+      "domain": "foundations",
+      "difficulty": 2,
+      "tags": ["html", "forms"],
+      "prerequisites": ["html-elements", "html-attributes"]
+    },
+    {
+      "id": "css-syntax",
+      "name": "CSS Syntax",
+      "description": "Write rules with selectors, properties, values, and valid CSS syntax.",
+      "domain": "css",
+      "difficulty": 1,
+      "tags": ["css"],
+      "prerequisites": ["html-elements"]
+    },
+    {
+      "id": "css-selectors",
+      "name": "CSS Selectors",
+      "description": "Target elements with type, class, id, descendant, and pseudo-class selectors.",
+      "domain": "css",
+      "difficulty": 2,
+      "tags": ["css"],
+      "prerequisites": ["css-syntax"]
+    },
+    {
+      "id": "css-box-model",
+      "name": "CSS Box Model",
+      "description": "Control spacing with margin, border, padding, and content sizing.",
+      "domain": "css",
+      "difficulty": 2,
+      "tags": ["css", "layout"],
+      "prerequisites": ["css-selectors"]
+    },
+    {
+      "id": "css-colors-typography",
+      "name": "CSS Colors and Typography",
+      "description": "Style readable text with colors, fonts, line height, and contrast basics.",
+      "domain": "css",
+      "difficulty": 2,
+      "tags": ["css", "design"],
+      "prerequisites": ["css-selectors", "css-box-model"]
+    },
+    {
+      "id": "css-flexbox",
+      "name": "CSS Flexbox",
+      "description": "Lay out components with flex containers, alignment, and direction.",
+      "domain": "css",
+      "difficulty": 3,
+      "tags": ["css", "layout"],
+      "prerequisites": ["css-box-model"]
+    },
+    {
+      "id": "css-grid-intro",
+      "name": "CSS Grid Intro",
+      "description": "Create simple grid layouts with rows, columns, and gap.",
+      "domain": "css",
+      "difficulty": 3,
+      "tags": ["css", "layout"],
+      "prerequisites": ["css-flexbox", "css-box-model"]
+    },
+    {
+      "id": "css-responsive",
+      "name": "Responsive Design",
+      "description": "Adapt layouts for mobile and desktop using media queries and fluid sizing.",
+      "domain": "css",
+      "difficulty": 3,
+      "tags": ["css", "responsive"],
+      "prerequisites": ["css-flexbox", "css-box-model"]
+    },
+    {
+      "id": "js-variables-types",
+      "name": "JavaScript Variables and Types",
+      "description": "Declare variables and work with strings, numbers, booleans, and basic values.",
+      "domain": "javascript",
+      "difficulty": 2,
+      "tags": ["javascript"],
+      "prerequisites": ["html-elements"]
+    },
+    {
+      "id": "js-functions",
+      "name": "JavaScript Functions",
+      "description": "Define and call functions with parameters and return values.",
+      "domain": "javascript",
+      "difficulty": 2,
+      "tags": ["javascript"],
+      "prerequisites": ["js-variables-types"]
+    },
+    {
+      "id": "js-conditionals",
+      "name": "JavaScript Conditionals",
+      "description": "Branch logic with if/else and comparison operators.",
+      "domain": "javascript",
+      "difficulty": 2,
+      "tags": ["javascript"],
+      "prerequisites": ["js-variables-types"]
+    },
+    {
+      "id": "js-loops",
+      "name": "JavaScript Loops",
+      "description": "Repeat actions with for and while loops.",
+      "domain": "javascript",
+      "difficulty": 2,
+      "tags": ["javascript"],
+      "prerequisites": ["js-conditionals"]
+    },
+    {
+      "id": "js-arrays",
+      "name": "JavaScript Arrays",
+      "description": "Store and iterate collections with arrays and common array methods.",
+      "domain": "javascript",
+      "difficulty": 3,
+      "tags": ["javascript"],
+      "prerequisites": ["js-loops", "js-variables-types"]
+    },
+    {
+      "id": "js-dom-selection",
+      "name": "DOM Selection",
+      "description": "Select page elements with querySelector and related DOM APIs.",
+      "domain": "javascript",
+      "difficulty": 3,
+      "tags": ["javascript", "dom"],
+      "prerequisites": ["html-elements", "js-variables-types"]
+    },
+    {
+      "id": "js-dom-manipulation",
+      "name": "DOM Manipulation",
+      "description": "Update text, classes, and attributes on selected DOM nodes.",
+      "domain": "javascript",
+      "difficulty": 3,
+      "tags": ["javascript", "dom"],
+      "prerequisites": ["js-dom-selection", "js-functions"]
+    },
+    {
+      "id": "js-events",
+      "name": "JavaScript Events",
+      "description": "Respond to clicks, input, and submit events with event listeners.",
+      "domain": "javascript",
+      "difficulty": 3,
+      "tags": ["javascript", "dom"],
+      "prerequisites": ["js-dom-manipulation"]
+    },
+    {
+      "id": "combining-html-css-js",
+      "name": "Combining HTML, CSS, and JavaScript",
+      "description": "Connect structure, styling, and behavior in a single page.",
+      "domain": "integration",
+      "difficulty": 3,
+      "tags": ["integration"],
+      "prerequisites": ["html-elements", "css-syntax", "js-variables-types"]
+    },
+    {
+      "id": "debugging-basics",
+      "name": "Debugging Basics",
+      "description": "Use console logging and browser devtools to find and fix common errors.",
+      "domain": "integration",
+      "difficulty": 3,
+      "tags": ["integration", "debugging"],
+      "prerequisites": ["js-functions", "combining-html-css-js"]
+    },
+    {
+      "id": "project-structure",
+      "name": "Project Structure",
+      "description": "Organize HTML, CSS, and JS files for a small multi-section site.",
+      "domain": "integration",
+      "difficulty": 3,
+      "tags": ["integration", "projects"],
+      "prerequisites": [
+        "html-document-structure",
+        "css-syntax",
+        "combining-html-css-js"
+      ]
+    }
+  ]
+}
