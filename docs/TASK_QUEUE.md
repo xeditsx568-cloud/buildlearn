@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (Phase 4 backend task definitions prepared)  
+> **Last updated:** 2026-08-10 (Phase 4 backend formalization merged)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -10,7 +10,7 @@
 
 **Goal:** Phase 4 onboarding — P1 UI complete (TASK-201, TASK-202); P2 profile persistence and resume outstanding (TASK-211–213).
 
-**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** Phase 4 **P1 UI complete.** Phase 4 **not yet complete** — P2 persistence/resume outstanding (**TASK-211**, **TASK-212**, **TASK-213**). **TASK-203 blocked** until Phase 4 minimum DoD is met (ADR-021).
+**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** **ADR-021 merged (2026-08-10).** Phase 4 **P1 UI complete.** Phase 4 **not yet complete** — P2 persistence/resume outstanding (**TASK-211**, **TASK-212**, **TASK-213**). **TASK-211 may begin.** **TASK-203 blocked** until Phase 4 minimum DoD is met (ADR-021).
 
 ### Phase 4 boundary (2026-08-10)
 
