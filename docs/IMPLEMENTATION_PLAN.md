@@ -116,26 +116,29 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 ---
 
 ### PHASE 4 — User Onboarding & Goal Selection
-**Objective:** New users complete onboarding and land on dashboard.
+**Objective:** New users complete onboarding and land on `/roadmap` (first learning view per UX_SPECIFICATION.md §138 and ADR-020).
 
 **Features:**
-- "What do you want to build?" flow
-- Experience level selection
-- Optional placement quiz (5 questions)
-- Goal stored on profile
-- Empty dashboard shell
+- "What do you want to build?" flow (TASK-201)
+- Experience level selection (TASK-201)
+- Optional placement quiz — shell in TASK-201; content/scoring in TASK-202 (5 questions)
+- Goal stored on profile (profile API — Programmer 2; **not TASK-201**)
+- Onboarding resume on sign-in (profile API — **not TASK-201**)
 
 **Dependencies:** Phase 2, Phase 3
 
-**Database:** profiles extended (goal fields)
+**Database:** Existing `profiles` fields (`experience_level`, `learning_goal_text`, `goal_summary`, `onboarding_complete`) — no new tables in Phase 4 UI work. Profile writes via profile API (P2).
 
 **Agent assignments:**
 | Agent | Work |
 |-------|------|
-| Programmer 1 | Onboarding UI wizard |
-| Programmer 2 | Placement quiz + profile API |
+| Programmer 1 | Onboarding UI wizard (TASK-201) |
+| Programmer 2 | Profile persistence API + onboarding resume logic; placement quiz backend (parallel Phase 4) |
+| Programmer 1 | Placement quiz UI content (TASK-202) |
 
-**DoD:** New user completes onboarding; goal saved; redirected to dashboard
+**DoD:** New user completes onboarding wizard; goal saved to profile (requires profile API); redirected to **`/roadmap`** on completion. `/roadmap` page UI is Phase 6 (TASK-205) — Phase 4 wires the CTA only.
+
+**TASK-201 boundary:** UI wizard, client-side state, stub path preview, auth routing. Excludes profile API, real AI path generation, roadmap implementation, and Prisma changes.
 
 ---
 

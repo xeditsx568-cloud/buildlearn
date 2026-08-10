@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+### Planning (Phase 4 — TASK-201 task definition)
+- **TASK-201 full task definition added** to `docs/TASK_QUEUE.md` — Onboarding wizard UI (Programmer 1, Phase 4, P0, status `pending`)
+- **IMPLEMENTATION_PLAN.md Phase 4 updated** — authoritative onboarding completion destination is `/roadmap` (UX spec + ADR-020); profile persistence/resume documented as separate P2 Phase 4 backend dependency, not TASK-201
+- Implementation not started; awaiting Checker review of task definition
+
 ### Operational (Phase 3 — TASK-104 Neon lesson complete)
 - **TASK-104 operational follow-up complete (2026-08-10)**
 - Migration `20260810173000_lessons` deployed to Neon successfully via **Database Migrate Deploy**

@@ -1,16 +1,16 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (TASK-104 operational complete)  
+> **Last updated:** 2026-08-10 (TASK-201 task definition prepared)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
-## Current Sprint: Phase 3 — Content Foundation (complete)
+## Current Sprint: Phase 4 — User Onboarding & Goal Selection
 
-**Goal:** Curriculum foundation — concept graph, goal templates, Lesson 1 schema and seed (TASK-103, TASK-104).
+**Goal:** Onboarding wizard UI (TASK-201); profile persistence and placement quiz content follow in separate Phase 4 tasks.
 
-**Status:** **Phase 3 Content Foundation complete (2026-08-10).** TASK-103 and TASK-104 operationally complete in Neon. **TASK-201 not started.**
+**Status:** **Phase 3 Content Foundation complete (2026-08-10).** TASK-201 task definition prepared — **status `pending`; implementation not started.**
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
@@ -502,12 +502,92 @@ Notes: |
 
 ---
 
+## Backlog — Phase 4 (User Onboarding)
+
+### TASK-201
+```yaml
+TASK-ID: TASK-201
+Title: Onboarding wizard UI
+Description: |
+  Implement the `(onboarding)` route group and four-step wizard UI per
+  UX_SPECIFICATION.md §5.3–5.6. Client-side navigation and validation only;
+  stub/mock path data on the path preview step. No profile API, no real AI
+  path generation, no roadmap page implementation.
+Owner: Programmer 1
+Status: pending
+Priority: P0
+Phase: 4
+Dependencies: [TASK-101, TASK-102, TASK-103, TASK-104]
+Branch: feature/TASK-201-onboarding-wizard
+Files:
+  - src/app/(onboarding)/layout.tsx
+  - src/app/(onboarding)/goal/page.tsx
+  - src/app/(onboarding)/experience/page.tsx
+  - src/app/(onboarding)/quiz/page.tsx
+  - src/app/(onboarding)/path/page.tsx
+  - src/components/onboarding/**
+  - src/lib/auth-routes.ts
+  - src/middleware.ts
+  - src/app/sign-up/[[...sign-up]]/page.tsx
+  - tests/unit/auth-routes.test.ts
+  - tests/unit/onboarding/**
+Acceptance Criteria:
+  - Authenticated new users are directed from sign-up to /onboarding/goal
+  - Onboarding contains four visible steps — goal, experience, quiz, path
+  - Goal screen — textarea, 10–500 character validation, example goal chips, Continue disabled until valid
+  - Experience screen — beginner, some_exposure, intermediate; Continue requires selection
+  - Quiz screen — route exists, correct onboarding shell, user can skip to path; full quiz content/scoring deferred to TASK-202
+  - Path screen — loading, error, and loaded preview states; stub/mock path data only; Start learning CTA
+  - Onboarding completion destination is /roadmap (CTA may link to /roadmap; roadmap page itself is NOT implemented in this task)
+  - /onboarding/* requires authentication
+  - Onboarding uses no normal authenticated app navigation
+  - Responsive/mobile behavior follows UX_SPECIFICATION.md
+Tests Required:
+  - Unit test — onboarding auth-route classification
+  - Unit test — goal validation (min 10, max 500 characters)
+  - Unit test — experience selection requirement
+  - Unit test — quiz skip navigation to path step
+  - Unit test — path loading, error, and loaded preview states where practical
+  - Unit test — sign-up redirect target is /onboarding/goal
+Reviewer: Checker
+Notes: |
+  **Out of scope (do NOT implement in TASK-201):**
+  profile persistence API, onboarding resume logic (requires profile read),
+  quiz question implementation/scoring (TASK-202), real AI path generation
+  (Phase 5 TASK-203/204), learning_paths tables, /roadmap page implementation
+  (Phase 6 TASK-205), lesson player, project creation, OpenAI integration,
+  Prisma schema changes, API routes, TASK-202+.
+
+  **Phase 4 backend dependency (separate from TASK-201):**
+  Profile persistence and onboarding resume logic (goal/experience save,
+  onboarding_complete flag, sign-in resume step) are Programmer 2 Phase 4
+  work — profile API — not part of this task. TASK-201 may use client-side
+  wizard state until that API ships.
+
+  **Sign-up redirect:** Update SignUp forceRedirectUrl in
+  src/app/sign-up/[[...sign-up]]/page.tsx. Coordinate
+  NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL in .env.example with P2
+  (FILE_OWNERSHIP — .env.example owned by Programmer 2).
+
+  **Completion destination:** Frozen UX (UX_SPECIFICATION.md §138) and
+  ADR-020 — onboarding complete → /roadmap. TASK-201 wires the Start
+  learning CTA to /roadmap; the roadmap page is implemented in TASK-205.
+
+  **Path preview:** Use stub/mock path data only. Real generation is Phase 5.
+
+  **Dependencies satisfied:** Phase 2 auth (TASK-101/102) and Phase 3 content
+  (TASK-103/104) complete. Profile fields already exist on profiles table;
+  no schema migration required for UI-only work.
+```
+
+---
+
 ## Backlog — Phase 4+
 
-| Task ID | Title | Owner | Phase | Priority |
-| ------- | ----- | ----- | ----- | -------- |
-| TASK-201 | Onboarding wizard UI | P1 | 4 | P0 |
-| TASK-202 | Placement quiz | P1 | 4 | P1 |
+| Task ID | Title | Owner | Phase | Priority | Status |
+| ------- | ----- | ----- | ----- | -------- | ------ |
+| TASK-201 | Onboarding wizard UI | P1 | 4 | P0 | pending |
+| TASK-202 | Placement quiz | P1 | 4 | P1 | backlog |
 | TASK-203 | AI service abstraction | P2 | 5 | P0 |
 | TASK-204 | Path generation pipeline | P2 | 5 | P0 |
 | TASK-205 | Learning path UI | P1 | 6 | P0 |
@@ -556,7 +636,9 @@ Notes: |
 | Phase 2 pending | 0 |
 | Phase 3 pending | 0 |
 | Phase 3 blocked | 0 |
-| Backlog (Phase 3+) | 10 |
+| Phase 4 pending | 1 |
+| Phase 4 in progress | 0 |
+| Backlog (Phase 4+) | 9 |
 | Completed (all phases) | 15 |
 
 ---
@@ -575,3 +657,4 @@ Notes: |
 | TASK-102 | 2 | Clerk webhook | P2 | done |
 | TASK-103 | 3 | Concept graph seed | P2 | done |
 | TASK-104 | 3 | Lesson schema + L1 | P2 | done |
+| TASK-201 | 4 | Onboarding wizard UI | P1 | pending |

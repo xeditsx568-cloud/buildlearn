@@ -34,5 +34,6 @@
 - **Planning:** Approved (2026-08-05)
 - **Phase 1:** Complete — tagged `v0.1.0-foundation`
 - **Phase 2:** Complete — auth foundation, Neon init migration applied (2026-08-10).
-- **Phase 3:** **Complete (2026-08-10)** — TASK-103 and TASK-104 operationally complete in Neon. **TASK-201 not started.**
+- **Phase 3:** **Complete (2026-08-10)** — TASK-103 and TASK-104 operationally complete in Neon.
+- **Phase 4:** **TASK-201 defined (`pending`)** — Onboarding wizard UI; implementation not started.
 - **UX specification:** v1.2 — **MVP Design Freeze approved** (2026-08-05)
