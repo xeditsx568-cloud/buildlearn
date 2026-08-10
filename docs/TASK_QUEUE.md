@@ -1,16 +1,34 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (TASK-202 task definition merged)  
+> **Last updated:** 2026-08-10 (TASK-202 merged)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
 ## Current Sprint: Phase 4 — User Onboarding & Goal Selection
 
-**Goal:** Phase 4 onboarding — TASK-201 complete; TASK-202 placement quiz UI next; profile persistence remains separate P2 work.
+**Goal:** Phase 4 onboarding — TASK-201 and TASK-202 P1 UI complete; profile persistence and placement quiz backend remain separate P2 work.
 
-**Status:** **TASK-201 merged (2026-08-10).** TASK-202 task definition **merged and approved** — **status `pending`; implementation not started.**
+**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** Phase 4 P1 onboarding UI complete. **Profile persistence API, onboarding resume backend, and placement quiz backend/API remain outstanding (P2).** TASK-203+ not started.
+
+### Phase 4 boundary (2026-08-10)
+
+**TASK-202 completed (P1):**
+- 5 curated MCQs under `src/lib/onboarding/`
+- One-question-at-a-time quiz with progress indicator
+- Skip flow → `/onboarding/path`
+- Client-side deterministic scoring + sessionStorage-backed quiz state
+- Path preview remains stub/mock (placement signals reserved for Phase 5)
+
+**Still outstanding (outside TASK-202):**
+- Profile persistence API (P2)
+- Onboarding resume backend logic (P2)
+- Placement quiz backend/API (P2)
+- `.env.example` / deployment sign-up redirect alignment (pre-production ops)
+- Real path generation (Phase 5 — TASK-204)
+- AI/OpenAI infrastructure (Phase 5 — TASK-203+)
+- `/roadmap` page implementation (Phase 6 — TASK-205)
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
@@ -603,11 +621,12 @@ Description: |
   Question data lives under src/lib/onboarding/ (P1-owned). No backend,
   profile persistence, Prisma changes, or path-preview modifications.
 Owner: Programmer 1
-Status: pending
+Status: done
 Priority: P1
 Phase: 4
 Dependencies: [TASK-201]
 Branch: feature/TASK-202-placement-quiz
+Merged: 2026-08-10
 Files:
   - src/components/onboarding/quiz-shell-screen.tsx
   - src/components/onboarding/onboarding-provider.tsx
@@ -641,10 +660,11 @@ Tests Required:
   - Unit test — scoring boundary cases
   - Unit test — onboarding provider/sessionStorage quiz state round-trip
   - Unit test — regression of TASK-201 quiz skip/path behavior
-Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/TASK-202-task-definition.md)
+Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/TASK-202.md)
 Notes: |
-  Task definition merged to main 2026-08-10. Implementation not started;
-  begin on `feature/TASK-202-placement-quiz` when Master directs.
+  Merged to main 2026-08-10. Placement quiz: 5 curated MCQs, one-at-a-time UI,
+  progress dots, skip → `/onboarding/path`, deterministic client-side scoring
+  in sessionStorage. Path preview unchanged (stub/mock).
 
   **Question content location (Master decision):**
   Curated question data under `src/lib/onboarding/` (P1-owned). Do NOT create
@@ -686,7 +706,6 @@ Notes: |
 
 | Task ID | Title | Owner | Phase | Priority | Status |
 | ------- | ----- | ----- | ----- | -------- | ------ |
-| TASK-202 | Placement quiz | P1 | 4 | P1 | pending |
 | TASK-203 | AI service abstraction | P2 | 5 | P0 |
 | TASK-204 | Path generation pipeline | P2 | 5 | P0 |
 | TASK-205 | Learning path UI | P1 | 6 | P0 |
@@ -716,6 +735,7 @@ Notes: |
 | TASK-103 | Concept graph + goal templates | 2026-08-10 | Programmer 2 |
 | TASK-104 | Lesson schema + Lesson 1 | 2026-08-10 | Programmer 2 |
 | TASK-201 | Onboarding wizard UI | 2026-08-10 | Programmer 1 |
+| TASK-202 | Placement quiz | 2026-08-10 | Programmer 1 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -736,11 +756,11 @@ Notes: |
 | Phase 2 pending | 0 |
 | Phase 3 pending | 0 |
 | Phase 3 blocked | 0 |
-| Phase 4 pending | 1 |
+| Phase 4 pending | 0 |
 | Phase 4 in progress | 0 |
-| Phase 4 complete | 1 |
+| Phase 4 complete | 2 |
 | Backlog (Phase 4+) | 8 |
-| Completed (all phases) | 16 |
+| Completed (all phases) | 17 |
 
 ---
 
@@ -759,4 +779,4 @@ Notes: |
 | TASK-103 | 3 | Concept graph seed | P2 | done |
 | TASK-104 | 3 | Lesson schema + L1 | P2 | done |
 | TASK-201 | 4 | Onboarding wizard UI | P1 | done |
-| TASK-202 | 4 | Placement quiz | P1 | pending |
+| TASK-202 | 4 | Placement quiz | P1 | done |

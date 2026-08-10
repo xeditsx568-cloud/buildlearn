@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+### Added (Phase 4 — TASK-202)
+- **Placement quiz UI:** 5 curated beginner HTML/CSS/JS MCQs at `/onboarding/quiz`; one question at a time with progress dots
+- Client-side deterministic scoring (`totalCorrect`, `totalQuestions`, `percentage`, lightweight domain summary) in sessionStorage-backed onboarding state
+- Skip flow preserved (`I'm not sure — skip quiz` → `/onboarding/path`); completion stores answers + placement result → `/onboarding/path`
+- Question data under `src/lib/onboarding/` (P1-owned); path preview remains stub/mock (no score consumption)
+- Checker review: `docs/reviews/TASK-202.md` (APPROVED FOR MERGE)
+- Branch: `feature/TASK-202-placement-quiz` merged 2026-08-10
+- **Phase 4 P1 onboarding UI complete** — profile persistence, onboarding resume backend, placement quiz backend/API, and `.env.example` redirect alignment remain separate P2/ops work
+
 ### Planning (Phase 4 — TASK-202 task definition)
 - **TASK-202 full task definition added** to `docs/TASK_QUEUE.md` — Placement quiz (Programmer 1, Phase 4, P1, status `pending`)
 - Question content under `src/lib/onboarding/` (P1-owned); client-side scoring only; placement signals reserved for Phase 5

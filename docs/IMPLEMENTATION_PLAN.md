@@ -121,7 +121,7 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 **Features:**
 - "What do you want to build?" flow (TASK-201 ✅)
 - Experience level selection (TASK-201 ✅)
-- Optional placement quiz — shell in TASK-201 ✅; UI + client-side scoring in TASK-202 (5 questions, pending)
+- Optional placement quiz — TASK-201 shell ✅; UI + client-side scoring TASK-202 ✅ (5 questions)
 - Goal stored on profile (profile API — Programmer 2; **not TASK-201**)
 - Onboarding resume on sign-in (profile API — **not TASK-201**)
 
@@ -133,14 +133,16 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 | Agent | Work |
 |-------|------|
 | Programmer 1 | Onboarding UI wizard (TASK-201 ✅) |
-| Programmer 1 | Placement quiz UI + client-side scoring (TASK-202, pending) |
+| Programmer 1 | Placement quiz UI + client-side scoring (TASK-202 ✅) |
 | Programmer 2 | Profile persistence API + onboarding resume logic (parallel Phase 4); placement quiz backend/API deferred — not TASK-202 |
 
 **DoD:** New user completes onboarding wizard; goal saved to profile (requires profile API); redirected to **`/roadmap`** on completion. `/roadmap` page UI is Phase 6 (TASK-205) — Phase 4 wires the CTA only.
 
 **TASK-201 boundary:** UI wizard, client-side state, stub path preview, auth routing. Excludes profile API, real AI path generation, roadmap implementation, and Prisma changes.
 
-**TASK-202 boundary:** 5 curated MCQ placement quiz UI; deterministic client-side scoring/signals in sessionStorage; question data under `src/lib/onboarding/`. Excludes profile API, backend scoring, Prisma changes, and path-preview modifications. Placement signals reserved for Phase 5 (TASK-204).
+**TASK-202 boundary:** 5 curated MCQ placement quiz UI; deterministic client-side scoring/signals in sessionStorage; question data under `src/lib/onboarding/`. Excludes profile API, backend scoring, Prisma changes, and path-preview modifications. Placement signals reserved for Phase 5 (TASK-204). **Merged 2026-08-10.**
+
+**Phase 4 P1 complete; P2 outstanding:** profile persistence API, onboarding resume backend, placement quiz backend/API, and `.env.example`/deployment redirect alignment remain separate work before production.
 
 ---
 
