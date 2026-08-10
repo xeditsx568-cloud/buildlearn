@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (TASK-202 task definition prepared)  
+> **Last updated:** 2026-08-10 (TASK-202 task definition merged)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -10,7 +10,7 @@
 
 **Goal:** Phase 4 onboarding — TASK-201 complete; TASK-202 placement quiz UI next; profile persistence remains separate P2 work.
 
-**Status:** **TASK-201 merged (2026-08-10).** TASK-202 task definition prepared — **status `pending`; implementation not started.**
+**Status:** **TASK-201 merged (2026-08-10).** TASK-202 task definition **merged and approved** — **status `pending`; implementation not started.**
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
@@ -641,8 +641,11 @@ Tests Required:
   - Unit test — scoring boundary cases
   - Unit test — onboarding provider/sessionStorage quiz state round-trip
   - Unit test — regression of TASK-201 quiz skip/path behavior
-Reviewer: Checker
+Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/TASK-202-task-definition.md)
 Notes: |
+  Task definition merged to main 2026-08-10. Implementation not started;
+  begin on `feature/TASK-202-placement-quiz` when Master directs.
+
   **Question content location (Master decision):**
   Curated question data under `src/lib/onboarding/` (P1-owned). Do NOT create
   `content/placement-quiz.json` — `content/` is P2-owned per FILE_OWNERSHIP.

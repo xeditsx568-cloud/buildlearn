@@ -5,7 +5,9 @@
 - Question content under `src/lib/onboarding/` (P1-owned); client-side scoring only; placement signals reserved for Phase 5
 - Profile persistence and placement quiz backend remain separate P2 Phase 4 work
 - `.env.example` / deployment sign-up redirect alignment remains pre-production follow-up (not a TASK-202 blocker)
-- Implementation not started; awaiting Checker review of task definition
+- **TASK-202 implementation not started** — definition approved and merged; begin on `feature/TASK-202-placement-quiz` when Master directs
+- Checker review: `docs/reviews/TASK-202-task-definition.md` (APPROVED FOR MERGE)
+- Branch: `docs/TASK-202-task-definition` merged 2026-08-10
 
 ### Added (Phase 4 — TASK-201)
 - **Onboarding wizard UI:** `(onboarding)` route group with goal, experience, quiz shell, and path preview screens
