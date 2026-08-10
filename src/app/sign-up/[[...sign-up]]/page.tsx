@@ -1,7 +1,7 @@
 import { SignUp } from "@clerk/nextjs";
 import Link from "next/link";
 
-import { AUTHENTICATED_HOME } from "@/lib/auth-routes";
+import { SIGN_UP_REDIRECT } from "@/lib/auth-routes";
 
 export default function SignUpPage() {
   return (
@@ -9,7 +9,7 @@ export default function SignUpPage() {
       <Link href="/" className="text-lg font-semibold">
         BuildLearn
       </Link>
-      <SignUp forceRedirectUrl={AUTHENTICATED_HOME} />
+      <SignUp forceRedirectUrl={SIGN_UP_REDIRECT} />
       <p className="text-sm text-muted-foreground">
         <Link href="/" className="underline underline-offset-4">
           Return to home

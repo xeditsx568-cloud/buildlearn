@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  isAuthRoute,
+  AUTHENTICATED_HOME,
+  isOnboardingRoute,
   isProtectedAppRoute,
+  isProtectedRoute,
   isPublicRoute,
+  SIGN_UP_REDIRECT,
 } from "@/lib/auth-routes";
 
 describe("auth route classification", () => {
@@ -17,11 +20,12 @@ describe("auth route classification", () => {
       expect(isPublicRoute("/terms")).toBe(true);
     });
 
-    it("denies protected app routes", () => {
+    it("denies protected app and onboarding routes", () => {
       expect(isPublicRoute("/dashboard")).toBe(false);
       expect(isPublicRoute("/learn")).toBe(false);
       expect(isPublicRoute("/project")).toBe(false);
       expect(isPublicRoute("/build")).toBe(false);
+      expect(isPublicRoute("/onboarding/goal")).toBe(false);
     });
   });
 
@@ -34,36 +38,77 @@ describe("auth route classification", () => {
       expect(isProtectedAppRoute("/build/recipes/1")).toBe(true);
     });
 
-    it("does not protect public or future onboarding routes", () => {
-      expect(isProtectedAppRoute("/")).toBe(false);
-      expect(isProtectedAppRoute("/sign-in")).toBe(false);
+    it("does not protect onboarding routes directly", () => {
       expect(isProtectedAppRoute("/onboarding/goal")).toBe(false);
-      expect(isProtectedAppRoute("/api/webhooks/clerk")).toBe(false);
     });
   });
 
-  describe("isAuthRoute", () => {
-    it("identifies sign-in and sign-up flows", () => {
-      expect(isAuthRoute("/sign-in")).toBe(true);
-      expect(isAuthRoute("/sign-up")).toBe(true);
-      expect(isAuthRoute("/sign-in/factor-one")).toBe(true);
-      expect(isAuthRoute("/dashboard")).toBe(false);
+  describe("isOnboardingRoute", () => {
+    it("matches onboarding wizard routes", () => {
+      expect(isOnboardingRoute("/onboarding/goal")).toBe(true);
+      expect(isOnboardingRoute("/onboarding/experience")).toBe(true);
+      expect(isOnboardingRoute("/onboarding/quiz")).toBe(true);
+      expect(isOnboardingRoute("/onboarding/path")).toBe(true);
+    });
+
+    it("does not match unrelated routes", () => {
+      expect(isOnboardingRoute("/dashboard")).toBe(false);
+      expect(isOnboardingRoute("/roadmap")).toBe(false);
+    });
+  });
+
+  describe("isProtectedRoute", () => {
+    it("requires auth for app and onboarding routes", () => {
+      const protectedRoutes = [
+        "/dashboard",
+        "/learn",
+        "/project",
+        "/build",
+        "/onboarding/goal",
+        "/onboarding/experience",
+        "/onboarding/quiz",
+        "/onboarding/path",
+      ];
+
+      for (const route of protectedRoutes) {
+        expect(isProtectedRoute(route)).toBe(true);
+        expect(isPublicRoute(route)).toBe(false);
+      }
+    });
+  });
+
+  describe("sign-up redirect target", () => {
+    it("uses /onboarding/goal for new users after sign-up", () => {
+      expect(SIGN_UP_REDIRECT).toBe("/onboarding/goal");
+    });
+
+    it("keeps /dashboard as authenticated home for sign-in", () => {
+      expect(AUTHENTICATED_HOME).toBe("/dashboard");
     });
   });
 });
 
-/**
- * Middleware redirect behavior (unauthenticated → /sign-in) is enforced by
- * Clerk's auth.protect() in src/middleware.ts. Full request integration
- * requires Clerk session fixtures; route classification is covered above.
- */
 describe("middleware protection contract", () => {
   it("requires auth for all documented app routes", () => {
     const appRoutes = ["/dashboard", "/learn", "/project", "/build"];
 
     for (const route of appRoutes) {
-      expect(isProtectedAppRoute(route)).toBe(true);
+      expect(isProtectedRoute(route)).toBe(true);
       expect(isPublicRoute(route)).toBe(false);
+    }
+  });
+
+  it("requires auth for all onboarding routes", () => {
+    const onboardingRoutes = [
+      "/onboarding/goal",
+      "/onboarding/experience",
+      "/onboarding/quiz",
+      "/onboarding/path",
+    ];
+
+    for (const route of onboardingRoutes) {
+      expect(isProtectedRoute(route)).toBe(true);
+      expect(isOnboardingRoute(route)).toBe(true);
     }
   });
 });

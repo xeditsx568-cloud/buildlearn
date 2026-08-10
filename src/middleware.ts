@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import {
   AUTHENTICATED_HOME,
   isAuthRoute,
-  isProtectedAppRoute,
+  isProtectedRoute,
 } from "@/lib/auth-routes";
 
 export default clerkMiddleware(async (auth, req) => {
@@ -15,7 +15,7 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(new URL(AUTHENTICATED_HOME, req.url));
   }
 
-  if (isProtectedAppRoute(pathname)) {
+  if (isProtectedRoute(pathname)) {
     await auth.protect();
   }
 });
