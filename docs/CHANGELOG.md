@@ -6,6 +6,8 @@
 - Failed migration recovery (BOM fix) completed operationally after prior P3018
 - **TASK-103 database blocker cleared** — status moved from `blocked` to `pending`; implementation not started
 - Phase 3 (Content Foundation) ready to begin when directed
+- Status documentation branch: `docs/task-002-neon-migration-complete` merged 2026-08-10
+- Checker review: `docs/reviews/task-002-neon-migration-complete.md` (APPROVED FOR MERGE)
 
 ### Fixed (Infrastructure — Init migration BOM recovery)
 - **Removed UTF-8 BOM** from `prisma/migrations/20250805103100_init/migration.sql` — root cause of Neon P3018 / PostgreSQL 42601 at byte 1
