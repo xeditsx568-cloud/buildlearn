@@ -1,16 +1,16 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (TASK-103 operational complete)  
+> **Last updated:** 2026-08-10 (TASK-104 merged)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
 ## Current Sprint: Phase 3 — Content Foundation (in progress)
 
-**Goal:** Curriculum foundation — concept graph, goal templates, then lessons (TASK-104).
+**Goal:** Curriculum foundation — concept graph, goal templates, Lesson 1 schema and seed (TASK-103, TASK-104).
 
-**Status:** **TASK-103 operationally complete (2026-08-10).** Migration deployed; Database Seed workflow succeeded; Neon curriculum verified. **TASK-104 unblocked** — status `pending`; implementation not started.
+**Status:** **TASK-104 merged (2026-08-10).** Phase 3 foundation tasks complete in code. **Operational follow-up before any task consumes lesson data:** deploy lessons migration to Neon, run Database Seed, verify Lesson 1 (`how-websites-work`).
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
@@ -20,6 +20,12 @@
   - `concepts` = **24**
   - `goal_templates` = **5**
   - `concept_prerequisites` = **36**
+
+### Operational follow-up (before tasks consume lesson data)
+
+- Deploy migration **`20260810173000_lessons`** to Neon via **Database Migrate Deploy** — **not run yet**
+- Run **Database Seed** workflow (confirmation **`seed`**) — **not run yet** (will seed curriculum + Lesson 1)
+- Verify in Neon: `lessons` row `id = how-websites-work`, title **How Websites Work**, six blocks in `content`
 
 ---
 
@@ -467,24 +473,28 @@ TASK-ID: TASK-104
 Title: Lesson content schema and seed Lesson 1
 Phase: 3
 Owner: Programmer 2
-Status: pending
+Status: done
 Dependencies: [TASK-103]
 Priority: P0
 Branch: feature/TASK-104-lesson-schema
+Merged: 2026-08-10
 Files:
   - prisma/schema.prisma  # lessons table
   - src/lib/schemas/lesson.ts
   - content/lessons/01-how-websites-work.json
   - prisma/seed.ts
+  - prisma/migrations/20260810173000_lessons/**
+  - tests/unit/lesson-schema.test.ts
 Acceptance Criteria:
   - Zod schema validates lesson block types: objective, explain, interact, exercise, quiz, bridge
   - Lesson 1 seeded and queryable via Prisma
 Tests Required:
   - Unit test: schema accepts valid lesson, rejects invalid
-Reviewer: Checker
+Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/TASK-104.md)
 Notes: |
-  TASK-103 operational follow-up complete (2026-08-10). Blocker cleared.
-  Ready to begin when directed by Master Agent. Implementation not started.
+  Merged to main 2026-08-10. Code complete; migration + seed reviewed.
+  Operational follow-up before tasks consume lesson data: deploy 20260810173000_lessons
+  to Neon, run Database Seed, verify Lesson 1 id=how-websites-work. Not run during merge.
 ```
 
 ---
@@ -522,6 +532,7 @@ Notes: |
 | TASK-101 | Clerk authentication | 2026-08-06 | Programmer 1 |
 | TASK-102 | Clerk webhook user sync | 2026-08-10 | Programmer 2 |
 | TASK-103 | Concept graph + goal templates | 2026-08-10 | Programmer 2 |
+| TASK-104 | Lesson schema + Lesson 1 | 2026-08-10 | Programmer 2 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -540,10 +551,10 @@ Notes: |
 | Phase 2 complete | 2 |
 | Phase 2 infra complete | 3 |
 | Phase 2 pending | 0 |
-| Phase 3 pending | 1 |
+| Phase 3 pending | 0 |
 | Phase 3 blocked | 0 |
 | Backlog (Phase 3+) | 10 |
-| Completed (all phases) | 14 |
+| Completed (all phases) | 15 |
 
 ---
 
@@ -560,4 +571,4 @@ Notes: |
 | TASK-101 | 2 | Clerk auth | P1 | done |
 | TASK-102 | 2 | Clerk webhook | P2 | done |
 | TASK-103 | 3 | Concept graph seed | P2 | done |
-| TASK-104 | 3 | Lesson schema + L1 | P2 | pending |
+| TASK-104 | 3 | Lesson schema + L1 | P2 | done |

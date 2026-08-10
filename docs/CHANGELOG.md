@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+### Added (Phase 3 — TASK-104)
+- **Lesson content schema and Lesson 1 seed:** Prisma `Lesson` model; Zod validation for six block types (objective, explain, interact, exercise, quiz, bridge)
+- **Lesson 1:** `how-websites-work` / How Websites Work — curated JSON in `content/lessons/01-how-websites-work.json`
+- Migration: `20260810173000_lessons`
+- Idempotent seed via `prisma/seed.ts` (`seedLessons`)
+- Checker review: `docs/reviews/TASK-104.md` (APPROVED FOR MERGE)
+- Branch: `feature/TASK-104-lesson-schema` merged 2026-08-10
+- **Operational follow-up before tasks consume lesson data:** deploy lessons migration to Neon; run Database Seed; verify Lesson 1 — **not run during merge**
+
 ### Operational (Phase 3 — TASK-103 Neon curriculum complete)
 - **TASK-103 operational follow-up complete (2026-08-10)**
 - Migration `20260810170000_concept_graph_and_goal_templates` deployed to Neon successfully

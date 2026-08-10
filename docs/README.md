@@ -34,5 +34,5 @@
 - **Planning:** Approved (2026-08-05)
 - **Phase 1:** Complete — tagged `v0.1.0-foundation`
 - **Phase 2:** Complete — auth foundation, Neon init migration applied (2026-08-10).
-- **Phase 3:** In progress — **TASK-103 operationally complete (2026-08-10)**; Neon verified (24 concepts, 5 goal templates, 36 prerequisite edges). **TASK-104 pending** — ready when directed; not started.
+- **Phase 3:** Foundation tasks complete — **TASK-103 ✅**, **TASK-104 merged (2026-08-10)**. Lessons migration deploy + Neon seed outstanding before tasks consume lesson data. **TASK-201+ not started.**
 - **UX specification:** v1.2 — **MVP Design Freeze approved** (2026-08-05)
