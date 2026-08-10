@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+### Fixed (Infrastructure — Init migration BOM recovery)
+- **Removed UTF-8 BOM** from `prisma/migrations/20250805103100_init/migration.sql` — root cause of Neon P3018 / PostgreSQL 42601 at byte 1
+- **Manual resolve workflow:** `.github/workflows/db-migrate-resolve.yml` — `migrate resolve --rolled-back` for failed migrations (`workflow_dispatch`, confirm **`resolve`**, migration `20250805103100_init` only)
+- Recovery runbook added to `docs/notes/db-migrate-deploy-ci.md` (merge fix → resolve → deploy → verify)
+- Checker review: `docs/reviews/fix-init-migration-bom-recovery.md` (APPROVED FOR MERGE)
+- Branch: `fix/init-migration-bom-recovery` merged 2026-08-10
+- **Operational follow-up:** run **Database Migrate Resolve** then **Database Migrate Deploy** — neither workflow run as part of merge; TASK-103 remains blocked
+
 ### Added (Infrastructure — Neon migration deploy workflow)
 - **Manual GitHub Actions workflow:** `.github/workflows/db-migrate-deploy.yml` — applies committed Prisma migrations to Neon via `workflow_dispatch` only
 - Requires GitHub Environment **`neon`**, confirmation input **`deploy`**, and secrets `DATABASE_URL` (pooled) + `DIRECT_URL` (direct)

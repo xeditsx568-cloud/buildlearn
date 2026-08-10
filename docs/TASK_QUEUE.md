@@ -10,11 +10,11 @@
 
 **Goal:** Clerk authentication foundation — sign-in/sign-up, middleware, env validation, user sync webhook.
 
-**Status:** TASK-101 merged (2026-08-06). BUG-101-001 post-sign-in redirect fixed (2026-08-06). Prisma–Neon configuration merged (2026-08-08). **TASK-102 merged (2026-08-10).** Manual Neon migration deploy workflow merged (2026-08-10). Phase 2 auth foundation complete.
+**Status:** TASK-101 merged (2026-08-06). BUG-101-001 post-sign-in redirect fixed (2026-08-06). Prisma–Neon configuration merged (2026-08-08). **TASK-102 merged (2026-08-10).** Manual Neon migration deploy workflow merged (2026-08-10). Init migration BOM recovery merged (2026-08-10). Phase 2 auth foundation complete.
 
 ### Operational follow-up (before production use)
 
-- Configure GitHub Environment **`neon`** with `DATABASE_URL` (pooled) and `DIRECT_URL` (direct); run **Database Migrate Deploy** workflow with confirmation **`deploy`** to apply `20250805103100_init` (see `docs/notes/db-migrate-deploy-ci.md`; workflow **not run yet**)
+- Run **Database Migrate Resolve** then **Database Migrate Deploy** to apply `20250805103100_init` (see `docs/notes/db-migrate-deploy-ci.md` — init deploy previously failed on UTF-8 BOM; source fix merged; **workflows not run yet**)
 - If local Prisma CLI P1001 persists, use the CI workflow instead of `pnpm prisma:migrate` locally (`docs/notes/prisma-neon-connectivity.md`)
 - Register Clerk webhook endpoint → `POST /api/webhooks/clerk`
 - Add real `CLERK_WEBHOOK_SIGNING_SECRET` to deployment environments
@@ -245,6 +245,39 @@ Notes: |
 
 ---
 
+## Infrastructure — Init migration BOM recovery (complete)
+
+```yaml
+TASK-ID: FIX-INIT-MIGRATION-BOM
+Title: Init migration UTF-8 BOM fix and resolve workflow
+Description: |
+  Remove UTF-8 BOM from 20250805103100_init migration.sql (P3018 root cause).
+  Add manual db-migrate-resolve workflow and recovery runbook documentation.
+Owner: Programmer 2
+Status: done
+Priority: P0
+Phase: 2 (infrastructure)
+Dependencies: [INFRA-DB-MIGRATE-DEPLOY]
+Branch: fix/init-migration-bom-recovery
+Merged: 2026-08-10
+Files:
+  - prisma/migrations/20250805103100_init/migration.sql  # BOM removal only
+  - .github/workflows/db-migrate-resolve.yml
+  - docs/notes/db-migrate-deploy-ci.md
+  - docs/reviews/fix-init-migration-bom-recovery.md
+Acceptance Criteria:
+  - Only 3-byte BOM removed; SQL unchanged; UTF-8 without BOM
+  - resolve workflow: workflow_dispatch, confirm resolve, migration allowlist
+  - pnpm exec prisma migrate resolve --rolled-back only
+  - lint, typecheck, test pass; Checker APPROVED FOR MERGE
+Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/fix-init-migration-bom-recovery.md)
+Notes: |
+  Merged to main 2026-08-10. Resolve and Deploy workflows NOT run yet.
+  Post-merge: Resolve then Deploy on Neon. TASK-103 remains blocked.
+```
+
+---
+
 ## Infrastructure — Neon migration deploy (complete)
 
 ```yaml
@@ -402,8 +435,8 @@ Tests Required:
 Reviewer: Checker
 Notes: |
   Blocked until init migration (20250805103100_init) is applied to Neon.
-  Use manual Database Migrate Deploy workflow (docs/notes/db-migrate-deploy-ci.md).
-  Workflow merged but NOT run yet — do not start TASK-103 until migration succeeds.
+  Source BOM fix merged 2026-08-10. Run Database Migrate Resolve then Deploy
+  (docs/notes/db-migrate-deploy-ci.md). Workflows not run yet — do not start TASK-103.
 ```
 
 ### TASK-104
@@ -460,6 +493,7 @@ Reviewer: Checker
 | TASK-006 | Phase 1 gate review | 2026-08-05 | Checker |
 | CONFIG-PRISMA-NEON | Prisma–Neon env config | 2026-08-08 | Programmer 2 |
 | INFRA-DB-MIGRATE-DEPLOY | Neon migrate deploy workflow | 2026-08-10 | Programmer 2 |
+| FIX-INIT-MIGRATION-BOM | Init migration BOM recovery | 2026-08-10 | Programmer 2 |
 | TASK-101 | Clerk authentication | 2026-08-06 | Programmer 1 |
 | TASK-102 | Clerk webhook user sync | 2026-08-10 | Programmer 2 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
@@ -478,10 +512,10 @@ Reviewer: Checker
 | Phase 1 in review | 0 |
 | Phase 1 complete | 6 |
 | Phase 2 complete | 2 |
-| Phase 2 infra complete | 2 |
+| Phase 2 infra complete | 3 |
 | Phase 2 pending | 0 |
 | Backlog (Phase 3+) | 12 |
-| Completed (all phases) | 12 |
+| Completed (all phases) | 13 |
 
 ---
 
