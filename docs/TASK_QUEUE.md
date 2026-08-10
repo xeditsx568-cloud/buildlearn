@@ -314,6 +314,7 @@ Title: Clerk webhook for user sync
 Phase: 2
 Owner: Programmer 2
 Status: done
+Dependencies: [TASK-101]
 Priority: P0
 Branch: feature/TASK-102-clerk-webhook
 Merged: 2026-08-10
