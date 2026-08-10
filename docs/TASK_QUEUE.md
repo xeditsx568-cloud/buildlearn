@@ -1,12 +1,20 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10  
+> **Last updated:** 2026-08-10 (TASK-002 Neon migration operational complete)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
-## Current Sprint: Phase 2 — Authentication (complete)
+## Current Sprint: Phase 3 — Content Foundation (ready)
+
+**Goal:** Seed concept graph and goal templates (TASK-103).
+
+**Status:** TASK-002 operational prerequisite complete (2026-08-10). Init migration `20250805103100_init` successfully applied to Neon (`users`, `profiles`, `_prisma_migrations`). TASK-103 database blocker **cleared** — status **pending**; implementation **not started**.
+
+---
+
+## Phase 2 — Authentication (complete)
 
 **Goal:** Clerk authentication foundation — sign-in/sign-up, middleware, env validation, user sync webhook.
 
@@ -14,7 +22,7 @@
 
 ### Operational follow-up (before production use)
 
-- Run **Database Migrate Resolve** then **Database Migrate Deploy** to apply `20250805103100_init` (see `docs/notes/db-migrate-deploy-ci.md` — init deploy previously failed on UTF-8 BOM; source fix merged; **workflows not run yet**)
+- ~~Run **Database Migrate Resolve** then **Database Migrate Deploy** to apply `20250805103100_init`~~ — **complete (2026-08-10)**; Neon has `users`, `profiles`, `_prisma_migrations`
 - If local Prisma CLI P1001 persists, use the CI workflow instead of `pnpm prisma:migrate` locally (`docs/notes/prisma-neon-connectivity.md`)
 - Register Clerk webhook endpoint → `POST /api/webhooks/clerk`
 - Add real `CLERK_WEBHOOK_SIGNING_SECRET` to deployment environments
@@ -112,6 +120,8 @@ Notes: |
   users.id is String (Clerk format user_xxx), NOT UUID.
   Do not implement Clerk integration yet.
   See prisma/README.md.
+  Operational (2026-08-10): init migration 20250805103100_init applied to Neon
+  via manual Resolve → Deploy workflow. Tables users, profiles verified.
 ```
 
 ### TASK-003
@@ -272,8 +282,8 @@ Acceptance Criteria:
   - lint, typecheck, test pass; Checker APPROVED FOR MERGE
 Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/fix-init-migration-bom-recovery.md)
 Notes: |
-  Merged to main 2026-08-10. Resolve and Deploy workflows NOT run yet.
-  Post-merge: Resolve then Deploy on Neon. TASK-103 remains blocked.
+  Merged to main 2026-08-10. Resolve and Deploy completed operationally 2026-08-10.
+  Init migration applied to Neon; TASK-103 database blocker cleared.
 ```
 
 ---
@@ -306,9 +316,7 @@ Acceptance Criteria:
   - lint, typecheck, test pass; Checker APPROVED FOR MERGE
 Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/infra-db-migrate-deploy-workflow.md)
 Notes: |
-  Merged to main 2026-08-10. Workflow NOT run yet.
-  Post-merge: configure neon environment secrets; run once to apply init migration.
-  TASK-103 remains blocked until init migration applied to Neon.
+  Merged to main 2026-08-10. Init migration applied to Neon 2026-08-10 (operational).
 ```
 
 ---
@@ -415,7 +423,7 @@ TASK-ID: TASK-103
 Title: Seed concept graph and goal templates
 Phase: 3
 Owner: Programmer 2
-Status: blocked
+Status: pending
 Dependencies: [TASK-002]
 Priority: P0
 Branch: feature/TASK-103-concept-graph
@@ -434,9 +442,8 @@ Tests Required:
   - Unit test: concept count equals 24
 Reviewer: Checker
 Notes: |
-  Blocked until init migration (20250805103100_init) is applied to Neon.
-  Source BOM fix merged 2026-08-10. Run Database Migrate Resolve then Deploy
-  (docs/notes/db-migrate-deploy-ci.md). Workflows not run yet — do not start TASK-103.
+  Database blocker cleared 2026-08-10: init migration applied to Neon.
+  Ready to begin when directed; implementation not started.
 ```
 
 ### TASK-104
@@ -514,7 +521,9 @@ Reviewer: Checker
 | Phase 2 complete | 2 |
 | Phase 2 infra complete | 3 |
 | Phase 2 pending | 0 |
-| Backlog (Phase 3+) | 12 |
+| Phase 3 pending | 1 |
+| Phase 3 blocked | 1 |
+| Backlog (Phase 3+) | 11 |
 | Completed (all phases) | 13 |
 
 ---
@@ -531,5 +540,5 @@ Reviewer: Checker
 | TASK-006 | 1 | Phase 1 Checker gate | Checker | done |
 | TASK-101 | 2 | Clerk auth | P1 | done |
 | TASK-102 | 2 | Clerk webhook | P2 | done |
-| TASK-103 | 3 | Concept graph seed | P2 | blocked |
+| TASK-103 | 3 | Concept graph seed | P2 | pending |
 | TASK-104 | 3 | Lesson schema + L1 | P2 | blocked |
