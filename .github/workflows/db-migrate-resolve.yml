@@ -1,0 +1,56 @@
+name: Database Migrate Resolve
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "resolve" to mark a failed migration as rolled back'
+        required: true
+      migration_name:
+        description: 'Failed migration name (only 20250805103100_init supported for recovery)'
+        required: true
+        type: string
+
+jobs:
+  resolve:
+    name: Mark failed Prisma migration rolled back
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: neon
+    permissions:
+      contents: read
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+
+    steps:
+      - name: Confirm manual trigger
+        if: inputs.confirm != 'resolve'
+        run: |
+          echo "Aborted: confirmation input must be exactly 'resolve'."
+          exit 1
+
+      - name: Validate migration name
+        if: inputs.migration_name != '20250805103100_init'
+        run: |
+          echo "Aborted: unsupported migration name. Only 20250805103100_init is allowed for this recovery."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Mark migration rolled back
+        run: pnpm exec prisma migrate resolve --rolled-back "${{ inputs.migration_name }}"

@@ -1,4 +1,4 @@
-﻿-- CreateEnum
+-- CreateEnum
 CREATE TYPE "ExperienceLevel" AS ENUM ('beginner', 'some_exposure', 'intermediate');
 
 -- CreateTable

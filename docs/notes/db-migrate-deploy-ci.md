@@ -43,6 +43,31 @@ Uses `prisma migrate deploy` (not `migrate dev`). Safe to re-run; already-applie
 
 ---
 
+## Failed migration recovery
+
+Use when a migration failed in Neon (e.g. P3018) and must be marked rolled back before re-deploy.
+
+**Prerequisite:** Fix the migration source in git first (e.g. remove UTF-8 BOM from `migration.sql`), then merge to `main`.
+
+| Step | Action |
+| ---- | ------ |
+| 1 | Merge the migration fix to `main` |
+| 2 | Actions → **Database Migrate Resolve** → migration `20250805103100_init`, confirmation **`resolve`** |
+| 3 | Actions → **Database Migrate Deploy** → confirmation **`deploy`** |
+| 4 | Verify in Neon: `_prisma_migrations` success row; tables `users`, `profiles` |
+
+| Item | Value |
+| ---- | ----- |
+| File | `.github/workflows/db-migrate-resolve.yml` |
+| Trigger | **Manual only** (`workflow_dispatch`) |
+| GitHub Environment | **`neon`** |
+| Command | `pnpm exec prisma migrate resolve --rolled-back <migration_name>` |
+| Supported migration (this recovery) | **`20250805103100_init`** only |
+
+Does **not** run `migrate deploy`, `migrate dev`, or manual SQL. Run **Resolve** once, then **Deploy** separately.
+
+---
+
 ## References
 
 - Prisma–Neon local CLI note: `docs/notes/prisma-neon-connectivity.md`
