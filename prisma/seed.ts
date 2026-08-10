@@ -4,8 +4,14 @@ import {
   loadCurriculum,
   validateCurriculumIntegrity,
 } from "../src/lib/content/curriculum";
+import {
+  loadLessonFromFile,
+  toPersistedLessonContent,
+} from "../src/lib/schemas/lesson";
 
 const prisma = new PrismaClient();
+
+export const LESSON_ONE_FILE = "01-how-websites-work.json";
 
 export async function seedCurriculum(client: PrismaClient = prisma): Promise<void> {
   const curriculum = loadCurriculum();
@@ -66,8 +72,30 @@ export async function seedCurriculum(client: PrismaClient = prisma): Promise<voi
   }
 }
 
+export async function seedLessons(client: PrismaClient = prisma): Promise<void> {
+  const lesson = loadLessonFromFile(LESSON_ONE_FILE);
+
+  await client.lesson.upsert({
+    where: { id: lesson.id },
+    create: {
+      id: lesson.id,
+      title: lesson.title,
+      content: toPersistedLessonContent(lesson),
+      estimatedMinutes: lesson.estimatedMinutes,
+      version: lesson.version,
+    },
+    update: {
+      title: lesson.title,
+      content: toPersistedLessonContent(lesson),
+      estimatedMinutes: lesson.estimatedMinutes,
+      version: lesson.version,
+    },
+  });
+}
+
 async function main() {
   await seedCurriculum();
+  await seedLessons();
 }
 
 main()

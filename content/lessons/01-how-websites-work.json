@@ -1,0 +1,69 @@
+{
+  "id": "how-websites-work",
+  "title": "How Websites Work",
+  "estimatedMinutes": 8,
+  "version": 1,
+  "conceptIds": ["how-web-works"],
+  "blocks": [
+    {
+      "type": "objective",
+      "title": "What you'll learn",
+      "objectives": [
+        "Describe what happens when someone visits a website",
+        "Identify the roles of browsers, servers, HTML, CSS, and JavaScript",
+        "Explain why web pages are built from structured files"
+      ]
+    },
+    {
+      "type": "explain",
+      "title": "The request journey",
+      "body": "When you type a web address into your browser, the browser sends a request over the internet to a computer called a server. The server responds with files that describe the page. Your browser reads those files and turns them into the page you see.\n\nMost pages use three core languages:\n- **HTML** defines the structure and content\n- **CSS** controls layout and visual style\n- **JavaScript** adds interactivity\n\nYou do not need to memorize every detail yet. The important idea is that a website is a conversation between a browser and a server, using structured files.",
+      "code": {
+        "language": "text",
+        "content": "Browser  --request-->  Server\nBrowser  <--files---  Server\nBrowser renders HTML + CSS + JavaScript"
+      }
+    },
+    {
+      "type": "interact",
+      "title": "Spot the three languages",
+      "instructions": "This page skeleton uses HTML for structure. Edit the paragraph text inside the <p> tag to describe what you want your future business website to show visitors.",
+      "language": "html",
+      "starterCode": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>My Business Website</title>\n  </head>\n  <body>\n    <h1>Welcome</h1>\n    <p>We help customers with quality products and friendly service.</p>\n  </body>\n</html>",
+      "hint": "Change only the text between the opening and closing paragraph tags."
+    },
+    {
+      "type": "exercise",
+      "title": "Label the page parts",
+      "instructions": "Add a short comment above each major section in this HTML file using <!-- comment --> syntax. Label the document wrapper, head, and body.",
+      "language": "html",
+      "starterCode": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <title>How Websites Work</title>\n  </head>\n  <body>\n    <h1>How Websites Work</h1>\n    <p>Browsers request files from servers, then render HTML, CSS, and JavaScript.</p>\n  </body>\n</html>",
+      "solutionHint": "Use one HTML comment before the html, head, and body elements."
+    },
+    {
+      "type": "quiz",
+      "question": "Which statement best describes what a browser does when you visit a website?",
+      "options": [
+        {
+          "id": "a",
+          "label": "It stores the website permanently on your computer before showing anything"
+        },
+        {
+          "id": "b",
+          "label": "It requests page files from a server and renders them into a visible page"
+        },
+        {
+          "id": "c",
+          "label": "It writes JavaScript directly onto the server hard drive"
+        }
+      ],
+      "correctOptionId": "b",
+      "explanation": "Browsers request files from servers and render HTML, CSS, and JavaScript into the page you see."
+    },
+    {
+      "type": "bridge",
+      "body": "You now understand the basic request-and-render loop behind every website. Next you will write your first real HTML page and learn how structure turns into something people can read in the browser.",
+      "nextLessonId": "your-first-html-page",
+      "nextLessonTitle": "Your First HTML Page"
+    }
+  ]
+}

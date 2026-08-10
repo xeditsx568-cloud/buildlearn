@@ -69,3 +69,13 @@ model GoalTemplate {
 
   @@map("goal_templates")
 }
+
+model Lesson {
+  id               String @id
+  title            String
+  content          Json
+  estimatedMinutes Int    @map("estimated_minutes")
+  version          Int
+
+  @@map("lessons")
+}
