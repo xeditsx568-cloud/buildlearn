@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+### Added (Infrastructure — Neon curriculum seed workflow)
+- **Manual GitHub Actions workflow:** `.github/workflows/db-seed.yml` — runs approved TASK-103 curriculum seed against Neon via `workflow_dispatch` only
+- Requires GitHub Environment **`neon`**, confirmation input **`seed`**, and secrets `DATABASE_URL` + `DIRECT_URL`
+- Command: `pnpm db:seed` — seeds 24 concepts and 5 goal templates from committed JSON; idempotent; does not run migrations or alter schema
+- Setup note: `docs/notes/db-seed-ci.md`
+- Checker review: `docs/reviews/infra-db-seed-workflow.md` (APPROVED FOR MERGE)
+- Branch: `infra/db-seed-workflow` merged 2026-08-10
+- **Operational follow-up:** run **Database Seed** once; verify row counts — workflow has **not** been run yet; Neon **not seeded** during merge
+
 ### Added (Phase 3 — TASK-103)
 - **Concept graph and goal templates:** Prisma models `Concept`, `ConceptPrerequisite`, `GoalTemplate`
 - **24 curated concepts** and **5 goal templates** from `content/concepts.json` and `content/goal-templates.json` (frozen MVP scope: HTML/CSS/JS)

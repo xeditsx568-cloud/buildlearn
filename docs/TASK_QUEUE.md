@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-10 (TASK-103 merged)  
+> **Last updated:** 2026-08-10 (infra/db-seed-workflow merged)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -10,12 +10,12 @@
 
 **Goal:** Curriculum foundation — concept graph, goal templates, then lessons (TASK-104).
 
-**Status:** **TASK-103 merged (2026-08-10).** Code complete: 24 concepts, 5 goal templates, Prisma models, seed, migration `20260810170000_concept_graph_and_goal_templates`. **Operational follow-up before TASK-104:** deploy migration to Neon, run curriculum seed, verify rows.
+**Status:** **TASK-103 merged (2026-08-10).** Curriculum migration deployed to Neon. **Database Seed workflow merged (2026-08-10).** **Operational follow-up before TASK-104:** run **Database Seed** (confirmation `seed`), verify 24 concepts + 5 goal templates in Neon.
 
 ### Operational follow-up (before TASK-104)
 
-- Deploy migration **`20260810170000_concept_graph_and_goal_templates`** to Neon via **Database Migrate Deploy** (not run yet)
-- Run **`pnpm db:seed`** against Neon to populate concepts and goal templates (not run yet)
+- ~~Deploy migration **`20260810170000_concept_graph_and_goal_templates`** to Neon via **Database Migrate Deploy**~~ — **complete**
+- Run **Database Seed** workflow (`.github/workflows/db-seed.yml`, confirmation **`seed`**) — **not run yet**
 - Verify: 24 rows in `concepts`, 5 in `goal_templates`, prerequisite edges present
 
 ---
@@ -452,9 +452,9 @@ Tests Required:
   - Unit test: concept count equals 24
 Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/TASK-103.md)
 Notes: |
-  Merged to main 2026-08-10. Code complete; migration + seed reviewed.
-  Operational follow-up before TASK-104: deploy 20260810170000_concept_graph_and_goal_templates
-  to Neon, run pnpm db:seed, verify 24 concepts + 5 goal templates. Not run during merge.
+  Merged to main 2026-08-10. Code complete; migration deployed to Neon.
+  Operational follow-up before TASK-104: run Database Seed workflow (confirmation seed),
+  verify 24 concepts + 5 goal templates. Seed workflow merged; not run yet.
 ```
 
 ### TASK-104
@@ -479,8 +479,8 @@ Tests Required:
   - Unit test: schema accepts valid lesson, rejects invalid
 Reviewer: Checker
 Notes: |
-  Blocked until TASK-103 operational follow-up complete: deploy curriculum migration to Neon,
-  run pnpm db:seed, verify concepts and goal templates. Do not start until directed.
+  Blocked until TASK-103 operational follow-up complete: run Database Seed workflow
+  (confirmation seed), verify 24 concepts + 5 goal templates in Neon. Do not start until directed.
 ```
 
 ---
