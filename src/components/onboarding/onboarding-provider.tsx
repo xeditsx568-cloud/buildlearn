@@ -11,12 +11,21 @@ import {
 } from "react";
 
 import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding/constants";
-import type { ExperienceLevel, OnboardingState } from "@/lib/onboarding/types";
+import { scorePlacementQuiz } from "@/lib/onboarding/placement-scoring";
+import { getPlacementQuizQuestions } from "@/lib/onboarding/placement-quiz";
+import type {
+  ExperienceLevel,
+  OnboardingState,
+  QuizAnswer,
+} from "@/lib/onboarding/types";
 
 const defaultState: OnboardingState = {
   goalText: "",
   experienceLevel: null,
   quizSkipped: false,
+  quizCompleted: false,
+  quizAnswers: [],
+  placementResult: null,
 };
 
 interface OnboardingContextValue extends OnboardingState {
@@ -24,9 +33,30 @@ interface OnboardingContextValue extends OnboardingState {
   setGoalText: (goalText: string) => void;
   setExperienceLevel: (level: ExperienceLevel) => void;
   markQuizSkipped: () => void;
+  completeQuiz: (answers: QuizAnswer[]) => void;
 }
 
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
+
+function normalizeOnboardingState(
+  parsed: Partial<OnboardingState>,
+): OnboardingState {
+  return {
+    goalText: parsed.goalText ?? "",
+    experienceLevel: parsed.experienceLevel ?? null,
+    quizSkipped: parsed.quizSkipped ?? false,
+    quizCompleted: parsed.quizCompleted ?? false,
+    quizAnswers: Array.isArray(parsed.quizAnswers) ? parsed.quizAnswers : [],
+    placementResult: parsed.placementResult ?? null,
+  };
+}
+
+/** @internal Exported for unit tests — normalizes legacy sessionStorage payloads. */
+export function normalizeStoredOnboardingState(
+  parsed: Partial<OnboardingState>,
+): OnboardingState {
+  return normalizeOnboardingState(parsed);
+}
 
 function readStoredState(): OnboardingState {
   if (typeof window === "undefined") {
@@ -40,11 +70,7 @@ function readStoredState(): OnboardingState {
     }
 
     const parsed = JSON.parse(raw) as Partial<OnboardingState>;
-    return {
-      goalText: parsed.goalText ?? "",
-      experienceLevel: parsed.experienceLevel ?? null,
-      quizSkipped: parsed.quizSkipped ?? false,
-    };
+    return normalizeOnboardingState(parsed);
   } catch {
     return defaultState;
   }
@@ -84,7 +110,28 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const markQuizSkipped = useCallback(() => {
-    setState((current) => ({ ...current, quizSkipped: true }));
+    setState((current) => ({
+      ...current,
+      quizSkipped: true,
+      quizCompleted: false,
+      quizAnswers: [],
+      placementResult: null,
+    }));
+  }, []);
+
+  const completeQuiz = useCallback((answers: QuizAnswer[]) => {
+    const placementResult = scorePlacementQuiz(
+      getPlacementQuizQuestions(),
+      answers,
+    );
+
+    setState((current) => ({
+      ...current,
+      quizSkipped: false,
+      quizCompleted: true,
+      quizAnswers: answers,
+      placementResult,
+    }));
   }, []);
 
   const value = useMemo<OnboardingContextValue>(
@@ -94,8 +141,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       setGoalText,
       setExperienceLevel,
       markQuizSkipped,
+      completeQuiz,
     }),
-    [state, hydrated, setGoalText, setExperienceLevel, markQuizSkipped],
+    [
+      state,
+      hydrated,
+      setGoalText,
+      setExperienceLevel,
+      markQuizSkipped,
+      completeQuiz,
+    ],
   );
 
   return (
