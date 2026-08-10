@@ -10,11 +10,12 @@
 
 **Goal:** Clerk authentication foundation — sign-in/sign-up, middleware, env validation, user sync webhook.
 
-**Status:** TASK-101 merged (2026-08-06). BUG-101-001 post-sign-in redirect fixed (2026-08-06). Prisma–Neon configuration merged (2026-08-08). **TASK-102 merged (2026-08-10).** Phase 2 auth foundation complete.
+**Status:** TASK-101 merged (2026-08-06). BUG-101-001 post-sign-in redirect fixed (2026-08-06). Prisma–Neon configuration merged (2026-08-08). **TASK-102 merged (2026-08-10).** Manual Neon migration deploy workflow merged (2026-08-10). Phase 2 auth foundation complete.
 
 ### Operational follow-up (before production use)
 
-- Apply existing `20250805103100_init` migration to Neon (see `docs/notes/prisma-neon-connectivity.md` if local Prisma CLI P1001 persists)
+- Configure GitHub Environment **`neon`** with `DATABASE_URL` (pooled) and `DIRECT_URL` (direct); run **Database Migrate Deploy** workflow with confirmation **`deploy`** to apply `20250805103100_init` (see `docs/notes/db-migrate-deploy-ci.md`; workflow **not run yet**)
+- If local Prisma CLI P1001 persists, use the CI workflow instead of `pnpm prisma:migrate` locally (`docs/notes/prisma-neon-connectivity.md`)
 - Register Clerk webhook endpoint → `POST /api/webhooks/clerk`
 - Add real `CLERK_WEBHOOK_SIGNING_SECRET` to deployment environments
 - Perform live sign-up test; confirm `users` + `profiles` rows are created
@@ -244,6 +245,41 @@ Notes: |
 
 ---
 
+## Infrastructure — Neon migration deploy (complete)
+
+```yaml
+TASK-ID: INFRA-DB-MIGRATE-DEPLOY
+Title: Manual Neon Prisma migrate deploy workflow
+Description: |
+  GitHub Actions workflow to apply existing committed migrations to Neon.
+  Manual workflow_dispatch only; uses GitHub Environment neon and
+  prisma migrate deploy (not migrate dev).
+Owner: Programmer 2
+Status: done
+Priority: P0
+Phase: 2 (infrastructure)
+Dependencies: [CONFIG-PRISMA-NEON]
+Branch: infra/db-migrate-deploy-workflow
+Merged: 2026-08-10
+Files:
+  - .github/workflows/db-migrate-deploy.yml
+  - docs/notes/db-migrate-deploy-ci.md
+  - docs/reviews/infra-db-migrate-deploy-workflow.md
+Acceptance Criteria:
+  - workflow_dispatch only; confirmation input deploy
+  - environment neon; secrets DATABASE_URL + DIRECT_URL only
+  - permissions contents read; no secrets committed
+  - pnpm exec prisma migrate deploy only
+  - lint, typecheck, test pass; Checker APPROVED FOR MERGE
+Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/infra-db-migrate-deploy-workflow.md)
+Notes: |
+  Merged to main 2026-08-10. Workflow NOT run yet.
+  Post-merge: configure neon environment secrets; run once to apply init migration.
+  TASK-103 remains blocked until init migration applied to Neon.
+```
+
+---
+
 ## Infrastructure — Prisma–Neon (complete)
 
 ```yaml
@@ -364,6 +400,10 @@ Tests Required:
   - Unit test: DAG has no cycles
   - Unit test: concept count equals 24
 Reviewer: Checker
+Notes: |
+  Blocked until init migration (20250805103100_init) is applied to Neon.
+  Use manual Database Migrate Deploy workflow (docs/notes/db-migrate-deploy-ci.md).
+  Workflow merged but NOT run yet — do not start TASK-103 until migration succeeds.
 ```
 
 ### TASK-104
@@ -419,6 +459,7 @@ Reviewer: Checker
 | TASK-005 | t3-env validation | 2026-08-05 | Programmer 2 |
 | TASK-006 | Phase 1 gate review | 2026-08-05 | Checker |
 | CONFIG-PRISMA-NEON | Prisma–Neon env config | 2026-08-08 | Programmer 2 |
+| INFRA-DB-MIGRATE-DEPLOY | Neon migrate deploy workflow | 2026-08-10 | Programmer 2 |
 | TASK-101 | Clerk authentication | 2026-08-06 | Programmer 1 |
 | TASK-102 | Clerk webhook user sync | 2026-08-10 | Programmer 2 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
@@ -437,10 +478,10 @@ Reviewer: Checker
 | Phase 1 in review | 0 |
 | Phase 1 complete | 6 |
 | Phase 2 complete | 2 |
-| Phase 2 infra complete | 1 |
+| Phase 2 infra complete | 2 |
 | Phase 2 pending | 0 |
 | Backlog (Phase 3+) | 12 |
-| Completed (all phases) | 11 |
+| Completed (all phases) | 12 |
 
 ---
 

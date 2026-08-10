@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+### Added (Infrastructure — Neon migration deploy workflow)
+- **Manual GitHub Actions workflow:** `.github/workflows/db-migrate-deploy.yml` — applies committed Prisma migrations to Neon via `workflow_dispatch` only
+- Requires GitHub Environment **`neon`**, confirmation input **`deploy`**, and secrets `DATABASE_URL` (pooled) + `DIRECT_URL` (direct)
+- Command: `pnpm exec prisma migrate deploy` — does not create or alter migration files
+- Setup note: `docs/notes/db-migrate-deploy-ci.md`
+- Checker review: `docs/reviews/infra-db-migrate-deploy-workflow.md` (APPROVED FOR MERGE)
+- Branch: `infra/db-migrate-deploy-workflow` merged 2026-08-10
+- **Operational follow-up:** configure `neon` environment secrets in GitHub; run workflow once to apply `20250805103100_init` — workflow has **not** been run yet
+
 ### Added (Phase 2 — TASK-102)
 - **Clerk webhook user sync:** `POST /api/webhooks/clerk` with Svix verification via `verifyWebhook`
 - Handles `user.created`, `user.updated`, `user.deleted`; Prisma sync to `users` + `profiles`
