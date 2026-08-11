@@ -14,6 +14,13 @@ enum ExperienceLevel {
   intermediate
 }
 
+enum OnboardingStep {
+  goal
+  experience
+  quiz
+  path
+}
+
 model User {
   id        String    @id // Clerk user ID (e.g. user_2abc...)
   email     String    @unique
@@ -31,6 +38,7 @@ model Profile {
   learningGoalText   String?          @map("learning_goal_text") @db.Text
   goalSummary        Json?            @map("goal_summary")
   onboardingComplete Boolean          @default(false) @map("onboarding_complete")
+  onboardingStep     OnboardingStep?  @map("onboarding_step")
   user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("profiles")
