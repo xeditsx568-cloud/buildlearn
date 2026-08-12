@@ -9,6 +9,8 @@
 - **TASK-213 TASK-211 dependency satisfied** — implementation not started
 - **Phase 4 not yet complete** — TASK-212 and TASK-213 outstanding
 - **TASK-203 remains blocked** until Phase 4 minimum DoD complete
+- Checker review: `docs/reviews/task-211-neon-onboarding-step-complete.md` (APPROVED FOR MERGE)
+- Branch: `docs/task-211-neon-onboarding-step-complete` merged 2026-08-12
 
 ### Added (Phase 4 — TASK-211)
 - **Profile onboarding persistence API:** authenticated `GET`/`PATCH` `/api/profile` for ADR-021 fields (`learningGoalText`, `experienceLevel`, `onboardingStep`, `onboardingComplete`)
