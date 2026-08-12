@@ -1,5 +1,15 @@
 ## [Unreleased]
 
+### Operational (Phase 4 — TASK-211 Neon onboarding_step complete)
+- **TASK-211 operational follow-up complete (2026-08-12)**
+- Migration `20260811120000_onboarding_step` deployed to Neon successfully via **Database Migrate Deploy**
+- Neon verified: `profiles.onboarding_step` column exists (nullable `OnboardingStep` enum)
+- **TASK-211 fully complete operationally** — code merged and Neon schema aligned
+- **TASK-212 database prerequisite cleared** — implementation not started
+- **TASK-213 TASK-211 dependency satisfied** — implementation not started
+- **Phase 4 not yet complete** — TASK-212 and TASK-213 outstanding
+- **TASK-203 remains blocked** until Phase 4 minimum DoD complete
+
 ### Added (Phase 4 — TASK-211)
 - **Profile onboarding persistence API:** authenticated `GET`/`PATCH` `/api/profile` for ADR-021 fields (`learningGoalText`, `experienceLevel`, `onboardingStep`, `onboardingComplete`)
 - **Prisma:** `OnboardingStep` enum (`goal`, `experience`, `quiz`, `path`); nullable `profiles.onboarding_step`
@@ -18,7 +28,7 @@
 - **TASK-203 blocked** until Phase 4 minimum DoD complete
 - Checker review: `docs/reviews/phase-4-backend-task-definitions.md` (APPROVED FOR MERGE)
 - Branch: `docs/phase-4-backend-task-definitions` merged 2026-08-10
-- **TASK-212 may begin** when Master directs; Neon migration deploy required before deployed DB consumption
+- **TASK-212 may begin** when Master directs; Neon migration deploy complete (2026-08-12)
 
 ### Added (Phase 4 — TASK-202)
 - **Placement quiz UI:** 5 curated beginner HTML/CSS/JS MCQs at `/onboarding/quiz`; one question at a time with progress dots
