@@ -127,14 +127,14 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 
 **Dependencies:** Phase 2, Phase 3
 
-**Database:** Existing `profiles` fields (`experience_level`, `learning_goal_text`, `goal_summary`, `onboarding_complete`) — no new tables in Phase 4 UI work. Profile writes via profile API (P2).
+**Database:** Existing `profiles` fields plus `onboarding_step` (`OnboardingStep` enum, TASK-211 ✅). Profile writes via `GET`/`PATCH` `/api/profile` (TASK-211 ✅).
 
 **Agent assignments:**
 | Agent | Work |
 |-------|------|
 | Programmer 1 | Onboarding UI wizard (TASK-201 ✅) |
 | Programmer 1 | Placement quiz UI + client-side scoring (TASK-202 ✅) |
-| Programmer 2 | Profile persistence API + onboarding resume logic (parallel Phase 4); placement quiz backend/API deferred — not TASK-202 |
+| Programmer 2 | Profile persistence API (TASK-211 ✅) + onboarding resume logic (TASK-212); placement quiz backend/API deferred — not TASK-202 |
 
 **DoD:** New user completes onboarding wizard; goal saved to profile (requires profile API); redirected to **`/roadmap`** on completion. `/roadmap` page UI is Phase 6 (TASK-205) — Phase 4 wires the CTA only.
 
@@ -142,7 +142,7 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 
 **TASK-202 boundary:** 5 curated MCQ placement quiz UI; deterministic client-side scoring/signals in sessionStorage; question data under `src/lib/onboarding/`. Excludes profile API, backend scoring, Prisma changes, and path-preview modifications. Placement signals reserved for Phase 5 (TASK-204). **Merged 2026-08-10.**
 
-**Phase 4 P1 complete; P2 outstanding (ADR-021):** profile persistence API (TASK-211), onboarding resume routing (TASK-212), P1 profile integration (TASK-213), Clerk redirect ops (OPS-PHASE4-001). **TASK-203 blocked** until Phase 4 minimum DoD complete.
+**Phase 4 P1 complete; P2 partial (ADR-021):** profile persistence API (**TASK-211 ✅**), onboarding resume routing (**TASK-212**), P1 profile integration (**TASK-213**), Clerk redirect ops (**OPS-PHASE4-001**). **TASK-203 blocked** until Phase 4 minimum DoD complete. **Operational follow-up:** deploy migration `20260811120000_onboarding_step` to Neon before TASK-212/TASK-213 consume `onboardingStep` in deployed environments.
 
 ---
 

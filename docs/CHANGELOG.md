@@ -1,15 +1,24 @@
 ## [Unreleased]
 
+### Added (Phase 4 — TASK-211)
+- **Profile onboarding persistence API:** authenticated `GET`/`PATCH` `/api/profile` for ADR-021 fields (`learningGoalText`, `experienceLevel`, `onboardingStep`, `onboardingComplete`)
+- **Prisma:** `OnboardingStep` enum (`goal`, `experience`, `quiz`, `path`); nullable `profiles.onboarding_step`
+- Migration: `20260811120000_onboarding_step` (committed; **not deployed to Neon during merge**)
+- Clerk session identity only — no arbitrary `userId`; webhook remains User/Profile creation source; no placement persistence; no `goalSummary` writes
+- Checker review: `docs/reviews/TASK-211.md` (APPROVED FOR MERGE)
+- Branch: `feature/TASK-211-profile-onboarding-api` merged 2026-08-12
+- **Operational follow-up before TASK-212/TASK-213 consume deployed `onboardingStep`:** deploy `20260811120000_onboarding_step` to Neon via Database Migrate Deploy; verify `profiles.onboarding_step` column — **not run during merge**
+
 ### Planning (Phase 4 — backend task definitions)
 - **ADR-021** — Phase 4 onboarding persistence model (`onboardingStep` enum; no placement DB persistence in Phase 4)
-- **TASK-211** — Profile & onboarding persistence API (P2, pending)
-- **TASK-212** — Onboarding resume & auth routing (P2, pending; depends TASK-211)
-- **TASK-213** — Onboarding UI profile integration (P1, pending; depends TASK-211)
+- **TASK-211** — Profile & onboarding persistence API (**done**, merged 2026-08-12)
+- **TASK-212** — Onboarding resume & auth routing (P2, pending; depends TASK-211 ✅)
+- **TASK-213** — Onboarding UI profile integration (P1, pending; depends TASK-211 ✅)
 - **OPS-PHASE4-001** — Clerk sign-up redirect alignment (pending)
 - **TASK-203 blocked** until Phase 4 minimum DoD complete
 - Checker review: `docs/reviews/phase-4-backend-task-definitions.md` (APPROVED FOR MERGE)
 - Branch: `docs/phase-4-backend-task-definitions` merged 2026-08-10
-- **TASK-211 may begin** after merge; TASK-212/213 remain pending on TASK-211
+- **TASK-212 may begin** when Master directs; Neon migration deploy required before deployed DB consumption
 
 ### Added (Phase 4 — TASK-202)
 - **Placement quiz UI:** 5 curated beginner HTML/CSS/JS MCQs at `/onboarding/quiz`; one question at a time with progress dots
