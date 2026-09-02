@@ -1,25 +1,45 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { useOnboarding } from "@/components/onboarding/onboarding-provider";
 import { Button } from "@/components/ui/button";
+import { patchProfileOnboarding } from "@/lib/onboarding/onboarding-client";
 import { EXPERIENCE_OPTIONS } from "@/lib/onboarding/constants";
 import type { ExperienceLevel } from "@/lib/onboarding/types";
 import { isExperienceSelected } from "@/lib/onboarding/validation";
 
+const SAVE_ERROR_MESSAGE =
+  "We couldn't save your experience level. Please try again.";
+
 export function ExperienceScreen() {
   const router = useRouter();
   const { experienceLevel, setExperienceLevel, hydrated } = useOnboarding();
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const canContinue = isExperienceSelected(experienceLevel);
 
-  function handleContinue() {
-    if (!canContinue) {
+  async function handleContinue() {
+    if (!canContinue || !experienceLevel || saving) {
       return;
     }
 
-    router.push("/onboarding/quiz");
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      await patchProfileOnboarding({
+        experienceLevel,
+        onboardingStep: "quiz",
+      });
+      router.push("/onboarding/quiz");
+    } catch {
+      setSaveError(SAVE_ERROR_MESSAGE);
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (!hydrated) {
@@ -55,9 +75,11 @@ export function ExperienceScreen() {
                 name="experience-level"
                 value={option.value}
                 checked={selected}
-                onChange={() =>
-                  setExperienceLevel(option.value as ExperienceLevel)
-                }
+                onChange={() => {
+                  setExperienceLevel(option.value as ExperienceLevel);
+                  setSaveError(null);
+                }}
+                disabled={saving}
                 className="mt-1 size-4 accent-primary"
               />
               <span className="space-y-1">
@@ -71,15 +93,21 @@ export function ExperienceScreen() {
         })}
       </div>
 
+      {saveError ? (
+        <p role="alert" className="text-sm text-red-600">
+          {saveError}
+        </p>
+      ) : null}
+
       <div className="flex justify-end">
         <Button
           type="button"
           size="lg"
           className="min-h-11 w-full sm:w-auto"
-          disabled={!canContinue}
-          onClick={handleContinue}
+          disabled={!canContinue || saving}
+          onClick={() => void handleContinue()}
         >
-          Continue →
+          {saving ? "Saving..." : "Continue →"}
         </Button>
       </div>
     </section>

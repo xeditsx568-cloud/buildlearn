@@ -11,6 +11,10 @@ import {
 } from "react";
 
 import { ONBOARDING_STORAGE_KEY } from "@/lib/onboarding/constants";
+import {
+  fetchProfileOnboarding,
+  mergeProfileIntoOnboardingState,
+} from "@/lib/onboarding/onboarding-client";
 import { scorePlacementQuiz } from "@/lib/onboarding/placement-scoring";
 import { getPlacementQuizQuestions } from "@/lib/onboarding/placement-quiz";
 import type {
@@ -89,8 +93,32 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setState(readStoredState());
-    setHydrated(true);
+    let cancelled = false;
+
+    async function hydrate() {
+      const stored = readStoredState();
+
+      try {
+        const profile = await fetchProfileOnboarding();
+        if (!cancelled) {
+          setState(mergeProfileIntoOnboardingState(stored, profile));
+        }
+      } catch {
+        if (!cancelled) {
+          setState(stored);
+        }
+      } finally {
+        if (!cancelled) {
+          setHydrated(true);
+        }
+      }
+    }
+
+    void hydrate();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {

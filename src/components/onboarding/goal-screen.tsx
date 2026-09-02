@@ -5,32 +5,57 @@ import { useState } from "react";
 
 import { useOnboarding } from "@/components/onboarding/onboarding-provider";
 import { Button } from "@/components/ui/button";
+import { patchProfileOnboarding } from "@/lib/onboarding/onboarding-client";
 import {
   EXAMPLE_GOAL_CHIPS,
   GOAL_MAX_LENGTH,
 } from "@/lib/onboarding/constants";
 import { validateGoalText } from "@/lib/onboarding/validation";
 
+const SAVE_ERROR_MESSAGE = "We couldn't save your goal. Please try again.";
+
 export function GoalScreen() {
   const router = useRouter();
   const { goalText, setGoalText, hydrated } = useOnboarding();
   const [showError, setShowError] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const validation = validateGoalText(goalText);
   const canContinue = validation.valid;
 
-  function handleContinue() {
-    if (!canContinue) {
-      setShowError(true);
+  async function handleContinue() {
+    if (!canContinue || saving) {
+      if (!canContinue) {
+        setShowError(true);
+      }
+
       return;
     }
 
-    router.push("/onboarding/experience");
+    setSaving(true);
+    setSaveError(null);
+    setShowError(false);
+
+    const trimmedGoal = goalText.trim();
+
+    try {
+      await patchProfileOnboarding({
+        learningGoalText: trimmedGoal,
+        onboardingStep: "experience",
+      });
+      router.push("/onboarding/experience");
+    } catch {
+      setSaveError(SAVE_ERROR_MESSAGE);
+    } finally {
+      setSaving(false);
+    }
   }
 
   function handleChipClick(chip: string) {
     setGoalText(chip);
     setShowError(false);
+    setSaveError(null);
   }
 
   if (!hydrated) {
@@ -56,6 +81,7 @@ export function GoalScreen() {
           onChange={(event) => {
             setGoalText(event.target.value);
             setShowError(false);
+            setSaveError(null);
           }}
           maxLength={GOAL_MAX_LENGTH}
           rows={5}
@@ -73,7 +99,7 @@ export function GoalScreen() {
           >
             {showError && !validation.valid
               ? validation.error
-              : "\u00a0"}
+              : saveError ?? "\u00a0"}
           </p>
           <p className="text-muted-foreground">
             {goalText.length} / {GOAL_MAX_LENGTH}
@@ -90,6 +116,7 @@ export function GoalScreen() {
             size="sm"
             className="min-h-11"
             onClick={() => handleChipClick(chip)}
+            disabled={saving}
           >
             {chip}
           </Button>
@@ -101,10 +128,10 @@ export function GoalScreen() {
           type="button"
           size="lg"
           className="min-h-11 w-full sm:w-auto"
-          disabled={!canContinue}
-          onClick={handleContinue}
+          disabled={!canContinue || saving}
+          onClick={() => void handleContinue()}
         >
-          Continue →
+          {saving ? "Saving..." : "Continue →"}
         </Button>
       </div>
     </section>

@@ -5,8 +5,12 @@ import { useState } from "react";
 
 import { useOnboarding } from "@/components/onboarding/onboarding-provider";
 import { Button } from "@/components/ui/button";
+import { patchProfileOnboarding } from "@/lib/onboarding/onboarding-client";
 import { getPlacementQuizQuestions } from "@/lib/onboarding/placement-quiz";
 import type { PlacementQuizQuestion, QuizAnswer } from "@/lib/onboarding/types";
+
+const SAVE_ERROR_MESSAGE =
+  "We couldn't save your progress. Please try again.";
 
 interface PlacementQuizViewProps {
   questions: PlacementQuizQuestion[];
@@ -17,6 +21,7 @@ interface PlacementQuizViewProps {
   onSkip: () => void;
   nextDisabled: boolean;
   nextLabel: string;
+  skipDisabled?: boolean;
 }
 
 export function PlacementQuizView({
@@ -28,6 +33,7 @@ export function PlacementQuizView({
   onSkip,
   nextDisabled,
   nextLabel,
+  skipDisabled = false,
 }: PlacementQuizViewProps) {
   const question = questions[currentQuestionIndex];
 
@@ -111,6 +117,7 @@ export function PlacementQuizView({
           variant="outline"
           className="min-h-11 w-full sm:w-auto"
           onClick={onSkip}
+          disabled={skipDisabled}
         >
           I&apos;m not sure — skip quiz
         </Button>
@@ -136,6 +143,8 @@ export function QuizShellScreen() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   if (!hydrated) {
     return null;
@@ -143,20 +152,40 @@ export function QuizShellScreen() {
 
   const currentQuestion = questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
-  const nextDisabled = selectedOptionId === null;
+  const nextDisabled = selectedOptionId === null || saving;
   const nextLabel = isLastQuestion ? "Complete quiz →" : "Next →";
+
+  async function proceedToPath(afterPersist: () => void) {
+    if (saving) {
+      return;
+    }
+
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      await patchProfileOnboarding({ onboardingStep: "path" });
+      afterPersist();
+      router.push("/onboarding/path");
+    } catch {
+      setSaveError(SAVE_ERROR_MESSAGE);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   function handleSelectOption(optionId: string) {
     setSelectedOptionId(optionId);
   }
 
   function handleSkip() {
-    markQuizSkipped();
-    router.push("/onboarding/path");
+    void proceedToPath(() => {
+      markQuizSkipped();
+    });
   }
 
   function handleNext() {
-    if (!currentQuestion || !selectedOptionId) {
+    if (!currentQuestion || !selectedOptionId || saving) {
       return;
     }
 
@@ -169,8 +198,9 @@ export function QuizShellScreen() {
     ];
 
     if (isLastQuestion) {
-      completeQuiz(updatedAnswers);
-      router.push("/onboarding/path");
+      void proceedToPath(() => {
+        completeQuiz(updatedAnswers);
+      });
       return;
     }
 
@@ -180,16 +210,24 @@ export function QuizShellScreen() {
   }
 
   return (
-    <PlacementQuizView
-      questions={questions}
-      currentQuestionIndex={currentQuestionIndex}
-      selectedOptionId={selectedOptionId}
-      onSelectOption={handleSelectOption}
-      onNext={handleNext}
-      onSkip={handleSkip}
-      nextDisabled={nextDisabled}
-      nextLabel={nextLabel}
-    />
+    <>
+      {saveError ? (
+        <p role="alert" className="mx-auto mb-4 max-w-2xl text-sm text-red-600">
+          {saveError}
+        </p>
+      ) : null}
+      <PlacementQuizView
+        questions={questions}
+        currentQuestionIndex={currentQuestionIndex}
+        selectedOptionId={selectedOptionId}
+        onSelectOption={handleSelectOption}
+        onNext={handleNext}
+        onSkip={handleSkip}
+        nextDisabled={nextDisabled}
+        nextLabel={saving ? "Saving..." : nextLabel}
+        skipDisabled={saving}
+      />
+    </>
   );
 }
 

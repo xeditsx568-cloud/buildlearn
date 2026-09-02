@@ -23,12 +23,20 @@ interface PathPreviewViewProps {
   status: PathPreviewStatus;
   goalText: string;
   onRetry?: () => void;
+  onStartLearning?: () => void;
+  startLearningDisabled?: boolean;
+  startLearningLabel?: string;
+  startLearningError?: string | null;
 }
 
 export function PathPreviewView({
   status,
   goalText,
   onRetry,
+  onStartLearning,
+  startLearningDisabled = false,
+  startLearningLabel = "Start learning →",
+  startLearningError = null,
 }: PathPreviewViewProps) {
   if (status === "loading") {
     return (
@@ -115,13 +123,29 @@ export function PathPreviewView({
         ))}
       </ol>
 
-      <div className="flex justify-end">
-        <a
-          href={getStartLearningHref()}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto"
-        >
-          Start learning →
-        </a>
+      <div className="flex flex-col items-end gap-2">
+        {startLearningError ? (
+          <p role="alert" className="text-sm text-red-600">
+            {startLearningError}
+          </p>
+        ) : null}
+        {onStartLearning ? (
+          <button
+            type="button"
+            onClick={onStartLearning}
+            disabled={startLearningDisabled}
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+          >
+            {startLearningLabel}
+          </button>
+        ) : (
+          <a
+            href={getStartLearningHref()}
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto"
+          >
+            {startLearningLabel}
+          </a>
+        )}
       </div>
     </section>
   );
