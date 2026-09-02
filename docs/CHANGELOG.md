@@ -1,5 +1,16 @@
 ## [Unreleased]
 
+### Added (Phase 4 — TASK-212)
+- **Onboarding resume & auth routing:** ADR-021 profile-aware resume resolver (`onboarding-resume.ts`)
+- Incomplete users resume stored/inferred onboarding step; complete users route to `/dashboard`
+- Middleware route gating via TASK-211 `GET /api/profile` (READ + ROUTE only; no Profile writes)
+- Sign-in server redirect for authenticated users; sign-up remains `/onboarding/goal`
+- No Prisma schema/migration changes
+- Checker review: `docs/reviews/TASK-212.md` (APPROVED FOR MERGE)
+- Branch: `feature/TASK-212-onboarding-resume-routing` merged 2026-09-02
+- **Phase 4 not yet complete** — TASK-213 UI profile integration outstanding
+- **TASK-203 remains blocked** until Phase 4 minimum DoD complete
+
 ### Operational (Phase 4 — TASK-211 Neon onboarding_step complete)
 - **TASK-211 operational follow-up complete (2026-08-12)**
 - Migration `20260811120000_onboarding_step` deployed to Neon successfully via **Database Migrate Deploy**
@@ -24,13 +35,13 @@
 ### Planning (Phase 4 — backend task definitions)
 - **ADR-021** — Phase 4 onboarding persistence model (`onboardingStep` enum; no placement DB persistence in Phase 4)
 - **TASK-211** — Profile & onboarding persistence API (**done**, merged 2026-08-12)
-- **TASK-212** — Onboarding resume & auth routing (P2, pending; depends TASK-211 ✅)
-- **TASK-213** — Onboarding UI profile integration (P1, pending; depends TASK-211 ✅)
+- **TASK-212** — Onboarding resume & auth routing (**done**, merged 2026-09-02)
+- **TASK-213** — Onboarding UI profile integration (P1, pending; depends TASK-211 ✅, TASK-212 ✅)
 - **OPS-PHASE4-001** — Clerk sign-up redirect alignment (pending)
 - **TASK-203 blocked** until Phase 4 minimum DoD complete
 - Checker review: `docs/reviews/phase-4-backend-task-definitions.md` (APPROVED FOR MERGE)
 - Branch: `docs/phase-4-backend-task-definitions` merged 2026-08-10
-- **TASK-212 may begin** when Master directs; Neon migration deploy complete (2026-08-12)
+- **TASK-213 may begin** when Master directs; TASK-212 resume routing merged (2026-09-02)
 
 ### Added (Phase 4 — TASK-202)
 - **Placement quiz UI:** 5 curated beginner HTML/CSS/JS MCQs at `/onboarding/quiz`; one question at a time with progress dots

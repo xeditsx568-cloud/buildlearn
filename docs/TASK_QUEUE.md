@@ -1,16 +1,16 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-08-12 (TASK-211 operational complete)  
+> **Last updated:** 2026-09-02 (TASK-212 merged)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
 ## Current Sprint: Phase 4 — User Onboarding & Goal Selection
 
-**Goal:** Phase 4 onboarding — P1 UI complete (TASK-201, TASK-202); P2 profile API complete (TASK-211); resume routing and UI integration outstanding (TASK-212–213).
+**Goal:** Phase 4 onboarding — P1 UI complete (TASK-201, TASK-202); P2 profile API and resume routing complete (TASK-211, TASK-212); UI profile integration outstanding (TASK-213).
 
-**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** **ADR-021 merged (2026-08-10).** **TASK-211 merged and operationally complete (2026-08-12).** Phase 4 **P1 UI complete.** Phase 4 **not yet complete** — P2 resume routing and UI integration outstanding (**TASK-212**, **TASK-213**). **TASK-212 database prerequisite cleared** — may begin when Master directs. **TASK-203 blocked** until Phase 4 minimum DoD is met (ADR-021).
+**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** **ADR-021 merged (2026-08-10).** **TASK-211 merged and operationally complete (2026-08-12).** **TASK-212 merged (2026-09-02).** Phase 4 **P1 UI complete.** Phase 4 **not yet complete** — P1 UI profile integration outstanding (**TASK-213**). **TASK-213 may begin** when Master directs. **TASK-203 blocked** until Phase 4 minimum DoD is met (ADR-021).
 
 ### Phase 4 boundary (2026-08-10)
 
@@ -20,10 +20,10 @@
 
 **P2 complete (merged and operational):**
 - TASK-211 — Profile & onboarding persistence API (2026-08-12; Neon migration verified 2026-08-12)
+- TASK-212 — Onboarding resume & auth routing (2026-09-02)
 
-**P2 outstanding (ADR-021):**
-- **TASK-212** — Onboarding resume & auth routing (P2, P0, `pending`; depends TASK-211 ✅; DB prerequisite ✅)
-- **TASK-213** — Onboarding UI profile integration (P1, P0, `pending`; depends TASK-211 ✅)
+**P2/P1 outstanding (ADR-021):**
+- **TASK-213** — Onboarding UI profile integration (P1, P0, `pending`; depends TASK-211 ✅, TASK-212 ✅)
 - **OPS-PHASE4-001** — Clerk redirect alignment (P2 ops, `pending`)
 
 **Blocked until Phase 4 minimum DoD:**
@@ -793,7 +793,7 @@ Description: |
   Completed users route to /dashboard. Guard app routes for incomplete
   onboarding; prevent completed users re-entering onboarding wizard.
 Owner: Programmer 2
-Status: pending
+Status: done
 Priority: P0
 Phase: 4
 Dependencies: [TASK-211]
@@ -824,17 +824,21 @@ Tests Required:
   - Unit test — completed user blocked from onboarding routes
   - Unit test — incomplete user blocked from app routes (where applicable)
   - Unit test — regression of existing auth-route classification
-Reviewer: Checker
+Reviewer: Checker (APPROVED FOR MERGE — docs/reviews/TASK-212.md)
 Notes: |
   **Authority:** ADR-021 routing and resume inference rules.
 
-  **Depends on TASK-211** profile read API or shared profile service for
-  onboardingComplete and onboardingStep. **TASK-211 dependency satisfied.**
-  **Database prerequisite cleared (2026-08-12):** `profiles.onboarding_step`
-  verified in Neon.
+  **Merged to main 2026-09-02.** Implementation `09b1922`; checker review `ec8047a`.
 
-  **Out of scope:** profile PATCH implementation (TASK-211), P1 provider
-  integration (TASK-213), placement persistence, TASK-203+.
+  **Delivered:** ADR-021 resume resolver; profile-aware authenticated routing via
+  middleware + sign-in server redirect; incomplete-user resume; completed-user
+  redirect to `/dashboard`; app/onboarding route gating. READ + ROUTE only — no
+  Profile writes; no Prisma migration required.
+
+  **Depends on TASK-211** — satisfied. Database prerequisite cleared (2026-08-12).
+
+  **Out of scope:** profile PATCH (TASK-211), P1 provider integration (TASK-213),
+  placement persistence, TASK-203+.
 ```
 
 ### TASK-213
@@ -884,9 +888,10 @@ Notes: |
   **Authority:** ADR-021 step update policy.
 
   **Depends on TASK-211.** TASK-211 dependency satisfied (API merged and Neon
-  migration verified 2026-08-12). TASK-212 resume routing should land first or in
-  parallel; P1 integration must not assume resume routing until TASK-212 merged
-  for sign-in flows — coordinate merge order with Master.
+  migration verified 2026-08-12). **TASK-212 merged (2026-09-02)** — resume routing
+  foundation available. TASK-212 resume routing should land first or in parallel;
+  P1 integration must not assume resume routing until TASK-212 merged for sign-in
+  flows — **TASK-212 now merged.**
 
   **Out of scope:** backend API (TASK-211), middleware resume (TASK-212),
   placement server persistence, profile fields beyond ADR-021, TASK-203+.
@@ -960,6 +965,7 @@ Notes: |
 | TASK-201 | Onboarding wizard UI | 2026-08-10 | Programmer 1 |
 | TASK-202 | Placement quiz | 2026-08-10 | Programmer 1 |
 | TASK-211 | Profile & onboarding persistence API | 2026-08-12 | Programmer 2 |
+| TASK-212 | Onboarding resume & auth routing | 2026-09-02 | Programmer 2 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -981,12 +987,12 @@ Notes: |
 | Phase 3 pending | 0 |
 | Phase 3 blocked | 0 |
 | Phase 4 P1 complete | 2 |
-| Phase 4 P2 complete | 1 |
-| Phase 4 P2 pending | 2 |
+| Phase 4 P2 complete | 2 |
+| Phase 4 P1 pending | 1 |
 | Phase 4 ops pending | 1 |
 | Phase 4 phase complete | 0 |
 | Backlog (Phase 5+) | 8 |
-| Completed (all phases) | 18 |
+| Completed (all phases) | 19 |
 
 ---
 
@@ -1007,6 +1013,6 @@ Notes: |
 | TASK-201 | 4 | Onboarding wizard UI | P1 | done |
 | TASK-202 | 4 | Placement quiz | P1 | done |
 | TASK-211 | 4 | Profile & onboarding API | P2 | done |
-| TASK-212 | 4 | Onboarding resume routing | P2 | pending |
+| TASK-212 | 4 | Onboarding resume routing | P2 | done |
 | TASK-213 | 4 | Onboarding UI profile integration | P1 | pending |
 | TASK-203 | 5 | AI service abstraction | P2 | blocked |
