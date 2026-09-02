@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   AUTHENTICATED_HOME,
+  isAuthRoute,
   isOnboardingRoute,
   isProtectedAppRoute,
   isProtectedRoute,
   isPublicRoute,
+  requiresOnboardingResumeRouting,
   SIGN_UP_REDIRECT,
 } from "@/lib/auth-routes";
 
@@ -84,6 +86,30 @@ describe("auth route classification", () => {
 
     it("keeps /dashboard as authenticated home for sign-in", () => {
       expect(AUTHENTICATED_HOME).toBe("/dashboard");
+    });
+  });
+
+  describe("requiresOnboardingResumeRouting", () => {
+    it("includes auth, app, and onboarding routes", () => {
+      expect(requiresOnboardingResumeRouting("/sign-in")).toBe(true);
+      expect(requiresOnboardingResumeRouting("/sign-up")).toBe(true);
+      expect(requiresOnboardingResumeRouting("/dashboard")).toBe(true);
+      expect(requiresOnboardingResumeRouting("/learn")).toBe(true);
+      expect(requiresOnboardingResumeRouting("/onboarding/quiz")).toBe(true);
+    });
+
+    it("excludes marketing and legal routes", () => {
+      expect(requiresOnboardingResumeRouting("/")).toBe(false);
+      expect(requiresOnboardingResumeRouting("/privacy")).toBe(false);
+      expect(requiresOnboardingResumeRouting("/terms")).toBe(false);
+    });
+  });
+
+  describe("isAuthRoute", () => {
+    it("matches sign-in and sign-up routes", () => {
+      expect(isAuthRoute("/sign-in")).toBe(true);
+      expect(isAuthRoute("/sign-up")).toBe(true);
+      expect(isAuthRoute("/sign-in/factor-one")).toBe(true);
     });
   });
 });

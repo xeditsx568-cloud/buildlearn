@@ -63,3 +63,12 @@ export function isProtectedRoute(pathname: string): boolean {
 export function isAuthRoute(pathname: string): boolean {
   return matchesPrefix(pathname, "/sign-in") || matchesPrefix(pathname, "/sign-up");
 }
+
+/** Routes where profile-aware onboarding resume routing may apply. */
+export function requiresOnboardingResumeRouting(pathname: string): boolean {
+  return (
+    isAuthRoute(pathname) ||
+    isProtectedAppRoute(pathname) ||
+    isOnboardingRoute(pathname)
+  );
+}
