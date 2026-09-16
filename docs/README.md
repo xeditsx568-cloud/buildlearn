@@ -35,5 +35,5 @@
 - **Phase 1:** Complete — tagged `v0.1.0-foundation`
 - **Phase 2:** Complete — auth foundation, Neon init migration applied (2026-08-10).
 - **Phase 3:** **Complete (2026-08-10)** — TASK-103 and TASK-104 operationally complete in Neon.
-- **Phase 4:** **Minimum DoD complete (2026-09-16)** — TASK-201, TASK-202, TASK-211, TASK-212, TASK-213 merged. Placement quiz data remains client-only (ADR-021). **OPS-PHASE4-001** pending (Clerk redirect ops). **TASK-203** `pending` (Phase 4 gate satisfied; not started). `/roadmap` UI not implemented (TASK-205).
+- **Phase 4:** **Minimum DoD complete (2026-09-16)** — TASK-201–213 merged. **OPS-PHASE4-001** repo alignment merged; **deployment env still outstanding** (task `pending`). **TASK-203** `pending` (not started). `/roadmap` UI not implemented (TASK-205).
 - **UX specification:** v1.2 — **MVP Design Freeze approved** (2026-08-05)

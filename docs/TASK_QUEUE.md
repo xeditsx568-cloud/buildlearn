@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-09-16 (TASK-213 merged)  
+> **Last updated:** 2026-09-16 (OPS-PHASE4-001 repo alignment merged)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -10,7 +10,7 @@
 
 **Goal:** Phase 4 onboarding — authenticated users complete onboarding with profile-backed persistence and resume (ADR-021).
 
-**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** **ADR-021 merged (2026-08-10).** **TASK-211 merged and operationally complete (2026-08-12).** **TASK-212 merged (2026-09-02).** **TASK-213 merged (2026-09-16).** **Phase 4 minimum DoD complete (2026-09-16).** **TASK-203 unblocked** — status `pending` (Phase 4 gate satisfied; implementation not started). **OPS-PHASE4-001** remains `pending` (pre-production ops; not required for minimum product DoD).
+**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** **ADR-021 merged (2026-08-10).** **TASK-211 merged and operationally complete (2026-08-12).** **TASK-212 merged (2026-09-02).** **TASK-213 merged (2026-09-16).** **Phase 4 minimum DoD complete (2026-09-16).** **OPS-PHASE4-001** repository alignment **merged (2026-09-16)** — task status **`pending`** until deployment env verified. **TASK-203 unblocked** — status `pending` (implementation not started).
 
 ### Phase 4 boundary (2026-08-10)
 
@@ -46,18 +46,24 @@ authoritative for Phase 4.
 - **TASK-211 fully complete operationally** — TASK-212 database prerequisite cleared; TASK-213 TASK-211 dependency satisfied
 - **Not run during TASK-211 merge** — completed as post-merge operational follow-up
 
-### Operational follow-up — OPS-PHASE4-001 (pending — deployment manual)
+### Operational follow-up — OPS-PHASE4-001 (pending — deployment outstanding)
 
-**Repository (branch `ops/phase-4-clerk-redirect`):**
-- `.env.example`: `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal`
-- CI / Vitest env: sign-up force redirect aligned with `SIGN_UP_REDIRECT`
-- Sign-in force redirect remains `/dashboard`; `<SignUp />` / `<SignIn />` unchanged (TASK-201/TASK-212)
+| Track | Status |
+| ----- | ------ |
+| **Repository alignment** | **COMPLETE** (merged 2026-09-16, `ops/phase-4-clerk-redirect`) |
+| **Deployment environment alignment** | **OUTSTANDING** — not updated or smoke-tested from repo workflow |
 
-**Deployment (manual — not verifiable from repo):**
-- Set production/staging `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal` in host env (e.g. Vercel)
+**Repository (on `main`):**
+- `.env.example`, CI, Vitest: `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal`
+- Sign-in: `NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard`
+- Application `<SignUp />` / `<SignIn />` and TASK-212 resume routing unchanged
+- Checker review: `docs/reviews/OPS-PHASE4-001.md` (APPROVED FOR MERGE)
+
+**Deployment (manual — required to close OPS-PHASE4-001):**
+- Set staging/production `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal`
 - Keep `NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard`
-- Smoke-test: new sign-up → `/onboarding/goal`; returning incomplete sign-in → resume step (TASK-212)
-- Mark OPS-PHASE4-001 **done** only after deployment env verified
+- Smoke-test: new sign-up → `/onboarding/goal`; incomplete sign-in → resume step (TASK-212)
+- Mark OPS-PHASE4-001 **`done`** only after deployment env verified
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
@@ -946,9 +952,9 @@ Notes: |
   Pre-production ops. May merge independently of TASK-211–213 but should
   complete before production deploy. Not a blocker for TASK-211 development.
 
-  **Repository alignment:** `.env.example`, CI, and Vitest sign-up redirect →
-  `/onboarding/goal` (branch `ops/phase-4-clerk-redirect`). **Deployment env**
-  must be updated manually on the host; task remains **pending** until verified.
+  **Repository alignment:** merged 2026-09-16 (`.env.example`, CI, Vitest →
+  `/onboarding/goal`). **Deployment env** still **outstanding** on host; task
+  remains **pending** until verified and smoke-tested.
 ```
 
 ---

@@ -1,5 +1,12 @@
 ## [Unreleased]
 
+### Operational (Phase 4 — OPS-PHASE4-001 repository alignment)
+- **Clerk redirect repo alignment:** `.env.example`, CI, and Vitest sign-up force redirect → `/onboarding/goal`; sign-in remains `/dashboard`
+- Aligns documented/local env with `SIGN_UP_REDIRECT` and Phase 4 onboarding entry; TASK-212 dynamic resume unchanged
+- Checker review: `docs/reviews/OPS-PHASE4-001.md` (APPROVED FOR MERGE)
+- Branch: `ops/phase-4-clerk-redirect` merged 2026-09-16
+- **OPS-PHASE4-001 remains `pending`** — deployment environment alignment **outstanding** (manual host env + smoke-test)
+
 ### Added (Phase 4 — TASK-213)
 - **Onboarding UI profile integration:** P1 onboarding wired to TASK-211 `GET`/`PATCH` `/api/profile`
 - Persisted profile is durable source of truth for goal and experience; quiz/placement remains client/session-only (ADR-021)
