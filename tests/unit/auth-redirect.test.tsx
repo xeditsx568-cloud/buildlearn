@@ -50,6 +50,15 @@ describe("post-auth redirect configuration", () => {
     expect(SIGN_UP_REDIRECT).toBe("/onboarding/goal");
   });
 
+  it("aligns Clerk sign-up force redirect env with SIGN_UP_REDIRECT (OPS-PHASE4-001)", () => {
+    expect(process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL).toBe(
+      SIGN_UP_REDIRECT,
+    );
+    expect(process.env.NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL).toBe(
+      AUTHENTICATED_HOME,
+    );
+  });
+
   it("passes forceRedirectUrl to SignIn for signed-out users", async () => {
     mockAuth.mockResolvedValue({ userId: null });
 

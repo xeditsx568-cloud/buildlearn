@@ -46,11 +46,18 @@ authoritative for Phase 4.
 - **TASK-211 fully complete operationally** — TASK-212 database prerequisite cleared; TASK-213 TASK-211 dependency satisfied
 - **Not run during TASK-211 merge** — completed as post-merge operational follow-up
 
-### Operational follow-up — OPS-PHASE4-001 (pending)
+### Operational follow-up — OPS-PHASE4-001 (pending — deployment manual)
 
-- Align `.env.example` and deployment `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal`
-- Sign-in force redirect remains `/dashboard`; incomplete-user resume handled by TASK-212
-- Application `SignUp` already uses `SIGN_UP_REDIRECT` from TASK-201
+**Repository (branch `ops/phase-4-clerk-redirect`):**
+- `.env.example`: `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal`
+- CI / Vitest env: sign-up force redirect aligned with `SIGN_UP_REDIRECT`
+- Sign-in force redirect remains `/dashboard`; `<SignUp />` / `<SignIn />` unchanged (TASK-201/TASK-212)
+
+**Deployment (manual — not verifiable from repo):**
+- Set production/staging `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal` in host env (e.g. Vercel)
+- Keep `NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard`
+- Smoke-test: new sign-up → `/onboarding/goal`; returning incomplete sign-in → resume step (TASK-212)
+- Mark OPS-PHASE4-001 **done** only after deployment env verified
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
@@ -938,6 +945,10 @@ Reviewer: Checker
 Notes: |
   Pre-production ops. May merge independently of TASK-211–213 but should
   complete before production deploy. Not a blocker for TASK-211 development.
+
+  **Repository alignment:** `.env.example`, CI, and Vitest sign-up redirect →
+  `/onboarding/goal` (branch `ops/phase-4-clerk-redirect`). **Deployment env**
+  must be updated manually on the host; task remains **pending** until verified.
 ```
 
 ---
