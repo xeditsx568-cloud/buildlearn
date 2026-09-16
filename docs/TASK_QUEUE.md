@@ -1,16 +1,16 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-09-02 (TASK-212 merged)  
+> **Last updated:** 2026-09-16 (TASK-213 merged)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
 ## Current Sprint: Phase 4 — User Onboarding & Goal Selection
 
-**Goal:** Phase 4 onboarding — P1 UI complete (TASK-201, TASK-202); P2 profile API and resume routing complete (TASK-211, TASK-212); UI profile integration outstanding (TASK-213).
+**Goal:** Phase 4 onboarding — authenticated users complete onboarding with profile-backed persistence and resume (ADR-021).
 
-**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** **ADR-021 merged (2026-08-10).** **TASK-211 merged and operationally complete (2026-08-12).** **TASK-212 merged (2026-09-02).** Phase 4 **P1 UI complete.** Phase 4 **not yet complete** — P1 UI profile integration outstanding (**TASK-213**). **TASK-213 may begin** when Master directs. **TASK-203 blocked** until Phase 4 minimum DoD is met (ADR-021).
+**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** **ADR-021 merged (2026-08-10).** **TASK-211 merged and operationally complete (2026-08-12).** **TASK-212 merged (2026-09-02).** **TASK-213 merged (2026-09-16).** **Phase 4 minimum DoD complete (2026-09-16).** **TASK-203 unblocked** — status `pending` (Phase 4 gate satisfied; implementation not started). **OPS-PHASE4-001** remains `pending` (pre-production ops; not required for minimum product DoD).
 
 ### Phase 4 boundary (2026-08-10)
 
@@ -22,12 +22,14 @@
 - TASK-211 — Profile & onboarding persistence API (2026-08-12; Neon migration verified 2026-08-12)
 - TASK-212 — Onboarding resume & auth routing (2026-09-02)
 
-**P2/P1 outstanding (ADR-021):**
-- **TASK-213** — Onboarding UI profile integration (P1, P0, `pending`; depends TASK-211 ✅, TASK-212 ✅)
+**P1 profile integration (merged):**
+- TASK-213 — Onboarding UI profile integration (2026-09-16)
+
+**Phase 4 ops outstanding (not minimum DoD):**
 - **OPS-PHASE4-001** — Clerk redirect alignment (P2 ops, `pending`)
 
-**Blocked until Phase 4 minimum DoD:**
-- **TASK-203+** — Phase 5 AI infrastructure (TASK-203 explicitly blocked)
+**Phase 5 ready (gate satisfied):**
+- **TASK-203** — AI service abstraction (`pending`; Phase 4 minimum DoD complete — do not start without Master direction)
 
 **Deferred (not Phase 4 minimum DoD):**
 - Placement quiz server persistence — inspect before TASK-204; not TASK-214 yet
@@ -851,11 +853,21 @@ Description: |
   onboardingComplete. sessionStorage remains local convenience/cache only.
   Preserve TASK-201/202 UX; no new backend endpoints.
 Owner: Programmer 1
-Status: pending
+Status: done
 Priority: P0
 Phase: 4
-Dependencies: [TASK-211]
+Dependencies: [TASK-211, TASK-212]
 Branch: feature/TASK-213-onboarding-profile-integration
+Merged: 2026-09-16
+Delivered:
+  - Onboarding UI connected to authenticated GET/PATCH /api/profile
+  - Persisted profile is durable source of truth for goal and experience (hydration)
+  - Goal continue: learningGoalText + onboardingStep=experience
+  - Experience continue: experienceLevel + onboardingStep=quiz
+  - Quiz complete/skip: onboardingStep=path only (placement remains client/session-only)
+  - Start learning: onboardingComplete=true + onboardingStep=path; navigate /roadmap on success
+  - PATCH failures prevent navigation and allow retry
+  - No Prisma migration required
 Files:
   - src/components/onboarding/onboarding-provider.tsx
   - src/components/onboarding/goal-screen.tsx
@@ -930,11 +942,11 @@ Notes: |
 
 ---
 
-## Backlog — Phase 4+ (TASK-203 blocked)
+## Backlog — Phase 5+ (TASK-203 pending)
 
 | Task ID | Title | Owner | Phase | Priority | Status |
 | ------- | ----- | ----- | ----- | -------- | ------ |
-| TASK-203 | AI service abstraction | P2 | 5 | P0 | **blocked** (Phase 4 DoD) |
+| TASK-203 | AI service abstraction | P2 | 5 | P0 | **pending** (Phase 4 gate satisfied) |
 | TASK-204 | Path generation pipeline | P2 | 5 | P0 |
 | TASK-205 | Learning path UI | P1 | 6 | P0 |
 | TASK-206 | Lesson player | P1 | 7 | P0 |
@@ -966,6 +978,7 @@ Notes: |
 | TASK-202 | Placement quiz | 2026-08-10 | Programmer 1 |
 | TASK-211 | Profile & onboarding persistence API | 2026-08-12 | Programmer 2 |
 | TASK-212 | Onboarding resume & auth routing | 2026-09-02 | Programmer 2 |
+| TASK-213 | Onboarding UI profile integration | 2026-09-16 | Programmer 1 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -986,13 +999,13 @@ Notes: |
 | Phase 2 pending | 0 |
 | Phase 3 pending | 0 |
 | Phase 3 blocked | 0 |
-| Phase 4 P1 complete | 2 |
+| Phase 4 P1 complete | 3 |
 | Phase 4 P2 complete | 2 |
-| Phase 4 P1 pending | 1 |
+| Phase 4 P1 pending | 0 |
 | Phase 4 ops pending | 1 |
-| Phase 4 phase complete | 0 |
+| Phase 4 phase complete | 1 |
 | Backlog (Phase 5+) | 8 |
-| Completed (all phases) | 19 |
+| Completed (all phases) | 20 |
 
 ---
 
@@ -1014,5 +1027,5 @@ Notes: |
 | TASK-202 | 4 | Placement quiz | P1 | done |
 | TASK-211 | 4 | Profile & onboarding API | P2 | done |
 | TASK-212 | 4 | Onboarding resume routing | P2 | done |
-| TASK-213 | 4 | Onboarding UI profile integration | P1 | pending |
-| TASK-203 | 5 | AI service abstraction | P2 | blocked |
+| TASK-213 | 4 | Onboarding UI profile integration | P1 | done |
+| TASK-203 | 5 | AI service abstraction | P2 | pending |

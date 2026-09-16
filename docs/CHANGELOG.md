@@ -1,5 +1,17 @@
 ## [Unreleased]
 
+### Added (Phase 4 — TASK-213)
+- **Onboarding UI profile integration:** P1 onboarding wired to TASK-211 `GET`/`PATCH` `/api/profile`
+- Persisted profile is durable source of truth for goal and experience; quiz/placement remains client/session-only (ADR-021)
+- Goal → `learningGoalText` + `onboardingStep=experience`; experience → `experienceLevel` + `onboardingStep=quiz`
+- Quiz complete/skip → `onboardingStep=path` only; Start learning → `onboardingComplete=true` + navigate `/roadmap` on success
+- Persistence failures prevent navigation and allow retry; no Prisma migration required
+- Checker review: `docs/reviews/TASK-213.md` (APPROVED FOR MERGE)
+- Branch: `feature/TASK-213-onboarding-profile-integration` merged 2026-09-16
+- **Phase 4 minimum DoD complete (2026-09-16)** — `/roadmap` page UI not implemented (accepted gap; TASK-205)
+- **TASK-203 unblocked** — status `pending`; implementation not started
+- **OPS-PHASE4-001 remains pending** — Clerk env/deployment redirect alignment (pre-production ops)
+
 ### Added (Phase 4 — TASK-212)
 - **Onboarding resume & auth routing:** ADR-021 profile-aware resume resolver (`onboarding-resume.ts`)
 - Incomplete users resume stored/inferred onboarding step; complete users route to `/dashboard`

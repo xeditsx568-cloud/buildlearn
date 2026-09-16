@@ -142,7 +142,7 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 
 **TASK-202 boundary:** 5 curated MCQ placement quiz UI; deterministic client-side scoring/signals in sessionStorage; question data under `src/lib/onboarding/`. Excludes profile API, backend scoring, Prisma changes, and path-preview modifications. Placement signals reserved for Phase 5 (TASK-204). **Merged 2026-08-10.**
 
-**Phase 4 P1 complete; P2 complete (ADR-021):** profile persistence API (**TASK-211 ✅**, Neon migration verified 2026-08-12), onboarding resume routing (**TASK-212 ✅**, merged 2026-09-02), P1 profile integration (**TASK-213**), Clerk redirect ops (**OPS-PHASE4-001**). **TASK-203 blocked** until Phase 4 minimum DoD complete.
+**Phase 4 minimum DoD complete (2026-09-16, ADR-021):** profile persistence API (**TASK-211 ✅**), resume routing (**TASK-212 ✅**), P1 profile integration (**TASK-213 ✅**, merged 2026-09-16). Clerk redirect ops (**OPS-PHASE4-001**) remains pending pre-production. **TASK-203** unblocked (`pending`; implementation not started). `/roadmap` page UI remains Phase 6 (TASK-205).
 
 ---
 
@@ -445,7 +445,7 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 [✅] Phase 1  — Foundation (TASK-001–006)
 [✅] Phase 2  — Auth (TASK-101 ✅, TASK-102 ✅); Neon init migration applied (2026-08-10)
 [✅] Phase 3  — Content Foundation (TASK-103 ✅, TASK-104 ✅ operationally complete 2026-08-10)
-[ ] Phase 4  — Onboarding
+[✅] Phase 4  — Onboarding (minimum DoD 2026-09-16; OPS-PHASE4-001 ops pending)
 [ ] Phase 5  — AI paths
 [ ] Phase 6  — Roadmap & Dashboard UI
 [ ] Phase 7  — Lessons
