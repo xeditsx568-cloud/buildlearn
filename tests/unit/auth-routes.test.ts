@@ -24,6 +24,7 @@ describe("auth route classification", () => {
 
     it("denies protected app and onboarding routes", () => {
       expect(isPublicRoute("/dashboard")).toBe(false);
+      expect(isPublicRoute("/roadmap")).toBe(false);
       expect(isPublicRoute("/learn")).toBe(false);
       expect(isPublicRoute("/project")).toBe(false);
       expect(isPublicRoute("/build")).toBe(false);
@@ -34,6 +35,7 @@ describe("auth route classification", () => {
   describe("isProtectedAppRoute", () => {
     it("protects app shell routes and nested paths", () => {
       expect(isProtectedAppRoute("/dashboard")).toBe(true);
+      expect(isProtectedAppRoute("/roadmap")).toBe(true);
       expect(isProtectedAppRoute("/learn")).toBe(true);
       expect(isProtectedAppRoute("/learn/lessons/foo")).toBe(true);
       expect(isProtectedAppRoute("/project")).toBe(true);

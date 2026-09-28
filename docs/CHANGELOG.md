@@ -1,5 +1,12 @@
 ## [Unreleased]
 
+### Added (MVP-M1 — TASK-204)
+- **Deterministic learning path:** template + concept-graph path plan persisted to `learning_paths` / `learning_path_steps`
+- **API:** `GET`/`POST` `/api/learning-path` (generate idempotent, read active path)
+- **Onboarding:** path preview loads persisted plan via POST generate; completion ensures path exists
+- **Roadmap v1:** `/roadmap` lists steps and links to first unlocked lesson; lesson player placeholder route
+- **Migration:** `20260928120000_learning_paths` (deploy to Neon before production use)
+
 ### Planning (First MVP — Option A, ADR-022)
 - **MVP delivery model:** End-to-end vertical slices (MVP-M1→M4); deterministic/template path first; ~3 lessons + project start before full 12-lesson / Build Mode scope
 - **TASK_QUEUE:** Reorganized backlog; **OPS-PHASE4-001 closed** (production auth verified 2026-09-28); TASK-102 Neon webhook row verification noted outstanding separately

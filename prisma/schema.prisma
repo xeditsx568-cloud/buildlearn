@@ -21,12 +21,40 @@ enum OnboardingStep {
   path
 }
 
+enum LearningPathStatus {
+  active
+  completed
+  paused
+}
+
+enum PathGeneratedBy {
+  system
+  ai
+}
+
+enum LearningPathStepType {
+  lesson
+  challenge
+  project_milestone
+  mini_project
+  review
+}
+
+enum LearningPathStepStatus {
+  locked
+  available
+  in_progress
+  completed
+  skipped
+}
+
 model User {
-  id        String    @id // Clerk user ID (e.g. user_2abc...)
-  email     String    @unique
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
-  profile   Profile?
+  id            String         @id // Clerk user ID (e.g. user_2abc...)
+  email         String         @unique
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  deletedAt     DateTime?      @map("deleted_at") @db.Timestamptz(3)
+  profile       Profile?
+  learningPaths LearningPath[]
 
   @@map("users")
 }
@@ -70,12 +98,44 @@ model ConceptPrerequisite {
 }
 
 model GoalTemplate {
-  id               String   @id
+  id               String         @id
   name             String
-  matchingKeywords String[] @map("matching_keywords")
-  conceptIds       String[] @map("concept_ids")
+  matchingKeywords String[]       @map("matching_keywords")
+  conceptIds       String[]       @map("concept_ids")
+  learningPaths    LearningPath[]
 
   @@map("goal_templates")
+}
+
+model LearningPath {
+  id             String             @id @default(uuid())
+  userId         String             @map("user_id")
+  goalTemplateId String?            @map("goal_template_id")
+  status         LearningPathStatus @default(active)
+  generatedBy    PathGeneratedBy    @default(system) @map("generated_by")
+  metadata       Json               @default("{}")
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goalTemplate   GoalTemplate?      @relation(fields: [goalTemplateId], references: [id], onDelete: SetNull)
+  steps          LearningPathStep[]
+
+  @@index([userId, status])
+  @@map("learning_paths")
+}
+
+model LearningPathStep {
+  id          String                 @id @default(uuid())
+  pathId      String                 @map("path_id")
+  orderIndex  Int                    @map("order_index")
+  stepType    LearningPathStepType   @map("step_type")
+  referenceId String                 @map("reference_id")
+  status      LearningPathStepStatus @default(locked)
+  metadata    Json                   @default("{}")
+  path        LearningPath           @relation(fields: [pathId], references: [id], onDelete: Cascade)
+
+  @@unique([pathId, orderIndex])
+  @@index([pathId, orderIndex])
+  @@map("learning_path_steps")
 }
 
 model Lesson {

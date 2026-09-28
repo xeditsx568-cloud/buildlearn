@@ -9,6 +9,7 @@ import {
   GOAL_MIN_LENGTH,
 } from "@/lib/onboarding/constants";
 import { ONBOARDING_STEP_VALUES } from "@/lib/onboarding/onboarding-step";
+import { ensureActiveLearningPathForUser } from "@/server/services/learning-path-service";
 import { db } from "@/server/db";
 
 export class ProfileNotFoundError extends Error {
@@ -133,6 +134,10 @@ export async function patchOwnProfileOnboarding(
     where: { userId },
     data: input,
   });
+
+  if (updated.onboardingComplete) {
+    await ensureActiveLearningPathForUser(userId);
+  }
 
   return toProfileOnboardingRecord(updated);
 }

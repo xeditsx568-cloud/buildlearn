@@ -3,6 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockUserFindUnique = vi.fn();
 const mockProfileUpdate = vi.fn();
 
+const mockEnsureActiveLearningPathForUser = vi.fn();
+
+vi.mock("@/server/services/learning-path-service", () => ({
+  ensureActiveLearningPathForUser: (...args: unknown[]) =>
+    mockEnsureActiveLearningPathForUser(...args),
+}));
+
 vi.mock("@/server/db", () => ({
   db: {
     user: {
@@ -219,6 +226,9 @@ describe("patchOwnProfileOnboarding", () => {
       where: { userId: "user_2abc123" },
       data: { onboardingComplete: true, onboardingStep: "path" },
     });
+    expect(mockEnsureActiveLearningPathForUser).toHaveBeenCalledWith(
+      "user_2abc123",
+    );
   });
 
   it("does not alter unprovided fields in the service update payload", async () => {

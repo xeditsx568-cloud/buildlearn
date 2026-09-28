@@ -4,7 +4,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { useOnboarding } from "@/components/onboarding/onboarding-provider";
-import { PathPreviewView } from "@/components/onboarding/path-preview-view";
+import {
+  PathPreviewView,
+  type PathPreviewStepItem,
+} from "@/components/onboarding/path-preview-view";
+import { generateLearningPath } from "@/lib/learning-path/learning-path-client";
 import { patchProfileOnboarding } from "@/lib/onboarding/onboarding-client";
 import {
   ONBOARDING_COMPLETION_ROUTE,
@@ -22,6 +26,7 @@ export function PathPreviewScreen() {
   const [attempt, setAttempt] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [steps, setSteps] = useState<PathPreviewStepItem[]>([]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -29,12 +34,39 @@ export function PathPreviewScreen() {
     }
 
     setStatus("loading");
+    setSteps([]);
+
+    let cancelled = false;
 
     const timer = window.setTimeout(() => {
-      setStatus("loaded");
+      void (async () => {
+        try {
+          const path = await generateLearningPath();
+          if (cancelled) {
+            return;
+          }
+
+          setSteps(
+            path.steps.map((step) => ({
+              orderIndex: step.orderIndex,
+              displayTitle: step.displayTitle,
+              stepType: step.stepType,
+              status: step.status,
+            })),
+          );
+          setStatus("loaded");
+        } catch {
+          if (!cancelled) {
+            setStatus("error");
+          }
+        }
+      })();
     }, PATH_LOADING_DELAY_MS);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [hydrated, attempt]);
 
   async function handleStartLearning() {
@@ -66,9 +98,10 @@ export function PathPreviewScreen() {
     <PathPreviewView
       status={status}
       goalText={goalText}
+      steps={steps}
       onRetry={() => setAttempt((value) => value + 1)}
       onStartLearning={() => void handleStartLearning()}
-      startLearningDisabled={saving}
+      startLearningDisabled={saving || status !== "loaded"}
       startLearningLabel={saving ? "Saving..." : "Start learning →"}
       startLearningError={saveError}
     />
@@ -79,15 +112,19 @@ export function PathPreviewScreen() {
 export function PathPreviewScreenStatic({
   status,
   goalText = "A portfolio site for my photography business",
+  steps = [],
 }: {
   status: PathPreviewStatus;
   goalText?: string;
+  steps?: PathPreviewStepItem[];
 }) {
   return (
     <PathPreviewView
       status={status}
       goalText={goalText}
+      steps={steps}
       onRetry={() => undefined}
+      onStartLearning={() => undefined}
     />
   );
 }
