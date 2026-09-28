@@ -351,6 +351,50 @@ may continue targeting `/roadmap` per ADR-020 and TASK-201.
 
 ---
 
+### ADR-022: MVP Vertical Slices (Option A) — Deterministic Path First
+
+**Status:** ACCEPTED  
+**Date:** 2026-09-28
+
+**Context:** Phases 1–4 foundation and onboarding are complete. The founder
+requires a **smaller but fully working end-to-end MVP** before expanding to the
+full 12-lesson / full Build Mode scope in PRODUCT_REQUIREMENTS.md.
+
+**Decision:**
+
+1. **Delivery model:** Remaining MVP work ships as **end-to-end vertical
+   slices** (path → roadmap → lesson → progress → AI → expand content →
+   project). Do not polish isolated screens before the core learning loop works.
+
+2. **First path generation:** The **first working vertical slice** uses
+   **deterministic / template + concept-graph** path generation (goal templates,
+   curated DAG, experience level). **AI-generated learning paths are not a
+   dependency** for the first slice (FR-2.5 satisfied by constrained generation;
+   AI goal refinement FR-2.4 remains P1 backlog).
+
+3. **First MVP target (testable product):** Sign up → onboarding → persisted
+   roadmap → complete **~3 high-quality lessons** with editor, preview, progress,
+   AI hints/review (teacher-not-builder) → **begin** persistent project workspace.
+   Full 12 lessons, 8 challenges, and complete Build Mode (5 recipes) remain
+   **post–first-MVP backlog** unless explicitly promoted.
+
+4. **AI role unchanged:** Teacher, mentor, reviewer — not a code generator that
+   completes the learner's work (PROJECT_CONTEXT.md, ADR-001).
+
+**Consequences:**
+
+- TASK_QUEUE reorganizes around **MVP-M1…MVP-M4** milestones (see
+  TASK_QUEUE.md § MVP delivery).
+- TASK-204 reframed: deterministic path v1 **before** AI path enhancements.
+- TASK-205 / TASK-206 / TASK-203 sequencing follows milestones, not strict
+  legacy Phase 5 → 6 → 7 → 12 order.
+- IMPLEMENTATION_PLAN MVP checklist updated; legacy phase numbers retained for
+  history and full-product roadmap.
+
+**Related:** ADR-001, ADR-020, IMPLEMENTATION_PLAN.md § MVP vertical slices
+
+---
+
 ## Override Process
 
 1. Stakeholder requests change

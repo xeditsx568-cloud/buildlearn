@@ -1,8 +1,8 @@
 # Project Context — BuildLearn
 
-> **Status:** Planning phase complete. MVP Design Freeze approved 2026-08-05. Phase 2 in progress — TASK-101 merged 2026-08-06.  
+> **Status:** Phases 1–4 foundation complete. **First MVP (Option A)** delivery active per ADR-022 — see `docs/TASK_QUEUE.md` § MVP delivery milestones.  
 > **Working codename:** BuildLearn (final product name TBD — see DECISIONS.md)  
-> **Last updated:** 2026-08-04
+> **Last updated:** 2026-09-28 (planning pointer only)
 
 ---
 

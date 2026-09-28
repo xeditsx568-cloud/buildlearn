@@ -1,16 +1,119 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-09-16 (OPS-PHASE4-001 repo alignment merged)  
+> **Last updated:** 2026-09-28 (ADR-022 MVP vertical slices; OPS-PHASE4-001 closed)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
 
-## Current Sprint: Phase 4 — User Onboarding & Goal Selection
+## Current focus: First MVP (Option A) — vertical slices
+
+**Founder decision (2026-09-28, ADR-022):** Ship a **smaller, fully working
+end-to-end MVP** first (~3 lessons + project start), then expand curriculum and
+Build Mode. Build **vertical slices**, not isolated screen polish.
+
+**Foundation complete:** Phases 1–4 minimum DoD (TASK-001–006, 101–102, 103–104,
+201–202, 211–213). Production auth verified (Clerk, Google OAuth, middleware
+`/__clerk` matcher `28b727e`). **OPS-PHASE4-001 `done`** (2026-09-28).
+
+**Active delivery track:** **MVP-M1** → **MVP-M2** → **MVP-M3** → **MVP-M4**
+(see § MVP delivery milestones below).
+
+**Do not start:** Product code / Prisma migrations / TASK-203 until Master
+assigns the first MVP-M1 implementation task from this plan.
+
+---
+
+## MVP delivery milestones (ADR-022)
+
+Legacy task IDs (TASK-203+) are **mapped** to milestones; execution order follows
+milestones, not legacy Phase 5→6→7 numbering.
+
+### MVP-M1 — Path spine & roadmap (first slice)
+
+**Learner outcome:** After onboarding, land on a **real `/roadmap`** showing a
+**persisted personalized path** (deterministic/template + concept graph); **first
+lesson node unlocked** and navigable.
+
+| Item | Detail |
+| ---- | ------ |
+| **Maps to** | **TASK-204** (deterministic path v1), **TASK-205** (roadmap UI v1), onboarding handoff |
+| **Dependencies** | Phase 3 graph/templates; TASK-211 profile fields; TASK-213 onboarding complete → `/roadmap` |
+| **Not in M1** | AI path generation; full roadmap polish (streak, replay, auto-scroll); lesson player/editor |
+| **Likely modules** | `prisma/schema.prisma` (+ migration when approved), path service, path API, `src/app/(app)/roadmap/**`, `src/lib/auth-routes.ts` (`/roadmap` protected), onboarding path step (replace mock with persisted path) |
+| **Tests** | Path DAG validation; template matching; API auth/IDOR; roadmap smoke |
+| **Definition of done** | New user: sign-up → onboarding → **Start learning** → **`/roadmap` loads** (not 404); steps persisted per user; **first lesson unlocked**; click navigates to **`/learn/lessons/how-websites-work`** (player may be minimal until M2) |
+
+**First implementation task to assign:** **TASK-204 — Deterministic learning path generation & persistence (MVP-M1)**.
+
+---
+
+### MVP-M2 — Lesson 1 completable (editor, preview, progress)
+
+**Learner outcome:** Complete **Lesson 1** inside BuildLearn: blocks, Monaco,
+iframe preview, client grading, progress saved, **next step unlocks** on roadmap.
+
+| Item | Detail |
+| ---- | ------ |
+| **Maps to** | **TASK-206** + **TASK-207** (deliver together), `lesson_progress` schema |
+| **Dependencies** | **MVP-M1**; Lesson 1 content (TASK-104 ✅) |
+| **Likely modules** | `src/app/(app)/learn/**`, lesson player components, grading lib, progress API, `/learn` redirect v1 |
+| **Tests** | Lesson schema; grader unit tests; progress API; completion unlock |
+| **Definition of done** | Signed-in user completes L1 end-to-end; refresh shows completed node; next node unlocked |
+
+---
+
+### MVP-M3 — AI teacher & reviewer (on the slice)
+
+**Learner outcome:** **Hints/explanations** and **structured review** on learning
+activities; teacher-not-builder guardrails; usage limits per FR-9.6.
+
+| Item | Detail |
+| ---- | ------ |
+| **Maps to** | **TASK-203** (AIService) + IMPLEMENTATION_PLAN Phase 12 tutor scope (MVP-M3 bundle) |
+| **Dependencies** | **MVP-M2**; provider env (e.g. `OPENAI_API_KEY`) when implementing |
+| **Not in M3** | AI-generated paths; full project milestone review (thin lesson review OK) |
+| **Likely modules** | `src/ai/**`, tutor UI, `src/app/api/ai/**`, usage logging schema as needed |
+| **Tests** | Mocked provider; help-level policy; quota decrement |
+| **Definition of done** | User requests hint in L1; on-topic Socratic response; low levels do not dump full solutions; submit/complete flow can trigger review/explanation |
+
+---
+
+### MVP-M4 — ~3 lessons & project workspace (first MVP target)
+
+**Learner outcome:** Progress through **~3 complete lessons**; **begin** persistent
+multi-file **project** workspace tied to goal (initial milestone shell OK).
+
+| Item | Detail |
+| ---- | ------ |
+| **Maps to** | Curriculum expansion (lessons 2–3 minimum), **TASK-210** (project workspace v1), dashboard **Continue learning** (FR-10) |
+| **Dependencies** | **MVP-M3** |
+| **Likely modules** | `content/lessons/**`, seed/migrations, `(app)/dashboard`, `(app)/project/**`, project APIs |
+| **Tests** | E2E: onboarding → L1 → L2 → L3; project file save/load |
+| **Definition of done** | Founder testable loop: onboarding → roadmap → **3 lessons** with AI assist → **project workspace opens** with saved files |
+
+---
+
+### Post–first-MVP backlog (unchanged vision, deferred)
+
+| Area | Legacy tasks / phases | Notes |
+| ---- | --------------------- | ----- |
+| Remaining lessons (4–12) | TASK-104 follow-on | Content + seed |
+| 8 challenges | TASK-208 | After lesson loop stable |
+| Full mastery / streak UI | TASK-209, FR-3.3–3.4 | Heuristics may start in M4 thin form |
+| Full Build Mode (5 recipes) | Phase 11 | Not required for first MVP test |
+| AI-generated path refinement | TASK-204 AI enhancement, FR-2.4 | After deterministic path proven |
+| Roadmap polish | Replay ADR-017, auto-scroll ADR-018 | P0 for full MVP, not first slice |
+| Placement server persistence | ADR-021 deferred | Inspect if skip rules need server signals |
+
+---
+
+## Phase 4 — complete (historical)
 
 **Goal:** Phase 4 onboarding — authenticated users complete onboarding with profile-backed persistence and resume (ADR-021).
 
-**Status:** **TASK-201 merged (2026-08-10).** **TASK-202 merged (2026-08-10).** **ADR-021 merged (2026-08-10).** **TASK-211 merged and operationally complete (2026-08-12).** **TASK-212 merged (2026-09-02).** **TASK-213 merged (2026-09-16).** **Phase 4 minimum DoD complete (2026-09-16).** **OPS-PHASE4-001** repository alignment **merged (2026-09-16)** — task status **`pending`** until deployment env verified. **TASK-203 unblocked** — status `pending` (implementation not started).
+**Status:** **Phase 4 minimum DoD complete (2026-09-16).** All TASK-201–213 merged.
+**OPS-PHASE4-001 `done` (2026-09-28).** Delivery continues under **MVP milestones** above.
 
 ### Phase 4 boundary (2026-08-10)
 
@@ -25,16 +128,6 @@
 **P1 profile integration (merged):**
 - TASK-213 — Onboarding UI profile integration (2026-09-16)
 
-**Phase 4 ops outstanding (not minimum DoD):**
-- **OPS-PHASE4-001** — Clerk redirect alignment (P2 ops, `pending`)
-
-**Phase 5 ready (gate satisfied):**
-- **TASK-203** — AI service abstraction (`pending`; Phase 4 minimum DoD complete — do not start without Master direction)
-
-**Deferred (not Phase 4 minimum DoD):**
-- Placement quiz server persistence — inspect before TASK-204; not TASK-214 yet
-- Real path generation (TASK-204), AI/OpenAI (TASK-203+), `/roadmap` UI (TASK-205)
-
 **ADR-021 decisions:** `onboardingStep` enum on `profiles`; persist goal, experience,
 completion, and resume step only; placement quiz remains client/sessionStorage
 authoritative for Phase 4.
@@ -46,24 +139,20 @@ authoritative for Phase 4.
 - **TASK-211 fully complete operationally** — TASK-212 database prerequisite cleared; TASK-213 TASK-211 dependency satisfied
 - **Not run during TASK-211 merge** — completed as post-merge operational follow-up
 
-### Operational follow-up — OPS-PHASE4-001 (pending — deployment outstanding)
+### OPS-PHASE4-001 — complete (2026-09-28)
 
 | Track | Status |
 | ----- | ------ |
-| **Repository alignment** | **COMPLETE** (merged 2026-09-16, `ops/phase-4-clerk-redirect`) |
-| **Deployment environment alignment** | **OUTSTANDING** — not updated or smoke-tested from repo workflow |
+| **Repository alignment** | **COMPLETE** (merged 2026-09-16) |
+| **Deployment environment alignment** | **COMPLETE** — Production verified |
 
-**Repository (on `main`):**
-- `.env.example`, CI, Vitest: `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal`
-- Sign-in: `NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard`
-- Application `<SignUp />` / `<SignIn />` and TASK-212 resume routing unchanged
-- Checker review: `docs/reviews/OPS-PHASE4-001.md` (APPROVED FOR MERGE)
+**Verification recorded (tracking only, 2026-09-28):**
+- Production deploy Ready (`ef7b37e`+, middleware `28b727e` for Clerk `/__clerk` proxy)
+- Clerk Sign In / Sign Up UI on `https://buildlearn-two.vercel.app`
+- Google OAuth configured; end-to-end sign-in tested (Testing mode intentional)
+- Sign-up entry → `/onboarding/goal` per env alignment
 
-**Deployment (manual — required to close OPS-PHASE4-001):**
-- Set staging/production `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/onboarding/goal`
-- Keep `NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard`
-- Smoke-test: new sign-up → `/onboarding/goal`; incomplete sign-in → resume step (TASK-212)
-- Mark OPS-PHASE4-001 **`done`** only after deployment env verified
+**Task status:** **`done`** — see Completed table and YAML below.
 
 ### Operational follow-up (before TASK-104) — complete (2026-08-10)
 
@@ -94,9 +183,9 @@ authoritative for Phase 4.
 
 - ~~Run **Database Migrate Resolve** then **Database Migrate Deploy** to apply `20250805103100_init`~~ — **complete (2026-08-10)**; Neon has `users`, `profiles`, `_prisma_migrations`
 - If local Prisma CLI P1001 persists, use the CI workflow instead of `pnpm prisma:migrate` locally (`docs/notes/prisma-neon-connectivity.md`)
-- Register Clerk webhook endpoint → `POST /api/webhooks/clerk`
-- Add real `CLERK_WEBHOOK_SIGNING_SECRET` to deployment environments
-- Perform live sign-up test; confirm `users` + `profiles` rows are created
+- ~~Register Clerk webhook endpoint → `POST /api/webhooks/clerk`~~ — **configured in Production (2026-09-28)**
+- ~~Add real `CLERK_WEBHOOK_SIGNING_SECRET` to deployment environments~~ — **configured in Production (2026-09-28)**
+- **Outstanding (TASK-102 ops — separate from TASK-102 code `done`):** Live sign-up → confirm **`users` + `profiles` rows in Neon** via webhook (`user.created`). Not a blocker for MVP-M1 planning; **required before calling auth/onboarding production-hardened complete.**
 
 ### Parallel execution (Phase 2 — complete)
 
@@ -931,11 +1020,12 @@ Description: |
   onboarding entry. Sign-in redirect remains /dashboard; incomplete-user
   resume is handled by TASK-212 application logic.
 Owner: Programmer 2
-Status: pending
+Status: done
 Priority: P1
 Phase: 4
 Dependencies: []
 Branch: ops/phase-4-clerk-redirect
+Completed: 2026-09-28
 Files:
   - .env.example
   - docs/TASK_QUEUE.md
@@ -945,32 +1035,70 @@ Acceptance Criteria:
   - Deployment environment documented in TASK_QUEUE or ops notes
   - NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL remains /dashboard
   - No application SignUp component regression — aligns with SIGN_UP_REDIRECT
+  - Production deployment env verified and smoke-tested
 Tests Required:
   - Existing auth-redirect.test.tsx continues to pass or updated intentionally
 Reviewer: Checker
 Notes: |
-  Pre-production ops. May merge independently of TASK-211–213 but should
-  complete before production deploy. Not a blocker for TASK-211 development.
-
-  **Repository alignment:** merged 2026-09-16 (`.env.example`, CI, Vitest →
-  `/onboarding/goal`). **Deployment env** still **outstanding** on host; task
-  remains **pending** until verified and smoke-tested.
+  **Repository alignment:** merged 2026-09-16. **Deployment verified:** 2026-09-28
+  (Production Clerk, sign-up/sign-in UI, Google OAuth, onboarding entry). Closed
+  in tracking only; no production config changes in this docs commit.
 ```
 
 ---
 
-## Backlog — Phase 5+ (TASK-203 pending)
+## Backlog — First MVP (MVP-M1 → MVP-M4)
 
-| Task ID | Title | Owner | Phase | Priority | Status |
-| ------- | ----- | ----- | ----- | -------- | ------ |
-| TASK-203 | AI service abstraction | P2 | 5 | P0 | **pending** (Phase 4 gate satisfied) |
-| TASK-204 | Path generation pipeline | P2 | 5 | P0 |
-| TASK-205 | Learning path UI | P1 | 6 | P0 |
-| TASK-206 | Lesson player | P1 | 7 | P0 |
-| TASK-207 | Monaco + iframe preview | P1 | 7 | P0 |
-| TASK-208 | Challenge system | P2 | 8 | P0 |
-| TASK-209 | Mastery service | P2 | 9 | P0 |
-| TASK-210 | Project workspace | P1 | 10 | P0 |
+| Milestone | Task ID | Title | Owner | Priority | Status | Notes |
+| --------- | ------- | ----- | ----- | -------- | ------ | ----- |
+| **MVP-M1** | **TASK-204** | Deterministic path generation & persistence | P2 | P0 | **pending** | **Start here.** No AI path dependency (ADR-022) |
+| **MVP-M1** | **TASK-205** | Roadmap UI (`/roadmap`) v1 | P1 | P0 | pending | Unlocked/current/locked nodes; depends TASK-204 |
+| **MVP-M2** | **TASK-206** | Lesson player | P1 | P0 | pending | Deliver with TASK-207 |
+| **MVP-M2** | **TASK-207** | Monaco + iframe preview | P1 | P0 | pending | Client grading; lesson progress |
+| **MVP-M3** | **TASK-203** | AI service abstraction | P2 | P0 | pending | **After MVP-M2** — tutor + reviewer on slice |
+| **MVP-M4** | *(content)* | Lessons 2–3 seed + player | P2 | P0 | pending | Extend TASK-104 pattern |
+| **MVP-M4** | **TASK-210** | Project workspace v1 | P1 | P0 | pending | Multi-file; begin project after ~3 lessons |
+| *Post-MVP* | **TASK-208** | Challenge system | P2 | P0 | pending | After first MVP loop |
+| *Post-MVP* | **TASK-209** | Mastery service | P2 | P0 | pending | Full FR-6; thin updates may land in M4 |
+| *Post-MVP* | *(Phase 11)* | Build Mode (5 recipes) | P1 | P0 | pending | Not first MVP target |
+
+### TASK-204 (MVP-M1 — next implementation)
+```yaml
+TASK-ID: TASK-204
+Title: Deterministic learning path generation & persistence
+Description: |
+  Generate and persist a personalized learning path from goal templates, concept
+  graph, and profile fields (experience level). ADR-022: no AI path dependency
+  for this task. Replace onboarding mock path preview with real persisted steps.
+  Enable roadmap and first-lesson navigation (TASK-205 may follow or overlap).
+Owner: Programmer 2
+Status: pending
+Priority: P0
+Phase: MVP-M1
+Dependencies: [TASK-103, TASK-104, TASK-211, TASK-213]
+Branch: feature/TASK-204-deterministic-path
+Files:
+  - prisma/schema.prisma
+  - prisma/migrations/**
+  - src/server/services/**  # path generation
+  - src/app/api/**          # path/roadmap read APIs as designed
+  - src/lib/onboarding/**   # handoff from mock to real path
+  - src/lib/auth-routes.ts  # /roadmap protected when route exists
+Acceptance Criteria:
+  - learning_paths + learning_path_steps persisted per ARCHITECTURE.md
+  - Path respects concept prerequisite DAG
+  - Goal template matching selects concept set / ordering rules
+  - Path created when user completes onboarding (Start learning)
+  - Deterministic output for same profile inputs (no LLM required)
+  - First step references lesson how-websites-work and is unlocked
+Tests Required:
+  - Unit: template match, DAG validation, step ordering
+  - Unit/API: auth — user can read only own path
+Reviewer: Checker
+Notes: |
+  Placement quiz remains client/sessionStorage (ADR-021); optional skip rules
+  may use client signals in a follow-up. Do not start TASK-203 in this branch.
+```
 
 ---
 
@@ -996,6 +1124,7 @@ Notes: |
 | TASK-211 | Profile & onboarding persistence API | 2026-08-12 | Programmer 2 |
 | TASK-212 | Onboarding resume & auth routing | 2026-09-02 | Programmer 2 |
 | TASK-213 | Onboarding UI profile integration | 2026-09-16 | Programmer 1 |
+| OPS-PHASE4-001 | Clerk redirect alignment (prod verified) | 2026-09-28 | Programmer 2 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -1019,10 +1148,11 @@ Notes: |
 | Phase 4 P1 complete | 3 |
 | Phase 4 P2 complete | 2 |
 | Phase 4 P1 pending | 0 |
-| Phase 4 ops pending | 1 |
+| Phase 4 ops pending | 0 |
 | Phase 4 phase complete | 1 |
-| Backlog (Phase 5+) | 8 |
-| Completed (all phases) | 20 |
+| MVP-M1 pending | 2 (TASK-204, TASK-205) |
+| First MVP backlog (M2–M4 + post) | 8 |
+| Completed (all phases) | 21 |
 
 ---
 
@@ -1045,4 +1175,12 @@ Notes: |
 | TASK-211 | 4 | Profile & onboarding API | P2 | done |
 | TASK-212 | 4 | Onboarding resume routing | P2 | done |
 | TASK-213 | 4 | Onboarding UI profile integration | P1 | done |
-| TASK-203 | 5 | AI service abstraction | P2 | pending |
+| OPS-PHASE4-001 | 4 | Clerk redirect alignment | P2 | done |
+| TASK-204 | MVP-M1 | Deterministic path generation | P2 | pending |
+| TASK-205 | MVP-M1 | Roadmap UI v1 | P1 | pending |
+| TASK-206 | MVP-M2 | Lesson player | P1 | pending |
+| TASK-207 | MVP-M2 | Monaco + preview | P1 | pending |
+| TASK-203 | MVP-M3 | AI service abstraction | P2 | pending |
+| TASK-210 | MVP-M4 | Project workspace v1 | P1 | pending |
+| TASK-208 | post-MVP | Challenge system | P2 | pending |
+| TASK-209 | post-MVP | Mastery service | P2 | pending |

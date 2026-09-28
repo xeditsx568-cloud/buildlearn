@@ -35,5 +35,6 @@
 - **Phase 1:** Complete — tagged `v0.1.0-foundation`
 - **Phase 2:** Complete — auth foundation, Neon init migration applied (2026-08-10).
 - **Phase 3:** **Complete (2026-08-10)** — TASK-103 and TASK-104 operationally complete in Neon.
-- **Phase 4:** **Minimum DoD complete (2026-09-16)** — TASK-201–213 merged. **OPS-PHASE4-001** repo alignment merged; **deployment env still outstanding** (task `pending`). **TASK-203** `pending` (not started). `/roadmap` UI not implemented (TASK-205).
+- **Phase 4:** **Complete (2026-09-16 minimum DoD; OPS-PHASE4-001 production verified 2026-09-28).**
+- **First MVP (Option A, ADR-022):** Delivery via **MVP-M1→M4** vertical slices — see [TASK_QUEUE.md](TASK_QUEUE.md) § MVP delivery milestones and [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) § 1A. **Next:** TASK-204 (deterministic path, MVP-M1). `/roadmap` not implemented yet.
 - **UX specification:** v1.2 — **MVP Design Freeze approved** (2026-08-05)

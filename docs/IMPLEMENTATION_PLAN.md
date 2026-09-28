@@ -1,7 +1,7 @@
 # Implementation Plan — BuildLearn
 
-> **Status:** Planning approved — Phase 1 ready  
-> **Last updated:** 2026-08-05
+> **Status:** Planning approved — **First MVP (Option A) in delivery** (ADR-022)  
+> **Last updated:** 2026-09-28
 
 ---
 
@@ -142,12 +142,37 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 
 **TASK-202 boundary:** 5 curated MCQ placement quiz UI; deterministic client-side scoring/signals in sessionStorage; question data under `src/lib/onboarding/`. Excludes profile API, backend scoring, Prisma changes, and path-preview modifications. Placement signals reserved for Phase 5 (TASK-204). **Merged 2026-08-10.**
 
-**Phase 4 minimum DoD complete (2026-09-16, ADR-021):** profile persistence API (**TASK-211 ✅**), resume routing (**TASK-212 ✅**), P1 profile integration (**TASK-213 ✅**, merged 2026-09-16). Clerk redirect ops (**OPS-PHASE4-001**) remains pending pre-production. **TASK-203** unblocked (`pending`; implementation not started). `/roadmap` page UI remains Phase 6 (TASK-205).
+**Phase 4 minimum DoD complete (2026-09-16, ADR-021):** profile persistence API (**TASK-211 ✅**), resume routing (**TASK-212 ✅**), P1 profile integration (**TASK-213 ✅**, merged 2026-09-16). **OPS-PHASE4-001 ✅ (2026-09-28).**
+
+---
+
+## 1A. First MVP delivery — vertical slices (ADR-022, 2026-09-28)
+
+**Objective:** A learner completes **sign-up → onboarding → persisted roadmap →
+~3 lessons** (editor, preview, progress, AI hints/review) → **begins project
+workspace**, without waiting for full 12-lesson curriculum or complete Build Mode.
+
+**Principle:** End-to-end slices first; legacy phase numbers below remain the
+**full-product** roadmap.
+
+| Milestone | Learner gain | Primary tasks | DoD summary |
+| --------- | ------------ | ------------- | ----------- |
+| **MVP-M1** | Real roadmap after onboarding | TASK-204, TASK-205 | Persisted deterministic path; `/roadmap`; first lesson unlocked & openable |
+| **MVP-M2** | Complete Lesson 1 in-app | TASK-206, TASK-207 | Editor, preview, grading, progress, unlock next |
+| **MVP-M3** | AI teacher on slice | TASK-203 + tutor scope | Hints/review; teacher-not-builder; quotas |
+| **MVP-M4** | ~3 lessons + project start | Lessons 2–3 content, TASK-210 | Founder-testable first MVP loop |
+| **Backlog** | Full PRD MVP | TASK-208, 209, Phases 11–16 | 12 lessons, 8 challenges, Build Mode, polish |
+
+**Path generation (first slice):** Template + concept-graph + experience level
+(**deterministic**). AI path generation and FR-2.4 goal refinement are **not**
+M1 blockers.
+
+**Start implementation with:** **TASK-204 (MVP-M1)** — see TASK_QUEUE.md.
 
 ---
 
 ### PHASE 5 — AI Infrastructure & Path Generation
-**Objective:** AI generates personalized learning path from goal.
+**Objective:** AI infrastructure and **personalized path generation** (full product). **First slice uses deterministic path (MVP-M1) before AI path enhancements.**
 
 **Features:**
 - AIService abstraction layer
@@ -439,21 +464,34 @@ Phases reordered for dependency correctness and MVP focus. Security and testing 
 
 ## 2. MVP Milestone Checklist
 
+### First MVP (Option A — active)
+
+```
+[✅] Foundation — Phases 1–4 (through TASK-213; OPS-PHASE4-001 prod verified 2026-09-28)
+[ ] MVP-M1 — Deterministic path + /roadmap + first lesson openable (TASK-204, TASK-205)
+[ ] MVP-M2 — Lesson 1 completable: player, editor, preview, progress (TASK-206, TASK-207)
+[ ] MVP-M3 — AI teacher/reviewer on slice (TASK-203 + tutor)
+[ ] MVP-M4 — ~3 lessons + project workspace v1 (content + TASK-210)
+—— First MVP testable — then expand ——
+```
+
+### Full product phases (legacy checklist — post–first-MVP expansion)
+
 ```
 [✅] Phase 0  — Planning approved
 [✅] PREP    — Development environment prepared
 [✅] Phase 1  — Foundation (TASK-001–006)
 [✅] Phase 2  — Auth (TASK-101 ✅, TASK-102 ✅); Neon init migration applied (2026-08-10)
 [✅] Phase 3  — Content Foundation (TASK-103 ✅, TASK-104 ✅ operationally complete 2026-08-10)
-[✅] Phase 4  — Onboarding (minimum DoD 2026-09-16; OPS-PHASE4-001 ops pending)
-[ ] Phase 5  — AI paths
-[ ] Phase 6  — Roadmap & Dashboard UI
-[ ] Phase 7  — Lessons
+[✅] Phase 4  — Onboarding (minimum DoD 2026-09-16; OPS-PHASE4-001 ✅ 2026-09-28)
+[ ] Phase 5  — AI paths (full; M1 uses deterministic path first)
+[ ] Phase 6  — Roadmap & Dashboard UI (M1/M4 deliver v1)
+[ ] Phase 7  — Lessons (M2/M4 deliver v1)
 [ ] Phase 8  — Challenges
 [ ] Phase 9  — Mastery
-[ ] Phase 10 — Projects
-[ ] Phase 11 — Build Mode
-[ ] Phase 12 — AI Tutor
+[ ] Phase 10 — Projects (M4 delivers v1)
+[ ] Phase 11 — Build Mode (post–first-MVP)
+[ ] Phase 12 — AI Tutor (M3 delivers slice)
 [ ] Phase 13 — Project review
 [ ] Phase 14 — Polish
 [ ] Phase 15 — Testing

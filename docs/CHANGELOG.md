@@ -1,11 +1,18 @@
 ## [Unreleased]
 
+### Planning (First MVP — Option A, ADR-022)
+- **MVP delivery model:** End-to-end vertical slices (MVP-M1→M4); deterministic/template path first; ~3 lessons + project start before full 12-lesson / Build Mode scope
+- **TASK_QUEUE:** Reorganized backlog; **OPS-PHASE4-001 closed** (production auth verified 2026-09-28); TASK-102 Neon webhook row verification noted outstanding separately
+- **IMPLEMENTATION_PLAN:** § 1A First MVP milestones; updated checklist
+- **DECISIONS:** ADR-022 accepted
+- **No product code** in this planning update
+
 ### Operational (Phase 4 — OPS-PHASE4-001 repository alignment)
 - **Clerk redirect repo alignment:** `.env.example`, CI, and Vitest sign-up force redirect → `/onboarding/goal`; sign-in remains `/dashboard`
 - Aligns documented/local env with `SIGN_UP_REDIRECT` and Phase 4 onboarding entry; TASK-212 dynamic resume unchanged
 - Checker review: `docs/reviews/OPS-PHASE4-001.md` (APPROVED FOR MERGE)
 - Branch: `ops/phase-4-clerk-redirect` merged 2026-09-16
-- **OPS-PHASE4-001 remains `pending`** — deployment environment alignment **outstanding** (manual host env + smoke-test)
+- ~~**OPS-PHASE4-001 remains `pending`**~~ — **closed 2026-09-28** (production verified; see TASK_QUEUE.md)
 
 ### Added (Phase 4 — TASK-213)
 - **Onboarding UI profile integration:** P1 onboarding wired to TASK-211 `GET`/`PATCH` `/api/profile`
