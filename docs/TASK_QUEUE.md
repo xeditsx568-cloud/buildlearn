@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-09-29 (TASK-204 merged; MVP-M1 in progress)  
+> **Last updated:** 2026-09-29 (MVP-M1 operationally verified; MVP-M2 next)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -19,9 +19,14 @@ Build Mode. Build **vertical slices**, not isolated screen polish.
 **Active delivery track:** **MVP-M1** → **MVP-M2** → **MVP-M3** → **MVP-M4**
 (see § MVP delivery milestones below).
 
-**MVP-M1 progress:** **TASK-204 `done`** (merged 2026-09-29). **TASK-205** is next
-(roadmap UI v1 polish). **Do not start** TASK-205 or Neon `learning_paths` migration
-until Master assigns. **Do not start** TASK-203 until MVP-M2 milestone.
+**MVP-M1:** **Operationally verified in production (2026-09-29)** — sign-up through
+`/roadmap` smoke test passed after Neon pooled `DATABASE_URL` fix on Vercel.
+**TASK-204 `done`** (code + migration). **TASK-205** (roadmap visual polish) **deferred**
+until after **MVP-M2** functional slice (ADR-022: working loop before polish).
+
+**Next implementation track:** **MVP-M2** — **TASK-206 + TASK-207** (deliver together).
+**Do not start** TASK-203 until MVP-M2 complete. **Do not** patch TASK-211 to auto-create
+profiles for historical users who signed up during DB outage.
 
 ---
 
@@ -45,10 +50,23 @@ lesson node unlocked** and navigable.
 | **Tests** | Path DAG validation; template matching; API auth/IDOR; roadmap smoke |
 | **Definition of done** | New user: sign-up → onboarding → **Start learning** → **`/roadmap` loads** (not 404); steps persisted per user; **first lesson unlocked**; click navigates to **`/learn/lessons/how-websites-work`** (player may be minimal until M2) |
 
-**Next implementation task to assign:** **TASK-205 — Roadmap UI (`/roadmap`) v1 (MVP-M1)**.
+**Next implementation task to assign:** **MVP-M2 — TASK-206 + TASK-207** (Lesson 1
+completable end-to-end).
 
-**Operational (post-merge, not done):** Deploy migration **`20260928120000_learning_paths`**
-to Neon via **Database Migrate Deploy** before production/staging relies on path APIs.
+### Operational — TASK-204 / MVP-M1 production (complete 2026-09-29)
+
+| Item | Status |
+| ---- | ------ |
+| Migration **`20260928120000_learning_paths`** on Neon | **Complete** — Database Migrate Deploy **#6** from `main` @ `c93a743` |
+| Vercel Production **`DATABASE_URL`** | **Fixed** — Neon **pooled** connection string (`-pooler` + `pgbouncer=true` per `.env.example`); Production redeployed |
+| New-user **`user.created` webhook → `users` + `profiles`** | **Verified** in production (post-fix sign-up) |
+| TASK-204 production smoke test | **Passed** — sign-up → onboarding (goal → experience → quiz → path) → **`/roadmap`** |
+| MVP-M1 learner outcome | **Operationally verified** (minimal `/roadmap` from TASK-204 acceptable until TASK-205) |
+
+**Known limitation:** Users created while Production used a **non-pooled / unreachable**
+`DATABASE_URL` may lack webhook-persisted **`users`/`profiles`** rows. **Do not** change
+TASK-211 architecture (webhook remains sole creator). Those accounts need ops/support
+remediation or re-sign-up — not application-level profile auto-create.
 
 ---
 
@@ -189,7 +207,7 @@ authoritative for Phase 4.
 - If local Prisma CLI P1001 persists, use the CI workflow instead of `pnpm prisma:migrate` locally (`docs/notes/prisma-neon-connectivity.md`)
 - ~~Register Clerk webhook endpoint → `POST /api/webhooks/clerk`~~ — **configured in Production (2026-09-28)**
 - ~~Add real `CLERK_WEBHOOK_SIGNING_SECRET` to deployment environments~~ — **configured in Production (2026-09-28)**
-- **Outstanding (TASK-102 ops — separate from TASK-102 code `done`):** Live sign-up → confirm **`users` + `profiles` rows in Neon** via webhook (`user.created`). Not a blocker for MVP-M1 planning; **required before calling auth/onboarding production-hardened complete.**
+- ~~Live sign-up → confirm **`users` + `profiles` rows in Neon** via webhook (`user.created`)~~ — **verified in production (2026-09-29)** after Vercel pooled `DATABASE_URL` fix (see § Operational — TASK-204 / MVP-M1 production).
 
 ### Parallel execution (Phase 2 — complete)
 
@@ -1055,8 +1073,8 @@ Notes: |
 
 | Milestone | Task ID | Title | Owner | Priority | Status | Notes |
 | --------- | ------- | ----- | ----- | -------- | ------ | ----- |
-| **MVP-M1** | **TASK-204** | Deterministic path generation & persistence | P2 | P0 | **done** | Merged 2026-09-29; Neon migration pending ops |
-| **MVP-M1** | **TASK-205** | Roadmap UI (`/roadmap`) v1 | P1 | P0 | **pending** | **Next.** Minimal `/roadmap` shipped in TASK-204; polish here |
+| **MVP-M1** | **TASK-204** | Deterministic path generation & persistence | P2 | P0 | **done** | Merged + Neon migration + prod smoke **2026-09-29** |
+| **MVP-M1** | **TASK-205** | Roadmap UI (`/roadmap`) v1 | P1 | P1 | **deferred** | After MVP-M2; functional `/roadmap` OK for now |
 | **MVP-M2** | **TASK-206** | Lesson player | P1 | P0 | pending | Deliver with TASK-207 |
 | **MVP-M2** | **TASK-207** | Monaco + iframe preview | P1 | P0 | pending | Client grading; lesson progress |
 | **MVP-M3** | **TASK-203** | AI service abstraction | P2 | P0 | pending | **After MVP-M2** — tutor + reviewer on slice |
@@ -1083,7 +1101,8 @@ Phase: MVP-M1
 Dependencies: [TASK-103, TASK-104, TASK-211, TASK-213]
 Branch: feature/TASK-204-deterministic-path (squash-merged to main a6e859e)
 Checker: docs/reviews/TASK-204.md (APPROVED FOR MERGE, HEAD 85c3399)
-Operational: migration 20260928120000_learning_paths not applied to Neon yet
+Operational: migration 20260928120000_learning_paths deployed Neon Migrate Deploy #6 (2026-09-29)
+Production: smoke test passed; Vercel DATABASE_URL = Neon pooled URL
 Files:
   - prisma/schema.prisma
   - prisma/migrations/**
@@ -1158,8 +1177,9 @@ Notes: |
 | Phase 4 P1 pending | 0 |
 | Phase 4 ops pending | 0 |
 | Phase 4 phase complete | 1 |
-| MVP-M1 pending | 1 (TASK-205) |
-| MVP-M1 complete (tasks) | 1 (TASK-204) |
+| MVP-M1 pending (polish) | 1 (TASK-205 deferred) |
+| MVP-M1 complete (core) | 1 (TASK-204; milestone verified in prod) |
+| MVP-M2 pending | 2 (TASK-206, TASK-207) |
 | First MVP backlog (M2–M4 + post) | 8 |
 | Completed (all phases) | 22 |
 
@@ -1186,7 +1206,7 @@ Notes: |
 | TASK-213 | 4 | Onboarding UI profile integration | P1 | done |
 | OPS-PHASE4-001 | 4 | Clerk redirect alignment | P2 | done |
 | TASK-204 | MVP-M1 | Deterministic path generation | P2 | done |
-| TASK-205 | MVP-M1 | Roadmap UI v1 | P1 | pending |
+| TASK-205 | MVP-M1 | Roadmap UI v1 | P1 | deferred |
 | TASK-206 | MVP-M2 | Lesson player | P1 | pending |
 | TASK-207 | MVP-M2 | Monaco + preview | P1 | pending |
 | TASK-203 | MVP-M3 | AI service abstraction | P2 | pending |

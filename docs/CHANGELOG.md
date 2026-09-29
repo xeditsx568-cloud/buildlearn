@@ -8,7 +8,14 @@
 - **Migration:** `20260928120000_learning_paths` (deploy to Neon before production use)
 - Checker review: `docs/reviews/TASK-204.md` (APPROVED FOR MERGE, HEAD `85c3399`)
 - Branch: `feature/TASK-204-deterministic-path` squash-merged to `main` **2026-09-29** (`a6e859e`)
-- **Neon migration not applied yet** — required before production/staging path persistence
+
+### Operational (MVP-M1 — production verified 2026-09-29)
+- **Neon migration `20260928120000_learning_paths`:** deployed via **Database Migrate Deploy #6** from `main` @ `c93a743`
+- **Vercel Production `DATABASE_URL`:** corrected to Neon **pooled** connection string; Production redeployed (fixes webhook/profile/onboarding persistence failures caused by non-pooled URL)
+- **TASK-102 ops closed:** new-user `user.created` webhook → `users` + `profiles` verified in production
+- **TASK-204 production smoke test passed:** sign-up → onboarding (goal → experience → quiz → path) → `/roadmap`
+- **MVP-M1 operationally verified** (minimal `/roadmap` from TASK-204; TASK-205 polish deferred post-M2)
+- **Historical users:** accounts created during DB outage may lack webhook rows — no TASK-211 auto-create workaround
 
 ### Planning (First MVP — Option A, ADR-022)
 - **MVP delivery model:** End-to-end vertical slices (MVP-M1→M4); deterministic/template path first; ~3 lessons + project start before full 12-lesson / Build Mode scope

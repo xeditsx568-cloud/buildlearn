@@ -54,6 +54,19 @@ native `pg` connects successfully.
 
 ---
 
+## Production (Vercel) — 2026-09-29
+
+Vercel **Production** must use Neon **pooled** `DATABASE_URL` (`-pooler` hostname,
+`pgbouncer=true` per `.env.example`). A direct/non-pooled URL caused runtime DB
+failures (Clerk webhook sync, `PATCH /api/profile`, path persistence). After
+switching to the pooled string and redeploying, new-user onboarding through
+`/roadmap` verified successfully.
+
+**`DIRECT_URL`** remains the non-pooler host for Prisma migrate CLI / GitHub
+**Database Migrate Deploy** only — not for Vercel serverless runtime.
+
+---
+
 ## References
 
 - [Prisma + Neon](https://www.prisma.io/docs/orm/overview/databases/neon)
