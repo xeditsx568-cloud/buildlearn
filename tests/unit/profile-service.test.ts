@@ -2,6 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockUserFindUnique = vi.fn();
 const mockProfileUpdate = vi.fn();
+const mockTransaction = vi.fn();
+
+const mockEnsureActiveLearningPathForUser = vi.fn();
+
+vi.mock("@/server/services/learning-path-service", () => ({
+  ensureActiveLearningPathForUser: (...args: unknown[]) =>
+    mockEnsureActiveLearningPathForUser(...args),
+}));
 
 vi.mock("@/server/db", () => ({
   db: {
@@ -11,6 +19,8 @@ vi.mock("@/server/db", () => ({
     profile: {
       update: (...args: unknown[]) => mockProfileUpdate(...args),
     },
+    $transaction: (callback: (tx: unknown) => Promise<unknown>) =>
+      mockTransaction(callback),
   },
 }));
 
@@ -144,6 +154,13 @@ describe("getOwnProfileOnboarding", () => {
 describe("patchOwnProfileOnboarding", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockTransaction.mockImplementation(async (callback) =>
+      callback({
+        profile: {
+          update: mockProfileUpdate,
+        },
+      }),
+    );
     mockUserFindUnique.mockResolvedValue({
       id: "user_2abc123",
       deletedAt: null,
@@ -219,6 +236,25 @@ describe("patchOwnProfileOnboarding", () => {
       where: { userId: "user_2abc123" },
       data: { onboardingComplete: true, onboardingStep: "path" },
     });
+    expect(mockEnsureActiveLearningPathForUser).toHaveBeenCalledWith(
+      "user_2abc123",
+      expect.anything(),
+    );
+  });
+
+  it("does not persist onboardingComplete when path creation fails", async () => {
+    mockEnsureActiveLearningPathForUser.mockRejectedValue(
+      new Error("path generation failed"),
+    );
+
+    await expect(
+      patchOwnProfileOnboarding("user_2abc123", {
+        onboardingComplete: true,
+        onboardingStep: "path",
+      }),
+    ).rejects.toThrow("path generation failed");
+
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
   });
 
   it("does not alter unprovided fields in the service update payload", async () => {

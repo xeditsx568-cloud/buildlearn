@@ -1,17 +1,23 @@
-import {
-  MOCK_PATH_STEPS,
-  ONBOARDING_COMPLETION_ROUTE,
-} from "@/lib/onboarding/constants";
-import type { MockPathStep, PathPreviewStatus } from "@/lib/onboarding/types";
+import { ONBOARDING_COMPLETION_ROUTE } from "@/lib/onboarding/constants";
+import type { PathPreviewStatus } from "@/lib/onboarding/types";
 
-export function getPathStepTypeLabel(type: MockPathStep["type"]): string {
-  switch (type) {
+export type PathPreviewStepItem = {
+  orderIndex: number;
+  displayTitle: string;
+  stepType: string;
+  status: string;
+};
+
+export function getPathStepTypeLabel(stepType: string): string {
+  switch (stepType) {
     case "lesson":
       return "lesson";
     case "challenge":
       return "challenge";
-    case "milestone":
+    case "project_milestone":
       return "milestone";
+    default:
+      return stepType.replaceAll("_", " ");
   }
 }
 
@@ -22,6 +28,7 @@ export function getStartLearningHref(): string {
 interface PathPreviewViewProps {
   status: PathPreviewStatus;
   goalText: string;
+  steps: PathPreviewStepItem[];
   onRetry?: () => void;
   onStartLearning?: () => void;
   startLearningDisabled?: boolean;
@@ -32,6 +39,7 @@ interface PathPreviewViewProps {
 export function PathPreviewView({
   status,
   goalText,
+  steps,
   onRetry,
   onStartLearning,
   startLearningDisabled = false,
@@ -46,7 +54,7 @@ export function PathPreviewView({
         className="mx-auto flex w-full max-w-2xl flex-col gap-6"
       >
         <header className="space-y-2">
-          <h1 className="text-2xl font-semibold">Your path</h1>
+          <h1 className="text-2xl font-semibold">Your learning path</h1>
         </header>
         <div className="space-y-3">
           {Array.from({ length: 8 }).map((_, index) => (
@@ -60,7 +68,7 @@ export function PathPreviewView({
           Generating your personalized path...
         </p>
         <p className="text-sm text-muted-foreground">
-          This usually takes 10–20 seconds.
+          This usually takes a few seconds.
         </p>
       </section>
     );
@@ -73,7 +81,7 @@ export function PathPreviewView({
         className="mx-auto flex w-full max-w-2xl flex-col gap-6"
       >
         <header className="space-y-2">
-          <h1 className="text-2xl font-semibold">Your path</h1>
+          <h1 className="text-2xl font-semibold">Your learning path</h1>
         </header>
         <p>We couldn&apos;t generate your path.</p>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -103,21 +111,23 @@ export function PathPreviewView({
           Goal: {goalText.trim() || "Your project"}
         </p>
         <p className="text-xs text-muted-foreground">
-          Preview uses stub data — real path generation arrives in a later phase.
+          Path generated from your goal and our curated skill graph (deterministic
+          v1).
         </p>
       </header>
 
       <ol className="max-h-[420px] space-y-3 overflow-y-auto pr-1">
-        {MOCK_PATH_STEPS.map((step) => (
+        {steps.map((step) => (
           <li
-            key={step.order}
+            key={step.orderIndex}
             className="flex items-center justify-between gap-4 rounded-lg border border-input px-4 py-3"
           >
             <span>
-              {step.order === 1 ? "✓" : "○"} {step.order}. {step.title}
+              {step.status === "available" || step.orderIndex === 0 ? "✓" : "○"}{" "}
+              {step.orderIndex + 1}. {step.displayTitle}
             </span>
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              [{getPathStepTypeLabel(step.type)}]
+              [{getPathStepTypeLabel(step.stepType)}]
             </span>
           </li>
         ))}

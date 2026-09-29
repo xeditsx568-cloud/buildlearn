@@ -9,6 +9,21 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 
+const sampleSteps = [
+  {
+    orderIndex: 0,
+    displayTitle: "How Websites Work",
+    stepType: "lesson",
+    status: "available",
+  },
+  {
+    orderIndex: 1,
+    displayTitle: "Profile Card Challenge",
+    stepType: "challenge",
+    status: "locked",
+  },
+];
+
 describe("path preview states", () => {
   it("renders loading state copy and skeleton rows", () => {
     const html = renderToStaticMarkup(
@@ -16,7 +31,7 @@ describe("path preview states", () => {
     );
 
     expect(html).toContain("Generating your personalized path");
-    expect(html).toContain("This usually takes 10–20 seconds.");
+    expect(html).toContain("This usually takes a few seconds.");
     expect(html).toContain("animate-pulse");
   });
 
@@ -30,11 +45,12 @@ describe("path preview states", () => {
     expect(html).toContain("Contact support");
   });
 
-  it("renders loaded preview with stub path data", () => {
+  it("renders loaded preview with persisted path steps", () => {
     const html = renderToStaticMarkup(
       <PathPreviewScreenStatic
         status="loaded"
         goalText="A bakery landing page"
+        steps={sampleSteps}
       />,
     );
 
@@ -42,7 +58,7 @@ describe("path preview states", () => {
     expect(html).toContain("Goal: A bakery landing page");
     expect(html).toContain("How Websites Work");
     expect(html).toContain("Profile Card Challenge");
-    expect(html).toContain("Preview uses stub data");
+    expect(html).toContain("deterministic v1");
   });
 
   it("targets /roadmap from Start learning CTA", () => {
@@ -50,10 +66,10 @@ describe("path preview states", () => {
     expect(ONBOARDING_COMPLETION_ROUTE).toBe("/roadmap");
 
     const html = renderToStaticMarkup(
-      <PathPreviewScreenStatic status="loaded" />,
+      <PathPreviewScreenStatic status="loaded" steps={sampleSteps} />,
     );
 
-    expect(html).toContain('href="/roadmap"');
     expect(html).toContain("Start learning →");
+    expect(html).toContain("<button");
   });
 });

@@ -9,6 +9,7 @@ import {
   GOAL_MIN_LENGTH,
 } from "@/lib/onboarding/constants";
 import { ONBOARDING_STEP_VALUES } from "@/lib/onboarding/onboarding-step";
+import { ensureActiveLearningPathForUser } from "@/server/services/learning-path-service";
 import { db } from "@/server/db";
 
 export class ProfileNotFoundError extends Error {
@@ -127,6 +128,18 @@ export async function patchOwnProfileOnboarding(
 
   if (!existing) {
     throw new ProfileNotFoundError();
+  }
+
+  if (input.onboardingComplete === true) {
+    const updated = await db.$transaction(async (tx) => {
+      await ensureActiveLearningPathForUser(userId, tx);
+      return tx.profile.update({
+        where: { userId },
+        data: input,
+      });
+    });
+
+    return toProfileOnboardingRecord(updated);
   }
 
   const updated = await db.profile.update({

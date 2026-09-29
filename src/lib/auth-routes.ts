@@ -17,6 +17,7 @@ export const PUBLIC_ROUTE_PREFIXES = [
 /** Authenticated app shell routes under `(app)` route group. */
 export const PROTECTED_APP_ROUTE_PREFIXES = [
   "/dashboard",
+  "/roadmap",
   "/learn",
   "/project",
   "/build",

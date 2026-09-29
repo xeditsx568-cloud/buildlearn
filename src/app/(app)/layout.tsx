@@ -2,6 +2,7 @@ import Link from "next/link";
 
 const appNavItems = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/roadmap", label: "Roadmap" },
   { href: "/learn", label: "Learn" },
   { href: "/project", label: "Project" },
   { href: "/build", label: "Build" },
