@@ -468,7 +468,7 @@ M1 blockers.
 
 ```
 [✅] Foundation — Phases 1–4 (through TASK-213; OPS-PHASE4-001 prod verified 2026-09-28)
-[ ] MVP-M1 — Deterministic path + /roadmap + first lesson openable (TASK-204, TASK-205)
+[ ] MVP-M1 — Deterministic path + /roadmap + first lesson openable (TASK-204 ✅ merged 2026-09-29; TASK-205 pending)
 [ ] MVP-M2 — Lesson 1 completable: player, editor, preview, progress (TASK-206, TASK-207)
 [ ] MVP-M3 — AI teacher/reviewer on slice (TASK-203 + tutor)
 [ ] MVP-M4 — ~3 lessons + project workspace v1 (content + TASK-210)

@@ -6,6 +6,9 @@
 - **Onboarding:** path preview loads persisted plan via POST generate; completion ensures path exists
 - **Roadmap v1:** `/roadmap` lists steps and links to first unlocked lesson; lesson player placeholder route
 - **Migration:** `20260928120000_learning_paths` (deploy to Neon before production use)
+- Checker review: `docs/reviews/TASK-204.md` (APPROVED FOR MERGE, HEAD `85c3399`)
+- Branch: `feature/TASK-204-deterministic-path` squash-merged to `main` **2026-09-29** (`a6e859e`)
+- **Neon migration not applied yet** — required before production/staging path persistence
 
 ### Planning (First MVP — Option A, ADR-022)
 - **MVP delivery model:** End-to-end vertical slices (MVP-M1→M4); deterministic/template path first; ~3 lessons + project start before full 12-lesson / Build Mode scope

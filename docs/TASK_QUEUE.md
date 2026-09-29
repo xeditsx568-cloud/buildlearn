@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-09-28 (ADR-022 MVP vertical slices; OPS-PHASE4-001 closed)  
+> **Last updated:** 2026-09-29 (TASK-204 merged; MVP-M1 in progress)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -19,8 +19,9 @@ Build Mode. Build **vertical slices**, not isolated screen polish.
 **Active delivery track:** **MVP-M1** → **MVP-M2** → **MVP-M3** → **MVP-M4**
 (see § MVP delivery milestones below).
 
-**Do not start:** Product code / Prisma migrations / TASK-203 until Master
-assigns the first MVP-M1 implementation task from this plan.
+**MVP-M1 progress:** **TASK-204 `done`** (merged 2026-09-29). **TASK-205** is next
+(roadmap UI v1 polish). **Do not start** TASK-205 or Neon `learning_paths` migration
+until Master assigns. **Do not start** TASK-203 until MVP-M2 milestone.
 
 ---
 
@@ -44,7 +45,10 @@ lesson node unlocked** and navigable.
 | **Tests** | Path DAG validation; template matching; API auth/IDOR; roadmap smoke |
 | **Definition of done** | New user: sign-up → onboarding → **Start learning** → **`/roadmap` loads** (not 404); steps persisted per user; **first lesson unlocked**; click navigates to **`/learn/lessons/how-websites-work`** (player may be minimal until M2) |
 
-**First implementation task to assign:** **TASK-204 — Deterministic learning path generation & persistence (MVP-M1)**.
+**Next implementation task to assign:** **TASK-205 — Roadmap UI (`/roadmap`) v1 (MVP-M1)**.
+
+**Operational (post-merge, not done):** Deploy migration **`20260928120000_learning_paths`**
+to Neon via **Database Migrate Deploy** before production/staging relies on path APIs.
 
 ---
 
@@ -1051,8 +1055,8 @@ Notes: |
 
 | Milestone | Task ID | Title | Owner | Priority | Status | Notes |
 | --------- | ------- | ----- | ----- | -------- | ------ | ----- |
-| **MVP-M1** | **TASK-204** | Deterministic path generation & persistence | P2 | P0 | **pending** | **Start here.** No AI path dependency (ADR-022) |
-| **MVP-M1** | **TASK-205** | Roadmap UI (`/roadmap`) v1 | P1 | P0 | pending | Unlocked/current/locked nodes; depends TASK-204 |
+| **MVP-M1** | **TASK-204** | Deterministic path generation & persistence | P2 | P0 | **done** | Merged 2026-09-29; Neon migration pending ops |
+| **MVP-M1** | **TASK-205** | Roadmap UI (`/roadmap`) v1 | P1 | P0 | **pending** | **Next.** Minimal `/roadmap` shipped in TASK-204; polish here |
 | **MVP-M2** | **TASK-206** | Lesson player | P1 | P0 | pending | Deliver with TASK-207 |
 | **MVP-M2** | **TASK-207** | Monaco + iframe preview | P1 | P0 | pending | Client grading; lesson progress |
 | **MVP-M3** | **TASK-203** | AI service abstraction | P2 | P0 | pending | **After MVP-M2** — tutor + reviewer on slice |
@@ -1062,7 +1066,7 @@ Notes: |
 | *Post-MVP* | **TASK-209** | Mastery service | P2 | P0 | pending | Full FR-6; thin updates may land in M4 |
 | *Post-MVP* | *(Phase 11)* | Build Mode (5 recipes) | P1 | P0 | pending | Not first MVP target |
 
-### TASK-204 (MVP-M1 — next implementation)
+### TASK-204 (MVP-M1 — complete)
 ```yaml
 TASK-ID: TASK-204
 Title: Deterministic learning path generation & persistence
@@ -1072,11 +1076,14 @@ Description: |
   for this task. Replace onboarding mock path preview with real persisted steps.
   Enable roadmap and first-lesson navigation (TASK-205 may follow or overlap).
 Owner: Programmer 2
-Status: pending
+Status: done
+Completed: 2026-09-29
 Priority: P0
 Phase: MVP-M1
 Dependencies: [TASK-103, TASK-104, TASK-211, TASK-213]
-Branch: feature/TASK-204-deterministic-path
+Branch: feature/TASK-204-deterministic-path (squash-merged to main a6e859e)
+Checker: docs/reviews/TASK-204.md (APPROVED FOR MERGE, HEAD 85c3399)
+Operational: migration 20260928120000_learning_paths not applied to Neon yet
 Files:
   - prisma/schema.prisma
   - prisma/migrations/**
@@ -1125,6 +1132,7 @@ Notes: |
 | TASK-212 | Onboarding resume & auth routing | 2026-09-02 | Programmer 2 |
 | TASK-213 | Onboarding UI profile integration | 2026-09-16 | Programmer 1 |
 | OPS-PHASE4-001 | Clerk redirect alignment (prod verified) | 2026-09-28 | Programmer 2 |
+| TASK-204 | Deterministic path generation & persistence | 2026-09-29 | Programmer 2 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -1150,9 +1158,10 @@ Notes: |
 | Phase 4 P1 pending | 0 |
 | Phase 4 ops pending | 0 |
 | Phase 4 phase complete | 1 |
-| MVP-M1 pending | 2 (TASK-204, TASK-205) |
+| MVP-M1 pending | 1 (TASK-205) |
+| MVP-M1 complete (tasks) | 1 (TASK-204) |
 | First MVP backlog (M2–M4 + post) | 8 |
-| Completed (all phases) | 21 |
+| Completed (all phases) | 22 |
 
 ---
 
@@ -1176,7 +1185,7 @@ Notes: |
 | TASK-212 | 4 | Onboarding resume routing | P2 | done |
 | TASK-213 | 4 | Onboarding UI profile integration | P1 | done |
 | OPS-PHASE4-001 | 4 | Clerk redirect alignment | P2 | done |
-| TASK-204 | MVP-M1 | Deterministic path generation | P2 | pending |
+| TASK-204 | MVP-M1 | Deterministic path generation | P2 | done |
 | TASK-205 | MVP-M1 | Roadmap UI v1 | P1 | pending |
 | TASK-206 | MVP-M2 | Lesson player | P1 | pending |
 | TASK-207 | MVP-M2 | Monaco + preview | P1 | pending |
