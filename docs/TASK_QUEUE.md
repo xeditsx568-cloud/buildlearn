@@ -1126,6 +1126,80 @@ Notes: |
   may use client signals in a follow-up. Do not start TASK-203 in this branch.
 ```
 
+### TASK-206 (MVP-M2 — lesson player UI)
+```yaml
+TASK-ID: TASK-206
+Title: Lesson player UI (Lesson 1)
+Description: |
+  Replace /learn/lessons/[lessonId] placeholder with a functional block-based player
+  for how-websites-work. Sequential block navigation, completion UX, roadmap return.
+  Consumes TASK-207 APIs and client grading helpers. No AI hints (MVP-M3).
+Owner: Programmer 1
+Status: pending
+Priority: P0
+Phase: MVP-M2
+Dependencies: [TASK-104, TASK-204, TASK-207 APIs/contracts]
+Branch: feature/MVP-M2-lesson-1
+Files:
+  - src/app/(app)/learn/lessons/[lessonId]/**
+  - src/components/lesson-player/**
+  - src/lib/lesson-player/**          # client fetch helpers, shared types (with P2)
+  - package.json                      # Monaco dep — Master-approved only
+  - tests/unit/lesson-player/**       # RTL/player flow as needed
+Acceptance Criteria:
+  - Player renders all six L1 block types from seeded DB content
+  - Learner can step through blocks; interact/exercise use editor+preview; quiz gated
+  - Complete lesson triggers TASK-207 completion API; redirects to /roadmap
+  - Locked lessons/path steps not openable from player URL alone
+Tests Required:
+  - Component/flow tests for block navigation and quiz gating
+  - Uses mocked TASK-207 API responses
+Reviewer: Checker
+Notes: |
+  Deliver on same branch/integration window as TASK-207. TASK-205 polish out of scope.
+```
+
+### TASK-207 (MVP-M2 — editor, grading, progress, path unlock)
+```yaml
+TASK-ID: TASK-207
+Title: Monaco, preview, client grading, lesson progress & path unlock
+Description: |
+  lesson_progress migration (not applied during dev). Load L1 from lessons table.
+  Client-side HTML graders for L1 interact/exercise. Persist progress; atomic
+  lesson completion updates learning_path_steps (complete current lesson step,
+  unlock next). Auth-scoped APIs only.
+Owner: Programmer 2
+Status: pending
+Priority: P0
+Phase: MVP-M2
+Dependencies: [TASK-104, TASK-204]
+Branch: feature/MVP-M2-lesson-1
+Files:
+  - prisma/schema.prisma
+  - prisma/migrations/**              # lesson_progress only
+  - src/server/services/lesson-progress-service.ts
+  - src/server/services/learning-path-service.ts  # step complete/unlock helpers
+  - src/lib/grading/**                # L1 HTML graders (client-safe)
+  - src/lib/lesson-player/contracts.ts # API DTOs shared with P1
+  - src/app/api/lessons/**
+  - src/app/api/lesson-progress/**
+  - tests/unit/grading/**
+  - tests/unit/lesson-progress-service.test.ts
+  - tests/unit/learning-path-step-unlock.test.ts
+Acceptance Criteria:
+  - lesson_progress persisted per user+lesson; Clerk String user_id FK
+  - GET lesson returns parsed Zod-valid content for how-websites-work
+  - Complete lesson in one transaction: progress completed + path step completed + next available
+  - Idempotent complete; user cannot unlock another user's steps (IDOR tests)
+  - Graders pass golden L1 solutions; reject obvious failures
+Tests Required:
+  - Grader unit tests; service transaction tests; API auth tests
+Reviewer: Checker
+Notes: |
+  Do not apply migration to Neon until Checker-approved merge + Migrate Deploy workflow.
+  No TASK-203, no lesson 2–3, no dashboard/build mode.
+```
+
 ---
 
 ## Completed
