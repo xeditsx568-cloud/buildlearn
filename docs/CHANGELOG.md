@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+### Added (MVP-M2 — TASK-206 / TASK-207)
+- **Lesson 1 player:** block-based UI for `how-websites-work` (objective → bridge), Monaco + iframe preview, deterministic client graders, pass invalidation on edit (B1 fix)
+- **Progress API:** `GET`/`PATCH` `/api/lesson-progress/[lessonId]`, `GET` `/api/lessons/[lessonId]`, `POST` `/api/lessons/[lessonId]/complete` (auth-scoped; transactional path step complete + unlock next)
+- **Migration:** `20260929140000_lesson_progress` (**committed; not deployed to Neon during merge**)
+- Checker reviews: `docs/reviews/MVP-M2-WAVE1.md`, `docs/reviews/MVP-M2-FINAL.md` (APPROVED FOR MERGE, delta @ `9538bf0`)
+- Branch: `feature/MVP-M2-lesson-1` squash-merged to `main` **2026-09-29** (`338b2af`)
+- **Operational follow-up:** run **Database Migrate Deploy** for `20260929140000_lesson_progress` before production relies on lesson progress; then deploy app + **MVP-M2 production smoke** — **not run during merge**
+- **Non-blocking follow-ups (record only):** I-M2-01 (GET lesson path membership), I-M2-02 (server grader trust), I-M2-05 (back-nav editor reset vs pass flag); see `MVP-M2-FINAL.md`
+
 ### Added (MVP-M1 — TASK-204)
 - **Deterministic learning path:** template + concept-graph path plan persisted to `learning_paths` / `learning_path_steps`
 - **API:** `GET`/`POST` `/api/learning-path` (generate idempotent, read active path)

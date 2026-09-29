@@ -36,5 +36,5 @@
 - **Phase 2:** Complete — auth foundation, Neon init migration applied (2026-08-10).
 - **Phase 3:** **Complete (2026-08-10)** — TASK-103 and TASK-104 operationally complete in Neon.
 - **Phase 4:** **Complete (2026-09-16 minimum DoD; OPS-PHASE4-001 production verified 2026-09-28).**
-- **First MVP (Option A, ADR-022):** Delivery via **MVP-M1→M4** vertical slices — see [TASK_QUEUE.md](TASK_QUEUE.md) § MVP delivery milestones and [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) § 1A. **MVP-M1 operationally verified (2026-09-29)** — TASK-204 + Neon migration + production smoke. **Next:** **MVP-M2** (TASK-206/207). TASK-205 roadmap polish deferred until after functional lesson loop.
+- **First MVP (Option A, ADR-022):** Delivery via **MVP-M1→M4** vertical slices — see [TASK_QUEUE.md](TASK_QUEUE.md) § MVP delivery milestones and [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) § 1A. **MVP-M1 operationally verified (2026-09-29).** **MVP-M2 merged (2026-09-29, `338b2af`)** — lesson player + progress; **`20260929140000_lesson_progress` not yet on Neon**; production smoke pending. **Next:** ops (migrate + smoke), then **MVP-M3** when directed. TASK-205 deferred.
 - **UX specification:** v1.2 — **MVP Design Freeze approved** (2026-08-05)

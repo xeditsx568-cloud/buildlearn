@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-09-29 (MVP-M1 operationally verified; MVP-M2 next)  
+> **Last updated:** 2026-09-29 (MVP-M2 merged; migration + prod smoke pending)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -24,8 +24,11 @@ Build Mode. Build **vertical slices**, not isolated screen polish.
 **TASK-204 `done`** (code + migration). **TASK-205** (roadmap visual polish) **deferred**
 until after **MVP-M2** functional slice (ADR-022: working loop before polish).
 
-**Next implementation track:** **MVP-M2** — **TASK-206 + TASK-207** (deliver together).
-**Do not start** TASK-203 until MVP-M2 complete. **Do not** patch TASK-211 to auto-create
+**MVP-M2:** **Code merged to `main` (2026-09-29, `338b2af`)** — TASK-206/207 **done** (implementation).
+**Not yet operationally verified:** migration `20260929140000_lesson_progress` **not deployed**; MVP-M2 production smoke **pending**.
+
+**Next implementation track:** **MVP-M3** — **TASK-203** (when Master directs; after M2 prod verification).
+**Do not start** TASK-203 until Master directs. **Do not** patch TASK-211 to auto-create
 profiles for historical users who signed up during DB outage.
 
 ---
@@ -50,8 +53,15 @@ lesson node unlocked** and navigable.
 | **Tests** | Path DAG validation; template matching; API auth/IDOR; roadmap smoke |
 | **Definition of done** | New user: sign-up → onboarding → **Start learning** → **`/roadmap` loads** (not 404); steps persisted per user; **first lesson unlocked**; click navigates to **`/learn/lessons/how-websites-work`** (player may be minimal until M2) |
 
-**Next implementation task to assign:** **MVP-M2 — TASK-206 + TASK-207** (Lesson 1
-completable end-to-end).
+### Operational — MVP-M2 merge (2026-09-29)
+
+| Item | Status |
+| ---- | ------ |
+| Code merge **`feature/MVP-M2-lesson-1` → `main`** | **Complete** — squash `338b2af` |
+| Migration **`20260929140000_lesson_progress`** on Neon | **Pending** — **not** run during merge |
+| MVP-M2 production smoke test | **Pending** — after migration + app deploy |
+| TASK-206 / TASK-207 implementation | **Merged** (`done` in queue) |
+| Non-blocking follow-ups | I-M2-01, I-M2-02, I-M2-05 — see `docs/reviews/MVP-M2-FINAL.md` |
 
 ### Operational — TASK-204 / MVP-M1 production (complete 2026-09-29)
 
@@ -82,6 +92,7 @@ iframe preview, client grading, progress saved, **next step unlocks** on roadmap
 | **Likely modules** | `src/app/(app)/learn/**`, lesson player components, grading lib, progress API, `/learn` redirect v1 |
 | **Tests** | Lesson schema; grader unit tests; progress API; completion unlock |
 | **Definition of done** | Signed-in user completes L1 end-to-end; refresh shows completed node; next node unlocked |
+| **Merge status** | **Code on `main` (`338b2af`)** — ops verification pending (migration + smoke) |
 
 ---
 
@@ -1075,8 +1086,8 @@ Notes: |
 | --------- | ------- | ----- | ----- | -------- | ------ | ----- |
 | **MVP-M1** | **TASK-204** | Deterministic path generation & persistence | P2 | P0 | **done** | Merged + Neon migration + prod smoke **2026-09-29** |
 | **MVP-M1** | **TASK-205** | Roadmap UI (`/roadmap`) v1 | P1 | P1 | **deferred** | After MVP-M2; functional `/roadmap` OK for now |
-| **MVP-M2** | **TASK-206** | Lesson player | P1 | P0 | pending | Deliver with TASK-207 |
-| **MVP-M2** | **TASK-207** | Monaco + iframe preview | P1 | P0 | pending | Client grading; lesson progress |
+| **MVP-M2** | **TASK-206** | Lesson player | P1 | P0 | done | Merged `338b2af`; prod smoke pending |
+| **MVP-M2** | **TASK-207** | Monaco + iframe preview | P1 | P0 | done | Merged `338b2af`; migration pending |
 | **MVP-M3** | **TASK-203** | AI service abstraction | P2 | P0 | pending | **After MVP-M2** — tutor + reviewer on slice |
 | **MVP-M4** | *(content)* | Lessons 2–3 seed + player | P2 | P0 | pending | Extend TASK-104 pattern |
 | **MVP-M4** | **TASK-210** | Project workspace v1 | P1 | P0 | pending | Multi-file; begin project after ~3 lessons |
@@ -1135,11 +1146,11 @@ Description: |
   for how-websites-work. Sequential block navigation, completion UX, roadmap return.
   Consumes TASK-207 APIs and client grading helpers. No AI hints (MVP-M3).
 Owner: Programmer 1
-Status: pending
+Status: done
 Priority: P0
 Phase: MVP-M2
 Dependencies: [TASK-104, TASK-204, TASK-207 APIs/contracts]
-Branch: feature/MVP-M2-lesson-1
+Branch: feature/MVP-M2-lesson-1 (merged to main 2026-09-29)
 Files:
   - src/app/(app)/learn/lessons/[lessonId]/**
   - src/components/lesson-player/**
@@ -1169,11 +1180,11 @@ Description: |
   lesson completion updates learning_path_steps (complete current lesson step,
   unlock next). Auth-scoped APIs only.
 Owner: Programmer 2
-Status: pending
+Status: done
 Priority: P0
 Phase: MVP-M2
 Dependencies: [TASK-104, TASK-204]
-Branch: feature/MVP-M2-lesson-1
+Branch: feature/MVP-M2-lesson-1 (merged to main 2026-09-29)
 Files:
   - prisma/schema.prisma
   - prisma/migrations/**              # lesson_progress only
@@ -1226,6 +1237,8 @@ Notes: |
 | TASK-213 | Onboarding UI profile integration | 2026-09-16 | Programmer 1 |
 | OPS-PHASE4-001 | Clerk redirect alignment (prod verified) | 2026-09-28 | Programmer 2 |
 | TASK-204 | Deterministic path generation & persistence | 2026-09-29 | Programmer 2 |
+| TASK-206 | Lesson player UI (Lesson 1) | 2026-09-29 | Programmer 1 |
+| TASK-207 | Lesson progress, grading, path unlock | 2026-09-29 | Programmer 2 |
 | PHASE-0 | Planning documentation | 2026-08-04 | Architect |
 | PREP-001 | Development environment preparation | 2026-08-05 | Architect |
 
@@ -1253,9 +1266,9 @@ Notes: |
 | Phase 4 phase complete | 1 |
 | MVP-M1 pending (polish) | 1 (TASK-205 deferred) |
 | MVP-M1 complete (core) | 1 (TASK-204; milestone verified in prod) |
-| MVP-M2 pending | 2 (TASK-206, TASK-207) |
+| MVP-M2 merged (ops pending) | 2 (TASK-206, TASK-207) |
 | First MVP backlog (M2–M4 + post) | 8 |
-| Completed (all phases) | 22 |
+| Completed (all phases) | 24 |
 
 ---
 
@@ -1281,8 +1294,8 @@ Notes: |
 | OPS-PHASE4-001 | 4 | Clerk redirect alignment | P2 | done |
 | TASK-204 | MVP-M1 | Deterministic path generation | P2 | done |
 | TASK-205 | MVP-M1 | Roadmap UI v1 | P1 | deferred |
-| TASK-206 | MVP-M2 | Lesson player | P1 | pending |
-| TASK-207 | MVP-M2 | Monaco + preview | P1 | pending |
+| TASK-206 | MVP-M2 | Lesson player | P1 | done |
+| TASK-207 | MVP-M2 | Monaco + preview | P1 | done |
 | TASK-203 | MVP-M3 | AI service abstraction | P2 | pending |
 | TASK-210 | MVP-M4 | Project workspace v1 | P1 | pending |
 | TASK-208 | post-MVP | Challenge system | P2 | pending |

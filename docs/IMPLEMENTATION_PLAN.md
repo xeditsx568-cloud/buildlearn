@@ -167,7 +167,9 @@ workspace**, without waiting for full 12-lesson curriculum or complete Build Mod
 (**deterministic**). AI path generation and FR-2.4 goal refinement are **not**
 M1 blockers.
 
-**Start implementation with:** **MVP-M2 (TASK-206 + TASK-207)** — see TASK_QUEUE.md. MVP-M1 verified in production.
+**MVP-M2 merged (2026-09-29, `338b2af`):** TASK-206/207 on `main`; migration `20260929140000_lesson_progress` and production smoke **pending**.
+
+**Start implementation with:** **MVP-M3 (TASK-203)** when Master directs — see TASK_QUEUE.md.
 
 ---
 
@@ -469,7 +471,7 @@ M1 blockers.
 ```
 [✅] Foundation — Phases 1–4 (through TASK-213; OPS-PHASE4-001 prod verified 2026-09-28)
 [✅] MVP-M1 — Deterministic path + /roadmap + first lesson openable (TASK-204 merged; prod smoke 2026-09-29; TASK-205 polish deferred)
-[ ] MVP-M2 — Lesson 1 completable: player, editor, preview, progress (TASK-206, TASK-207)
+[✅] MVP-M2 — Lesson 1 completable: player, editor, preview, progress (TASK-206, TASK-207 merged; migration + prod smoke pending)
 [ ] MVP-M3 — AI teacher/reviewer on slice (TASK-203 + tutor)
 [ ] MVP-M4 — ~3 lessons + project workspace v1 (content + TASK-210)
 —— First MVP testable — then expand ——
