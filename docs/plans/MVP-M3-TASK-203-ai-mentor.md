@@ -299,7 +299,7 @@ Define **`requestedLevel(action, S)`**:
 | ------ | ----------------- |
 | `explain_task` | **1** (re-clarify; still counts as help turn if billable) |
 | `explain_last_check` | **2** if `S.failedChecksSinceLastPass >= 1`, else **1**; capped by `maxEligibleLevel` |
-| `get_help` | If `S.helpTurnCount === 0` → **1**. Else → `min(maxEligibleLevel(S), max(S.lastLevelDelivered, 1))` (no jump &gt; eligible) |
+| `get_help` | If `S.helpTurnCount === 0` → **1** when `S.failedChecksSinceLastPass === 0`; else **up to 2** when `S.failedChecksSinceLastPass >= 1` (capped by `maxEligibleLevel`). If `S.helpTurnCount > 0` → `min(maxEligibleLevel(S), max(S.lastLevelDelivered, 1))` (no jump &gt; eligible) |
 | `need_more_help` | `min(S.lastLevelDelivered + 1, maxEligibleLevel(S))` — if `lastLevelDelivered === 0`, treat as **1** |
 
 **Delivered level:** `effectiveLevel = requestedLevel`, then clamp to `maxEligibleLevel(S)`.
