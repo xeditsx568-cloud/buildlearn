@@ -2,7 +2,7 @@
 
 > **Status:** Phases 1–4 foundation complete. **MVP-M1 and MVP-M2 production verified** (2026-10-03). Next track: **MVP-M3** when Master directs — see `docs/TASK_QUEUE.md`.  
 > **Working codename:** BuildLearn (final product name TBD — see DECISIONS.md)  
-> **Last updated:** 2026-10-03 (MVP-M2 verification + ADR-023 teaching principle)
+> **Last updated:** 2026-10-03 (MVP-M3 TASK-203 planning defined — see `docs/plans/MVP-M3-TASK-203-ai-mentor.md`)
 
 ---
 
@@ -55,7 +55,7 @@ The AI escalation ladder for help (see **ADR-023** for exercise + mentor detail)
 4. Partial solution (worked example; learner finishes the rest)
 5. Full solution (only after genuine struggle or explicit request)
 
-**Activity loop (ADR-023):** TEACH → DEMONSTRATE → TRY → DETECT STRUGGLE → HELP → EXPLAIN → RETRY → SUCCEED. MVP-M2 verified mechanics; MVP-M3 should implement context-aware teaching on this ladder — not generic chat or instant answers.
+**Activity loop (ADR-023):** TEACH → DEMONSTRATE → TRY → DETECT STRUGGLE → HELP → EXPLAIN → RETRY → SUCCEED. MVP-M2 verified mechanics; **MVP-M3 plan** defines context-aware mentor on this ladder (Lesson 1, levels 1–4, structured help actions — not generic chat).
 
 ---
 

@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-10-03 (MVP-M2 production verified; MVP-M3 next when directed)  
+> **Last updated:** 2026-10-03 (MVP-M3 / TASK-203 planning defined — implementation not started)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -28,8 +28,8 @@ until after **MVP-M2** functional slice (ADR-022: working loop before polish).
 
 **Founder teaching finding (ADR-023):** L1 exercise blocked genuine beginners without external help — progressive teach/help model required; **informs MVP-M3 / TASK-203** (not implemented yet). **TASK-205** still **deferred**.
 
-**Next implementation track:** **MVP-M3** — **TASK-203** (context-aware AI mentor on the slice; ADR-023 alignment) when Master directs.
-**Do not start** TASK-203 until Master directs. **Do not** patch TASK-211 to auto-create
+**Next implementation track:** **MVP-M3** — **TASK-203** (P2 backend) + **TASK-203-UI** (P1 lesson mentor panel) on Lesson 1 only — plan: `docs/plans/MVP-M3-TASK-203-ai-mentor.md`.
+**Do not start** implementation until Master directs post-plan review. **Do not** patch TASK-211 to auto-create
 profiles for historical users who signed up during DB outage.
 
 ---
@@ -101,21 +101,23 @@ iframe preview, client grading, progress saved, **next step unlocks** on roadmap
 
 ---
 
-### MVP-M3 — AI teacher & reviewer (on the slice)
+### MVP-M3 — Context-aware AI mentor (Lesson 1 slice)
 
 **Learner outcome:** **Context-aware teaching** during Lesson 1 activities — progressive
 help per **ADR-023**, not generic chat or instant solutions. Teacher-not-builder (ADR-001).
 
+**Authoritative plan:** [`docs/plans/MVP-M3-TASK-203-ai-mentor.md`](plans/MVP-M3-TASK-203-ai-mentor.md)
+
 | Item | Detail |
 | ---- | ------ |
-| **Maps to** | **TASK-203** (AIService) + IMPLEMENTATION_PLAN Phase 12 tutor scope (MVP-M3 bundle) |
-| **Dependencies** | **MVP-M2 production verified**; provider env (e.g. `OPENAI_API_KEY`) when implementing |
-| **Not in M3** | AI-generated paths; full project milestone review; Lesson 1 content rewrite (unless scoped); TASK-205 |
-| **Mentor context (required design)** | Current lesson, block, objective, learner code, expected outcome, grader result, attempts/hints, stuck signal |
-| **Help policy** | Levels 1–4 progressive help; full solution last; detect struggle before escalating |
-| **Likely modules** | `src/ai/**`, tutor UI, `src/app/api/ai/**`, usage logging schema as needed |
-| **Tests** | Mocked provider; help-level policy; quota decrement; no solution dump on level 1–2 |
-| **Definition of done** | Beginner stuck on L1 exercise can get in-app guided help without external tools; hints stay on-task and Socratic at low levels |
+| **Maps to** | **TASK-203** (P2) + **TASK-203-UI** (P1) — Phase 12 tutor **slice** only |
+| **Dependencies** | **MVP-M2 production verified** @ `7d09768`; `OPENAI_API_KEY`; Upstash recommended for FR-9.6 |
+| **Not in M3** | Lessons 2–3, challenges, project/build tutor, AI paths, unrestricted chat, TASK-205, MVP-M4 |
+| **Schema** | Reuse `lesson_progress.hints_used`; **no** `ai_conversations` / `ai_messages` for M3 |
+| **API** | `POST /api/ai/mentor/help`, `GET /api/ai/mentor/quota` |
+| **Help policy** | ADR-023 levels 1–4; server-side `help-policy.ts`; stuck signals from player |
+| **Quota** | 30 messages / user / month; 10 req / min (FR-9.6) |
+| **Definition of done** | Founder golden path: “Label the page parts” completable with in-app mentor only; §16 smoke checklist |
 
 ---
 
@@ -1095,7 +1097,8 @@ Notes: |
 | **MVP-M1** | **TASK-205** | Roadmap UI (`/roadmap`) v1 | P1 | P1 | **deferred** | After MVP-M2; functional `/roadmap` OK for now |
 | **MVP-M2** | **TASK-206** | Lesson player | P1 | P0 | done | Merged `338b2af`; prod smoke pending |
 | **MVP-M2** | **TASK-207** | Monaco + iframe preview | P1 | P0 | done | Merged `338b2af`; migration pending |
-| **MVP-M3** | **TASK-203** | AI service abstraction | P2 | P0 | pending | **After MVP-M2** — tutor + reviewer on slice |
+| **MVP-M3** | **TASK-203** | AI mentor backend (provider, API, policy, quota) | P2 | P0 | pending | Plan approved — await Master go |
+| **MVP-M3** | **TASK-203-UI** | Lesson 1 mentor panel + stuck detection | P1 | P0 | pending | Same branch as TASK-203 |
 | **MVP-M4** | *(content)* | Lessons 2–3 seed + player | P2 | P0 | pending | Extend TASK-104 pattern |
 | **MVP-M4** | **TASK-210** | Project workspace v1 | P1 | P0 | pending | Multi-file; begin project after ~3 lessons |
 | *Post-MVP* | **TASK-208** | Challenge system | P2 | P0 | pending | After first MVP loop |
@@ -1218,6 +1221,88 @@ Notes: |
   No TASK-203, no lesson 2–3, no dashboard/build mode.
 ```
 
+### TASK-203 (MVP-M3 — AI mentor backend)
+```yaml
+TASK-ID: TASK-203
+Title: AI mentor backend — provider abstraction, context, policy, API (Lesson 1)
+Description: |
+  MVP-M3 P2 work: AIService + OpenAI/mock providers (Vercel AI SDK), mentor context
+  builder, ADR-023 help-level policy, POST /api/ai/mentor/help and GET quota.
+  Lesson how-websites-work only. Structured actions — not generic chat. FR-9.6 quotas
+  via Upstash (in-memory fallback in dev). Increment lesson_progress.hints_used.
+  No ai_conversations schema in M3. Full spec: docs/plans/MVP-M3-TASK-203-ai-mentor.md
+Owner: Programmer 2
+Status: pending
+Priority: P0
+Phase: MVP-M3
+Dependencies: [TASK-206, TASK-207]
+Branch: feature/MVP-M3-lesson-1-mentor
+Files:
+  - src/ai/**
+  - src/app/api/ai/mentor/**
+  - src/lib/ai/mentor-contracts.ts
+  - src/server/services/mentor-quota-service.ts
+  - src/env.ts
+  - .env.example
+  - package.json  # ai + @ai-sdk/openai + optional @upstash/ratelimit — Master-coordinated
+  - tests/unit/ai/**
+  - tests/unit/mentor-route.test.ts
+Acceptance Criteria:
+  - AIService interface with OpenAIProvider + MockProvider; CI uses mock only
+  - MentorHelpRequest/Response Zod contracts shared with P1
+  - Server computes effective help level 1–4; client signals not trusted alone
+  - Levels 1–2 do not return full L1 exercise solution (automated policy tests)
+  - Auth + lesson access gate; IDOR tests pass
+  - Monthly quota 30 and RPM 10 enforced (429 + headers)
+  - Successful responses increment hints_used for authenticated user
+  - Provider failure returns fallback payload contract (static hint path)
+  - Only lessonId how-websites-work accepted in M3
+Tests Required:
+  - help-policy, context-builder, mentor API auth/quota, mock provider policy tests
+Reviewer: Checker
+Notes: |
+  Coordinate Wave 0 contracts before TASK-203-UI integrates. Do not implement path
+  generation, project reviewer, or TASK-205. Optional ai_usage_logs migration out of M3 DoD.
+```
+
+### TASK-203-UI (MVP-M3 — lesson mentor UI)
+```yaml
+TASK-ID: TASK-203-UI
+Title: Lesson 1 AI mentor panel — UX, stuck detection, API client
+Description: |
+  MVP-M3 P1 work: AI mentor sidebar/FAB per UX_SPEC §5.10 on lesson player for
+  how-websites-work. Wire grader feedback, editor code, and per-block attempt signals
+  to POST /api/ai/mentor/help. Actions: get_help, explain_task, explain_last_check,
+  need_more_help. Optional short question field — no unrestricted chat UI. Replay mode
+  disables billable mentor. Spec: docs/plans/MVP-M3-TASK-203-ai-mentor.md
+Owner: Programmer 1
+Status: pending
+Priority: P0
+Phase: MVP-M3
+Dependencies: [TASK-206, TASK-203 mentor-contracts/API or mocked API]
+Branch: feature/MVP-M3-lesson-1-mentor
+Files:
+  - src/components/lesson-player/ai-mentor-panel.tsx
+  - src/components/lesson-player/lesson-player.tsx
+  - src/lib/lesson-player/mentor-client.ts
+  - src/lib/lesson-player/stuck-detection.ts
+  - tests/unit/lesson-player/stuck-detection.test.ts
+  - tests/unit/lesson-player/ai-mentor-panel.test.tsx
+Acceptance Criteria:
+  - Desktop sidebar + mobile FAB/sheet for mentor
+  - Stuck UX when failedChecks >= 2 or 180s on block (configurable constants)
+  - Displays help level, quota remaining, mentor messages, errors, loading
+  - Integrates with existing Run check / Run check flows — explain_last_check uses graderFeedback
+  - Replay mode (?replay=true when supported) does not call billable mentor
+  - Layout aligns with UX_SPEC §5.10 (two-column desktop)
+Tests Required:
+  - stuck-detection unit tests; panel RTL tests with mocked mentor API
+Reviewer: Checker
+Notes: |
+  Deliver on same integration branch/window as TASK-203. Do not expand to lessons 2–3.
+  package.json deps owned by Master/P2 — consume API only.
+```
+
 ---
 
 ## Completed
@@ -1274,7 +1359,7 @@ Notes: |
 | MVP-M1 pending (polish) | 1 (TASK-205 deferred) |
 | MVP-M1 complete (core) | 1 (TASK-204; milestone verified in prod) |
 | MVP-M2 complete (prod verified) | 2 (TASK-206, TASK-207) |
-| First MVP backlog (M2–M4 + post) | 8 |
+| First MVP backlog (M3–M4 + post) | 9 |
 | Completed (all phases) | 24 |
 
 ---
@@ -1303,7 +1388,8 @@ Notes: |
 | TASK-205 | MVP-M1 | Roadmap UI v1 | P1 | deferred |
 | TASK-206 | MVP-M2 | Lesson player | P1 | done |
 | TASK-207 | MVP-M2 | Monaco + preview | P1 | done |
-| TASK-203 | MVP-M3 | AI service abstraction | P2 | pending |
+| TASK-203 | MVP-M3 | AI mentor backend (L1) | P2 | pending |
+| TASK-203-UI | MVP-M3 | Lesson 1 mentor UI | P1 | pending |
 | TASK-210 | MVP-M4 | Project workspace v1 | P1 | pending |
 | TASK-208 | post-MVP | Challenge system | P2 | pending |
 | TASK-209 | post-MVP | Mastery service | P2 | pending |

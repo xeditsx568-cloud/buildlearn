@@ -1,7 +1,7 @@
 # Implementation Plan — BuildLearn
 
 > **Status:** Planning approved — **First MVP (Option A) in delivery** (ADR-022)  
-> **Last updated:** 2026-09-28
+> **Last updated:** 2026-10-03
 
 ---
 
@@ -159,7 +159,7 @@ workspace**, without waiting for full 12-lesson curriculum or complete Build Mod
 | --------- | ------------ | ------------- | ----------- |
 | **MVP-M1** | Real roadmap after onboarding | TASK-204, TASK-205 | Persisted deterministic path; `/roadmap`; first lesson unlocked & openable |
 | **MVP-M2** | Complete Lesson 1 in-app | TASK-206, TASK-207 | Editor, preview, grading, progress, unlock next |
-| **MVP-M3** | AI teacher on slice | TASK-203 + tutor scope | Hints/review; teacher-not-builder; quotas |
+| **MVP-M3** | AI mentor on L1 slice | TASK-203 + TASK-203-UI | ADR-023 levels 1–4; FR-9.6; not generic chat |
 | **MVP-M4** | ~3 lessons + project start | Lessons 2–3 content, TASK-210 | Founder-testable first MVP loop |
 | **Backlog** | Full PRD MVP | TASK-208, 209, Phases 11–16 | 12 lessons, 8 challenges, Build Mode, polish |
 
@@ -169,7 +169,21 @@ M1 blockers.
 
 **MVP-M2 production verified (2026-10-03):** TASK-206/207; migration **#7**; Vercel `a370ee7`; founder smoke — see `docs/reviews/mvp-m2-production-verification.md`. **ADR-023** records beginner teaching requirement for M3.
 
-**Start implementation with:** **MVP-M3 (TASK-203)** when Master directs — context-aware mentor per ADR-023; **not** TASK-205.
+**Start implementation with:** **MVP-M3 (TASK-203 + TASK-203-UI)** when Master directs — context-aware mentor per ADR-023; **not** TASK-205.
+
+**MVP-M3 planning (2026-10-03):** Formal task split and architecture in
+[`docs/plans/MVP-M3-TASK-203-ai-mentor.md`](plans/MVP-M3-TASK-203-ai-mentor.md).
+Lesson 1 only; structured mentor API; Upstash quotas; no conversation DB in M3.
+
+### MVP-M3 implementation notes (active plan)
+
+| Track | Agent | Scope |
+| ----- | ----- | ----- |
+| Backend | P2 — **TASK-203** | `src/ai/**`, `/api/ai/mentor/*`, help policy, AIService |
+| Frontend | P1 — **TASK-203-UI** | Mentor panel, stuck detection, lesson player layout |
+| Gate | Checker | Prompt safety, quota, no full solution at L1–2 |
+
+**Phase 12 full vision** (challenges, projects, streaming polish) remains backlog; M3 proves tutor on L1 vertical slice only.
 
 ---
 

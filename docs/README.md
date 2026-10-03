@@ -22,6 +22,7 @@
 | [AGENT_WORKFLOW.md](AGENT_WORKFLOW.md) | Five-agent roles, git branches, PR process |
 | [FILE_OWNERSHIP.md](FILE_OWNERSHIP.md) | Who edits which files |
 | [CHANGELOG.md](CHANGELOG.md) | Merged changes log | After merges |
+| [plans/MVP-M3-TASK-203-ai-mentor.md](plans/MVP-M3-TASK-203-ai-mentor.md) | MVP-M3 mentor architecture, DoD, API, P1/P2 split | Before TASK-203 implementation |
 
 ## Reviews
 
@@ -36,5 +37,5 @@
 - **Phase 2:** Complete — auth foundation, Neon init migration applied (2026-08-10).
 - **Phase 3:** **Complete (2026-08-10)** — TASK-103 and TASK-104 operationally complete in Neon.
 - **Phase 4:** **Complete (2026-09-16 minimum DoD; OPS-PHASE4-001 production verified 2026-09-28).**
-- **First MVP (Option A, ADR-022):** **MVP-M1** and **MVP-M2 production verified (2026-10-03)** — see [mvp-m2-production-verification.md](reviews/mvp-m2-production-verification.md) and **ADR-023** in [DECISIONS.md](DECISIONS.md). **Next:** **MVP-M3 (TASK-203)** when Master directs — context-aware teaching mentor. **TASK-205** deferred.
+- **First MVP (Option A, ADR-022):** **MVP-M1** and **MVP-M2 production verified (2026-10-03)** — see [mvp-m2-production-verification.md](reviews/mvp-m2-production-verification.md) and **ADR-023** in [DECISIONS.md](DECISIONS.md). **MVP-M3 planned:** [MVP-M3-TASK-203-ai-mentor.md](plans/MVP-M3-TASK-203-ai-mentor.md) (**TASK-203** + **TASK-203-UI**) — implementation when Master directs. **TASK-205** deferred.
 - **UX specification:** v1.2 — **MVP Design Freeze approved** (2026-08-05)
