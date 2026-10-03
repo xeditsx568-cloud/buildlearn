@@ -24,6 +24,17 @@ export const phase2ServerSchema = {
   CLERK_WEBHOOK_SIGNING_SECRET: z.string().min(1),
 } as const;
 
+/** MVP-M3 mentor (optional — Wave 0 stubs; not required for build). */
+export const mentorServerSchema = {
+  OPENAI_API_KEY: z.string().min(1).optional(),
+  AI_MENTOR_MODEL: z.string().min(1).optional(),
+  UPSTASH_REDIS_REST_URL: z.url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+  AI_MENTOR_MONTHLY_LIMIT: z.string().optional(),
+  AI_MENTOR_RPM_LIMIT: z.string().optional(),
+  MENTOR_REQUIRE_REDIS: z.enum(["true", "false"]).optional(),
+} as const;
+
 /** Phase 2 client variables — exported for schema unit tests. */
 export const phase2ClientSchema = {
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
@@ -39,6 +50,7 @@ export const env = createEnv({
   server: {
     ...phase1ServerSchema,
     ...phase2ServerSchema,
+    ...mentorServerSchema,
   },
   client: {
     ...phase1ClientSchema,
@@ -57,6 +69,13 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL,
     NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL:
       process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    AI_MENTOR_MODEL: process.env.AI_MENTOR_MODEL,
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    AI_MENTOR_MONTHLY_LIMIT: process.env.AI_MENTOR_MONTHLY_LIMIT,
+    AI_MENTOR_RPM_LIMIT: process.env.AI_MENTOR_RPM_LIMIT,
+    MENTOR_REQUIRE_REDIS: process.env.MENTOR_REQUIRE_REDIS,
   },
   emptyStringAsUndefined: true,
 });
