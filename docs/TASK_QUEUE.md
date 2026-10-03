@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-09-29 (MVP-M2 merged; migration + prod smoke pending)  
+> **Last updated:** 2026-10-03 (MVP-M2 production verified; MVP-M3 next when directed)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -24,10 +24,11 @@ Build Mode. Build **vertical slices**, not isolated screen polish.
 **TASK-204 `done`** (code + migration). **TASK-205** (roadmap visual polish) **deferred**
 until after **MVP-M2** functional slice (ADR-022: working loop before polish).
 
-**MVP-M2:** **Code merged to `main` (2026-09-29, `338b2af`)** — TASK-206/207 **done** (implementation).
-**Migration `20260929140000_lesson_progress`:** applied Neon Migrate Deploy **#7**. **MVP-M2 production smoke** pending after Vercel deploy (`postinstall` fix merged `b734367`).
+**MVP-M2:** **Production verified (2026-10-03)** on https://buildlearn-two.vercel.app — TASK-206/207 **done**; DoD satisfied (`docs/reviews/mvp-m2-production-verification.md`). Migration **#7** applied; Vercel green @ `a370ee7`.
 
-**Next implementation track:** **MVP-M3** — **TASK-203** (when Master directs; after M2 prod verification).
+**Founder teaching finding (ADR-023):** L1 exercise blocked genuine beginners without external help — progressive teach/help model required; **informs MVP-M3 / TASK-203** (not implemented yet). **TASK-205** still **deferred**.
+
+**Next implementation track:** **MVP-M3** — **TASK-203** (context-aware AI mentor on the slice; ADR-023 alignment) when Master directs.
 **Do not start** TASK-203 until Master directs. **Do not** patch TASK-211 to auto-create
 profiles for historical users who signed up during DB outage.
 
@@ -53,16 +54,19 @@ lesson node unlocked** and navigable.
 | **Tests** | Path DAG validation; template matching; API auth/IDOR; roadmap smoke |
 | **Definition of done** | New user: sign-up → onboarding → **Start learning** → **`/roadmap` loads** (not 404); steps persisted per user; **first lesson unlocked**; click navigates to **`/learn/lessons/how-websites-work`** (player may be minimal until M2) |
 
-### Operational — MVP-M2 merge (2026-09-29)
+### Operational — MVP-M2 (complete 2026-10-03)
 
 | Item | Status |
 | ---- | ------ |
-| Code merge **`feature/MVP-M2-lesson-1` → `main`** | **Complete** — squash `338b2af` |
-| Migration **`20260929140000_lesson_progress`** on Neon | **Complete** — Migrate Deploy **#7** |
-| Vercel build (`postinstall` prisma generate) | **Merged** `b734367` / `c70a65d` — await auto-deploy |
-| MVP-M2 production smoke test | **Pending** — after successful Vercel deploy |
-| TASK-206 / TASK-207 implementation | **Merged** (`done` in queue) |
-| Non-blocking follow-ups | I-M2-01, I-M2-02, I-M2-05 — see `docs/reviews/MVP-M2-FINAL.md` |
+| Code merge **`feature/MVP-M2-lesson-1` → `main`** | **Complete** — `338b2af` |
+| Migration **`20260929140000_lesson_progress`** on Neon | **Complete** — Migrate Deploy **#7** (do not re-run) |
+| Vercel build (`postinstall` prisma generate) | **Complete** — `a370ee7` production green |
+| MVP-M2 founder production smoke | **Complete** — 15/15 checklist |
+| MVP-M2 Definition of Done | **Satisfied** |
+| TASK-206 / TASK-207 | **done** |
+| Beginner UX finding | **ADR-023** — drives MVP-M3 teaching scope |
+| TASK-205 roadmap polish | **Deferred** (ADR-022) |
+| Non-blocking technical follow-ups | I-M2-01, I-M2-02, I-M2-05 — see `MVP-M2-FINAL.md` |
 
 ### Operational — TASK-204 / MVP-M1 production (complete 2026-09-29)
 
@@ -93,23 +97,25 @@ iframe preview, client grading, progress saved, **next step unlocks** on roadmap
 | **Likely modules** | `src/app/(app)/learn/**`, lesson player components, grading lib, progress API, `/learn` redirect v1 |
 | **Tests** | Lesson schema; grader unit tests; progress API; completion unlock |
 | **Definition of done** | Signed-in user completes L1 end-to-end; refresh shows completed node; next node unlocked |
-| **Merge status** | **Code on `main` (`338b2af`)** — ops verification pending (migration + smoke) |
+| **Production status** | **Verified** 2026-10-03 — see `docs/reviews/mvp-m2-production-verification.md` |
 
 ---
 
 ### MVP-M3 — AI teacher & reviewer (on the slice)
 
-**Learner outcome:** **Hints/explanations** and **structured review** on learning
-activities; teacher-not-builder guardrails; usage limits per FR-9.6.
+**Learner outcome:** **Context-aware teaching** during Lesson 1 activities — progressive
+help per **ADR-023**, not generic chat or instant solutions. Teacher-not-builder (ADR-001).
 
 | Item | Detail |
 | ---- | ------ |
 | **Maps to** | **TASK-203** (AIService) + IMPLEMENTATION_PLAN Phase 12 tutor scope (MVP-M3 bundle) |
-| **Dependencies** | **MVP-M2**; provider env (e.g. `OPENAI_API_KEY`) when implementing |
-| **Not in M3** | AI-generated paths; full project milestone review (thin lesson review OK) |
+| **Dependencies** | **MVP-M2 production verified**; provider env (e.g. `OPENAI_API_KEY`) when implementing |
+| **Not in M3** | AI-generated paths; full project milestone review; Lesson 1 content rewrite (unless scoped); TASK-205 |
+| **Mentor context (required design)** | Current lesson, block, objective, learner code, expected outcome, grader result, attempts/hints, stuck signal |
+| **Help policy** | Levels 1–4 progressive help; full solution last; detect struggle before escalating |
 | **Likely modules** | `src/ai/**`, tutor UI, `src/app/api/ai/**`, usage logging schema as needed |
-| **Tests** | Mocked provider; help-level policy; quota decrement |
-| **Definition of done** | User requests hint in L1; on-topic Socratic response; low levels do not dump full solutions; submit/complete flow can trigger review/explanation |
+| **Tests** | Mocked provider; help-level policy; quota decrement; no solution dump on level 1–2 |
+| **Definition of done** | Beginner stuck on L1 exercise can get in-app guided help without external tools; hints stay on-task and Socratic at low levels |
 
 ---
 
@@ -1267,7 +1273,7 @@ Notes: |
 | Phase 4 phase complete | 1 |
 | MVP-M1 pending (polish) | 1 (TASK-205 deferred) |
 | MVP-M1 complete (core) | 1 (TASK-204; milestone verified in prod) |
-| MVP-M2 merged (ops pending) | 2 (TASK-206, TASK-207) |
+| MVP-M2 complete (prod verified) | 2 (TASK-206, TASK-207) |
 | First MVP backlog (M2–M4 + post) | 8 |
 | Completed (all phases) | 24 |
 

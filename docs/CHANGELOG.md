@@ -6,10 +6,12 @@
 - Branch: `fix/vercel-prisma-generate-lifecycle` merged to `main` **2026-10-03** (`b734367`, review `c70a65d`)
 - **No migration** for this fix — `20260929140000_lesson_progress` already on Neon (Migrate Deploy **#7**)
 
-### Operational (MVP-M2 — post-merge ops)
-- **Neon `20260929140000_lesson_progress`:** applied via Database Migrate Deploy **#7** (do not re-run)
-- **Vercel:** failed build on `294d421` until postinstall fix; new deployment expected from `main` after push
-- **MVP-M2 production smoke:** pending after successful Vercel deploy
+### Operational (MVP-M2 — production verified 2026-10-03)
+- **Founder smoke passed** on https://buildlearn-two.vercel.app — full L1 loop, complete/unlock, roadmap statuses (see `docs/reviews/mvp-m2-production-verification.md`)
+- **Neon `20260929140000_lesson_progress`:** Migrate Deploy **#7** (do not re-run)
+- **Vercel:** green @ `main` `a370ee7`; postinstall Prisma generate operational
+- **Founder finding:** beginner exercise UX gap on L1 “Label the page parts” — **ADR-023** (Beginner Teaching Principle); informs MVP-M3, not M2 rollback
+- **TASK-205** remains deferred per ADR-022
 
 ### Added (MVP-M2 — TASK-206 / TASK-207)
 - **Lesson 1 player:** block-based UI for `how-websites-work` (objective → bridge), Monaco + iframe preview, deterministic client graders, pass invalidation on edit (B1 fix)
@@ -17,7 +19,7 @@
 - **Migration:** `20260929140000_lesson_progress` (Neon Migrate Deploy **#7**)
 - Checker reviews: `docs/reviews/MVP-M2-WAVE1.md`, `docs/reviews/MVP-M2-FINAL.md` (APPROVED FOR MERGE, delta @ `9538bf0`)
 - Branch: `feature/MVP-M2-lesson-1` squash-merged to `main` **2026-09-29** (`338b2af`)
-- **Operational follow-up:** MVP-M2 production smoke after Vercel deploy with postinstall fix — **pending**
+- **Production verification:** **complete** (2026-10-03)
 - **Non-blocking follow-ups (record only):** I-M2-01 (GET lesson path membership), I-M2-02 (server grader trust), I-M2-05 (back-nav editor reset vs pass flag); see `MVP-M2-FINAL.md`
 
 ### Added (MVP-M1 — TASK-204)

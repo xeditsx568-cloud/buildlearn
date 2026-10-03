@@ -395,6 +395,53 @@ full 12-lesson / full Build Mode scope in PRODUCT_REQUIREMENTS.md.
 
 ---
 
+### ADR-023: Beginner Teaching Principle (post–MVP-M2 founder test)
+
+**Status:** ACCEPTED  
+**Date:** 2026-10-03
+
+**Context:** MVP-M2 production verification proved the **technical learning loop**
+(roadmap → lesson → graders → progress → complete → unlock). Founder testing on
+Lesson 1 exercise **“Label the page parts”** showed that **beginners can be blocked
+on terminology and editor placement** the lesson is meant to introduce — requiring
+external human or ChatGPT help. That violates the product thesis for self-serve learning.
+
+**Decision:**
+
+1. **No assumed prior jargon** — BuildLearn must not assume the learner already
+   understands terms or editor-location concepts the lesson is teaching (e.g. HTML
+   comments, “above” a tag, which pane to edit).
+
+2. **Teaching loop** — Activities should follow:
+
+   **TEACH → DEMONSTRATE → TRY → DETECT STRUGGLE → HELP → EXPLAIN → RETRY → SUCCEED**
+
+3. **Progressive help levels** (exercises and future AI mentor):
+
+   | Level | Purpose |
+   | ----- | ------- |
+   | 1 | Plain-language hint explaining the concept |
+   | 2 | Explain exactly which part of the code to look at |
+   | 3 | Visually identify / highlight insertion location |
+   | 4 | One worked example; learner completes the remainder |
+   | Final fallback | Full solution only after genuine struggle or explicit request |
+
+4. **Self-contained platform** — The learner should not **need** an external person or
+   external chat tool to understand what BuildLearn is asking them to do.
+
+**Consequences:**
+
+- Informs **MVP-M3 / TASK-203**: AI mentor is **context-aware** (lesson, block,
+  objective, learner code, grader result, attempts, stuck point) and **teaches/guides** —
+  not a generic answer bot or immediate solution generator (extends ADR-001).
+- Does **not** require immediate Lesson 1 rewrite or TASK-205; implementation when Master
+  directs M3 / teaching enhancements.
+- Documented in `docs/reviews/mvp-m2-production-verification.md`.
+
+**Related:** ADR-001, ADR-022, PROJECT_CONTEXT.md § Product Philosophy, MVP-M3 in TASK_QUEUE.md
+
+---
+
 ## Override Process
 
 1. Stakeholder requests change
