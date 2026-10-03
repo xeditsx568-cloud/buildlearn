@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createAIService } from "@/ai/aiservice";
 import { MockProvider } from "@/ai/providers/mock-provider";
@@ -20,7 +20,13 @@ describe("MockProvider", () => {
 });
 
 describe("createAIService", () => {
-  it("defaults to mock provider", async () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("defaults to mock provider in non-production test env", async () => {
+    vi.stubEnv("NODE_ENV", "test");
+    delete process.env.OPENAI_API_KEY;
     const service = createAIService();
     const result = await service.generateText({
       systemPrompt: "teach",

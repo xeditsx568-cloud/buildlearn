@@ -7,6 +7,10 @@ import {
   MentorServiceUnavailableError,
 } from "@/server/services/mentor-errors";
 import {
+  RELEASE_MONTHLY_QUOTA_SCRIPT,
+  RESERVE_MONTHLY_QUOTA_SCRIPT,
+} from "@/server/services/mentor-quota-monthly";
+import {
   isMentorRedisConfigured,
   requireMentorRedis,
 } from "@/server/services/mentor-redis-client";
@@ -17,11 +21,7 @@ export type MentorQuotaStatus = {
   resetAt: string;
 };
 
-export type MentorQuotaCheckResult =
-  | { ok: true; status: MentorQuotaStatus }
-  | { ok: false; reason: "monthly_exhausted" | "rpm_exceeded" | "redis_unavailable" };
-
-function monthKey(userId: string, now = new Date()): string {
+export function monthQuotaKey(userId: string, now = new Date()): string {
   const yyyy = now.getUTCFullYear();
   const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
   return `mentor:month:${userId}:${yyyy}-${mm}`;
@@ -58,20 +58,49 @@ function getRpmLimiter(): Ratelimit {
   return cachedRatelimit;
 }
 
+function statusFromUsed(
+  used: number,
+  config: ReturnType<typeof getMentorLimitConfig>,
+): MentorQuotaStatus {
+  return {
+    remainingThisMonth: Math.max(0, config.monthlyMessageLimit - used),
+    limitThisMonth: config.monthlyMessageLimit,
+    resetAt: monthResetAt(),
+  };
+}
+
 /** In-memory quota for dev/test when Redis is not configured. */
 class InMemoryMentorQuotaService {
   private readonly monthly = new Map<string, number>();
   private readonly rpm = new Map<string, { count: number; windowStart: number }>();
+  private readonly monthlyLocks = new Map<string, Promise<void>>();
+
+  private async withMonthlyLock<T>(
+    key: string,
+    fn: () => Promise<T> | T,
+  ): Promise<T> {
+    const previous = this.monthlyLocks.get(key) ?? Promise.resolve();
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    this.monthlyLocks.set(
+      key,
+      previous.then(() => gate),
+    );
+    await previous;
+    try {
+      return await fn();
+    } finally {
+      release();
+    }
+  }
 
   async getStatus(userId: string): Promise<MentorQuotaStatus> {
     const config = getMentorLimitConfig();
-    const key = monthKey(userId);
+    const key = monthQuotaKey(userId);
     const used = this.monthly.get(key) ?? 0;
-    return {
-      remainingThisMonth: Math.max(0, config.monthlyMessageLimit - used),
-      limitThisMonth: config.monthlyMessageLimit,
-      resetAt: monthResetAt(),
-    };
+    return statusFromUsed(used, config);
   }
 
   async assertCanRequestHelp(userId: string): Promise<MentorQuotaStatus> {
@@ -87,20 +116,36 @@ class InMemoryMentorQuotaService {
       window.count += 1;
     }
 
-    const status = await this.getStatus(userId);
-    if (status.remainingThisMonth <= 0) {
-      throw new MentorQuotaExceededError(
-        undefined,
-        secondsUntilMonthReset(),
-      );
-    }
-    return status;
+    return this.getStatus(userId);
   }
 
-  async recordBillableHelp(userId: string): Promise<MentorQuotaStatus> {
-    const key = monthKey(userId);
-    this.monthly.set(key, (this.monthly.get(key) ?? 0) + 1);
-    return this.getStatus(userId);
+  async reserveMonthlyAiQuota(userId: string): Promise<MentorQuotaStatus> {
+    const config = getMentorLimitConfig();
+    const key = monthQuotaKey(userId);
+
+    return this.withMonthlyLock(key, () => {
+      const used = this.monthly.get(key) ?? 0;
+      if (used >= config.monthlyMessageLimit) {
+        throw new MentorQuotaExceededError(
+          undefined,
+          secondsUntilMonthReset(),
+        );
+      }
+      this.monthly.set(key, used + 1);
+      return statusFromUsed(used + 1, config);
+    });
+  }
+
+  async releaseMonthlyAiQuota(userId: string): Promise<MentorQuotaStatus> {
+    const config = getMentorLimitConfig();
+    const key = monthQuotaKey(userId);
+
+    return this.withMonthlyLock(key, () => {
+      const used = this.monthly.get(key) ?? 0;
+      const next = Math.max(0, used - 1);
+      this.monthly.set(key, next);
+      return statusFromUsed(next, config);
+    });
   }
 }
 
@@ -108,13 +153,9 @@ class RedisMentorQuotaService {
   async getStatus(userId: string): Promise<MentorQuotaStatus> {
     const config = getMentorLimitConfig();
     const redis = requireMentorRedis();
-    const usedRaw = await redis.get<number>(monthKey(userId));
+    const usedRaw = await redis.get<number>(monthQuotaKey(userId));
     const used = typeof usedRaw === "number" ? usedRaw : 0;
-    return {
-      remainingThisMonth: Math.max(0, config.monthlyMessageLimit - used),
-      limitThisMonth: config.monthlyMessageLimit,
-      resetAt: monthResetAt(),
-    };
+    return statusFromUsed(used, config);
   }
 
   async assertCanRequestHelp(userId: string): Promise<MentorQuotaStatus> {
@@ -128,43 +169,46 @@ class RedisMentorQuotaService {
       throw new MentorRateLimitError(undefined, retryAfter);
     }
 
-    const status = await this.getStatus(userId);
-    if (status.remainingThisMonth <= 0) {
-      throw new MentorQuotaExceededError(
-        undefined,
-        secondsUntilMonthReset(),
-      );
-    }
-    return status;
+    return this.getStatus(userId);
   }
 
-  async recordBillableHelp(userId: string): Promise<MentorQuotaStatus> {
+  async reserveMonthlyAiQuota(userId: string): Promise<MentorQuotaStatus> {
     const config = getMentorLimitConfig();
     const redis = requireMentorRedis();
-    const key = monthKey(userId);
-    const used = await redis.incr(key);
-    if (used === 1) {
-      await redis.expire(key, secondsUntilMonthReset());
-    }
-    const remaining = Math.max(0, config.monthlyMessageLimit - used);
-    if (remaining < 0) {
+    const key = monthQuotaKey(userId);
+    const result = await redis.eval(
+      RESERVE_MONTHLY_QUOTA_SCRIPT,
+      [key],
+      [String(config.monthlyMessageLimit), String(secondsUntilMonthReset())],
+    );
+    const used =
+      typeof result === "number" ? result : Number.parseInt(String(result), 10);
+
+    if (used < 0) {
       throw new MentorQuotaExceededError(
         undefined,
         secondsUntilMonthReset(),
       );
     }
-    return {
-      remainingThisMonth: remaining,
-      limitThisMonth: config.monthlyMessageLimit,
-      resetAt: monthResetAt(),
-    };
+
+    return statusFromUsed(used, config);
+  }
+
+  async releaseMonthlyAiQuota(userId: string): Promise<MentorQuotaStatus> {
+    const redis = requireMentorRedis();
+    await redis.eval(RELEASE_MONTHLY_QUOTA_SCRIPT, [monthQuotaKey(userId)], []);
+    return this.getStatus(userId);
   }
 }
 
 export interface MentorQuotaService {
   getStatus(userId: string): Promise<MentorQuotaStatus>;
+  /** RPM enforcement only — monthly quota uses reserve/release. */
   assertCanRequestHelp(userId: string): Promise<MentorQuotaStatus>;
-  recordBillableHelp(userId: string): Promise<MentorQuotaStatus>;
+  /** Atomically reserve one monthly AI slot before calling the provider. */
+  reserveMonthlyAiQuota(userId: string): Promise<MentorQuotaStatus>;
+  /** Release a reservation when AI is not used (fallback / provider failure). */
+  releaseMonthlyAiQuota(userId: string): Promise<MentorQuotaStatus>;
 }
 
 let inMemoryQuota: InMemoryMentorQuotaService | null = null;

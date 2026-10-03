@@ -12,7 +12,7 @@ describe("InMemory mentor quota service", () => {
     vi.unstubAllEnvs();
   });
 
-  it("tracks monthly remaining", async () => {
+  it("tracks monthly remaining after reservation", async () => {
     vi.stubEnv("NODE_ENV", "test");
     delete process.env.UPSTASH_REDIS_REST_URL;
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -22,22 +22,21 @@ describe("InMemory mentor quota service", () => {
     expect(initial.remainingThisMonth).toBe(30);
 
     await service.assertCanRequestHelp("user_q");
-    await service.recordBillableHelp("user_q");
+    await service.reserveMonthlyAiQuota("user_q");
 
     const after = await service.getStatus("user_q");
     expect(after.remainingThisMonth).toBe(29);
   });
 
-  it("throws when monthly quota exhausted", async () => {
+  it("throws when monthly quota exhausted on reserve", async () => {
     vi.stubEnv("NODE_ENV", "test");
     vi.stubEnv("AI_MENTOR_MONTHLY_LIMIT", "1");
     delete process.env.UPSTASH_REDIS_REST_URL;
 
     const service = createMentorQuotaService();
-    await service.assertCanRequestHelp("user_exhaust");
-    await service.recordBillableHelp("user_exhaust");
+    await service.reserveMonthlyAiQuota("user_exhaust");
 
-    await expect(service.assertCanRequestHelp("user_exhaust")).rejects.toThrow(
+    await expect(service.reserveMonthlyAiQuota("user_exhaust")).rejects.toThrow(
       MentorQuotaExceededError,
     );
   });

@@ -41,4 +41,16 @@ describe("mentor block state store factory", () => {
       MentorServiceUnavailableError,
     );
   });
+
+  it("ignores MENTOR_REQUIRE_REDIS=false in production (no in-memory fallback)", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("MENTOR_REQUIRE_REDIS", "false");
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+
+    expect(() => resolveMentorStoreMode()).toThrow(MentorServiceUnavailableError);
+    expect(() => createMentorBlockStateStore()).toThrow(
+      MentorServiceUnavailableError,
+    );
+  });
 });

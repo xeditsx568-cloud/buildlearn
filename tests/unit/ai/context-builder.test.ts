@@ -19,6 +19,9 @@ describe("buildMentorContext", () => {
     });
 
     expect(ctx.block.type).toBe("exercise");
+    if (ctx.block.type !== "exercise") {
+      throw new Error("expected exercise block at index 3");
+    }
     expect(ctx.block.title).toBe("Label the page parts");
     expect(ctx.effectiveHelpLevel).toBe(1);
     expect(ctx.learningObjective).toContain("browser");

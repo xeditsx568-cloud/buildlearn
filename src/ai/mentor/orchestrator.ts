@@ -23,7 +23,16 @@ import {
   createMentorQuotaService,
   type MentorQuotaService,
 } from "@/server/services/mentor-quota-service";
-import { MentorServiceUnavailableError } from "@/server/services/mentor-errors";
+import {
+  MentorAIUnavailableError,
+  MentorServiceUnavailableError,
+} from "@/server/services/mentor-errors";
+
+/**
+ * P1 contract: help advances Redis state + hints_used for both AI and fallback.
+ * Monthly AI quota is reserved before the provider call; released on fallback only.
+ * Use X-Mentor-Response-Source (ai | fallback) to distinguish delivery mode.
+ */
 
 const FULL_SOLUTION_PATTERN =
   /\b(write|give|show)\s+(me\s+)?(the\s+)?(full|complete|entire)\s+(solution|code|answer)\b/i;
@@ -67,6 +76,20 @@ function maybeEditorFocus(
   return undefined;
 }
 
+function resolveAIService(deps?: MentorHelpOrchestratorDeps): AIService | null {
+  if (deps?.aiService) {
+    return deps.aiService;
+  }
+  try {
+    return createAIService();
+  } catch (error) {
+    if (error instanceof MentorAIUnavailableError) {
+      return null;
+    }
+    throw error;
+  }
+}
+
 export type MentorHelpResult = MentorHelpResponse & {
   responseSource: "ai" | "fallback";
 };
@@ -108,14 +131,19 @@ export async function runMentorHelp(input: {
     );
   }
 
-  let quotaStatus = await quotaService.assertCanRequestHelp(input.userId);
+  await quotaService.assertCanRequestHelp(input.userId);
+  let quotaStatus = await quotaService.reserveMonthlyAiQuota(input.userId);
+  let monthlyQuotaCommitted = false;
 
   let message: string;
   let responseSource: "ai" | "fallback" = "ai";
 
-  const aiService = input.deps?.aiService ?? createAIService();
+  const aiService = resolveAIService(input.deps);
 
   try {
+    if (!aiService) {
+      throw new MentorAIUnavailableError();
+    }
     const systemPrompt = buildLessonMentorSystemPrompt(context);
     const userPrompt = buildLessonMentorUserPrompt(context);
     const result = await aiService.generateText({ systemPrompt, userPrompt });
@@ -123,9 +151,16 @@ export async function runMentorHelp(input: {
     if (!message) {
       throw new Error("Empty mentor response");
     }
+    monthlyQuotaCommitted = true;
   } catch (error) {
     if (error instanceof MentorServiceUnavailableError) {
+      if (!monthlyQuotaCommitted) {
+        quotaStatus = await quotaService.releaseMonthlyAiQuota(input.userId);
+      }
       throw error;
+    }
+    if (!monthlyQuotaCommitted) {
+      quotaStatus = await quotaService.releaseMonthlyAiQuota(input.userId);
     }
     responseSource = "fallback";
     message = buildFallbackMentorMessage({
@@ -141,9 +176,10 @@ export async function runMentorHelp(input: {
   );
   await stateStore.set(scope, nextState);
 
-  if (responseSource === "ai") {
-    quotaStatus = await quotaService.recordBillableHelp(input.userId);
+  if (monthlyQuotaCommitted) {
+    quotaStatus = await quotaService.getStatus(input.userId);
   }
+
   await incrementHintsUsedForMentorHelp(input.userId, input.request.lessonId);
 
   return {

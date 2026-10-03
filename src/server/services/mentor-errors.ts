@@ -31,6 +31,13 @@ export class MentorRateLimitError extends Error {
   }
 }
 
+export class MentorAIUnavailableError extends Error {
+  constructor(message = "Mentor AI is not configured") {
+    super(message);
+    this.name = "MentorAIUnavailableError";
+  }
+}
+
 export class MentorValidationError extends Error {
   constructor(message: string) {
     super(message);

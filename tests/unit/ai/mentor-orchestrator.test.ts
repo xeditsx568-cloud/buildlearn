@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/server/services/mentor-hints-service", () => ({
   incrementHintsUsedForMentorHelp: vi.fn().mockResolvedValue(1),
@@ -14,11 +14,17 @@ import {
 import { L1_LESSON_PAYLOAD } from "../../fixtures/l1-lesson-payload";
 
 describe("runMentorHelp", () => {
-  it("uses fallback when provider fails", async () => {
-    vi.stubEnv("NODE_ENV", "test");
-    delete process.env.UPSTASH_REDIS_REST_URL;
+  afterEach(() => {
     resetMentorQuotaServiceForTests();
+    vi.unstubAllEnvs();
+  });
 
+  it("uses fallback when provider fails and releases monthly quota", async () => {
+    vi.stubEnv("NODE_ENV", "test");
+    vi.stubEnv("AI_MENTOR_MONTHLY_LIMIT", "1");
+    delete process.env.UPSTASH_REDIS_REST_URL;
+
+    const quotaService = createMentorQuotaService();
     const failingAi = {
       generateText: vi.fn().mockRejectedValue(new Error("provider down")),
     };
@@ -33,7 +39,7 @@ describe("runMentorHelp", () => {
       },
       deps: {
         stateStore: new InMemoryMentorBlockStateStore(),
-        quotaService: createMentorQuotaService(),
+        quotaService,
         aiService: failingAi,
       },
     });
@@ -41,14 +47,42 @@ describe("runMentorHelp", () => {
     expect(result.responseSource).toBe("fallback");
     expect(result.message).toContain("Static mentor help");
     expect(result.helpLevel).toBe(1);
+    const status = await quotaService.getStatus("user_orch");
+    expect(status.remainingThisMonth).toBe(1);
   });
 
-  it("updates block state after AI help", async () => {
+  it("uses fallback in production when OpenAI is not configured", async () => {
     vi.stubEnv("NODE_ENV", "test");
     delete process.env.UPSTASH_REDIS_REST_URL;
-    resetMentorQuotaServiceForTests();
+    const quotaService = createMentorQuotaService();
+    vi.stubEnv("NODE_ENV", "production");
+    delete process.env.OPENAI_API_KEY;
+    const result = await runMentorHelp({
+      userId: "user_prod_fb",
+      lesson: L1_LESSON_PAYLOAD,
+      request: {
+        lessonId: "how-websites-work",
+        blockIndex: 3,
+        action: "get_help",
+      },
+      deps: {
+        stateStore: new InMemoryMentorBlockStateStore(),
+        quotaService,
+      },
+    });
+
+    expect(result.responseSource).toBe("fallback");
+    expect(result.message).toContain("Static mentor help");
+  });
+
+  it("updates block state after AI help and consumes monthly quota", async () => {
+    vi.stubEnv("NODE_ENV", "test");
+    delete process.env.UPSTASH_REDIS_REST_URL;
 
     const store = new InMemoryMentorBlockStateStore();
+    const quotaService = createMentorQuotaService();
+    const before = await quotaService.getStatus("user_orch2");
+
     const result = await runMentorHelp({
       userId: "user_orch2",
       lesson: L1_LESSON_PAYLOAD,
@@ -59,12 +93,15 @@ describe("runMentorHelp", () => {
       },
       deps: {
         stateStore: store,
-        quotaService: createMentorQuotaService(),
+        quotaService,
         aiService: new MockProvider(),
       },
     });
 
     expect(result.responseSource).toBe("ai");
+    const after = await quotaService.getStatus("user_orch2");
+    expect(after.remainingThisMonth).toBe(before.remainingThisMonth - 1);
+
     const state = await store.get({
       userId: "user_orch2",
       lessonId: "how-websites-work",
