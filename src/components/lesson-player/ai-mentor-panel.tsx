@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import type {
@@ -24,6 +24,7 @@ import {
   mentorRateLimitedCopy,
   mentorUnavailableCopy,
 } from "@/lib/lesson-player/mentor-copy";
+import { isSameMentorBlockScope } from "@/lib/lesson-player/mentor-block-scope";
 import { cn } from "@/lib/utils";
 
 export type AiMentorPanelProps = {
@@ -71,7 +72,18 @@ export function AiMentorPanel({
   const [statusText, setStatusText] = useState<string | null>(null);
   const [quotaBlocked, setQuotaBlocked] = useState(false);
 
+  const activeScopeRef = useRef({ lessonId, blockIndex });
+  const helpRequestGenerationRef = useRef(0);
+
   const mentorEnabled = lessonId === M3_MENTOR_LESSON_ID;
+
+  useEffect(() => {
+    activeScopeRef.current = { lessonId, blockIndex };
+    helpRequestGenerationRef.current += 1;
+    setMessage(null);
+    setStatusText(null);
+    setLoadingAction(null);
+  }, [lessonId, blockIndex]);
 
   const refreshQuota = useCallback(async () => {
     if (!mentorEnabled) {
@@ -95,8 +107,18 @@ export function AiMentorPanel({
         return;
       }
 
+      const requestScope = { lessonId, blockIndex };
+      const requestGeneration = helpRequestGenerationRef.current;
+
       setLoadingAction(action);
       setStatusText(null);
+
+      const applyBlockResult = (): boolean => {
+        if (requestGeneration !== helpRequestGenerationRef.current) {
+          return false;
+        }
+        return isSameMentorBlockScope(requestScope, activeScopeRef.current);
+      };
 
       try {
         const { data, source } = await postMentorHelp({
@@ -109,6 +131,10 @@ export function AiMentorPanel({
               ? { passed: lastGraderPassed, message: lastGraderMessage }
               : undefined,
         });
+
+        if (!applyBlockResult()) {
+          return;
+        }
 
         setMessage({
           text: data.message,
@@ -129,6 +155,10 @@ export function AiMentorPanel({
 
         void refreshQuota();
       } catch (error) {
+        if (!applyBlockResult()) {
+          return;
+        }
+
         setMessage(null);
         if (error instanceof MentorApiError) {
           if (error.status === 429 && error.code === "quota_exhausted") {
@@ -147,11 +177,14 @@ export function AiMentorPanel({
         }
         setStatusText(mentorNetworkErrorCopy());
       } finally {
-        setLoadingAction(null);
+        if (requestGeneration === helpRequestGenerationRef.current) {
+          setLoadingAction(null);
+        }
       }
     },
     [
       blockIndex,
+      lessonId,
       lastGraderMessage,
       lastGraderPassed,
       learnerCode,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   AiMentorFab,
@@ -83,6 +83,15 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
 
   const mentorLessonEnabled = lesson.id === M3_MENTOR_LESSON_ID;
 
+  const mentorBlockScopeRef = useRef({
+    lessonId: lesson.id,
+    blockIndex,
+  });
+
+  useEffect(() => {
+    mentorBlockScopeRef.current = { lessonId: lesson.id, blockIndex };
+  }, [lesson.id, blockIndex]);
+
   const currentBlock = blocks[blockIndex] as LessonBlock | undefined;
   const totalBlocks = blocks.length;
 
@@ -141,6 +150,7 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
         (result) => {
           setServerFailCount(result.blockState.failedChecksSinceLastPass);
         },
+        { getActiveScope: () => mentorBlockScopeRef.current },
       );
     },
     [blockIndex, mentorLessonEnabled],
