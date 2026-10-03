@@ -5,7 +5,8 @@
 - **TASK-203** (P2): AIService, mentor API, ADR-023 help policy, FR-9.6 quotas (Upstash; no conversation DB in M3)
 - **TASK-203-UI** (P1): lesson player mentor panel, stuck detection, structured actions (not generic chat)
 - **Revision (post-Checker `f662d3b`):** server Redis mentor state, grader-event API, help-policy anti-bypass, production Upstash required (503 fail-closed)
-- Checker review: `docs/reviews/mvp-m3-task-203-plan-checker.md` (CHANGES REQUIRED — addressed in plan revision)
+- **B-M3-02-delta:** grader-event server-runs shared `html-lesson-graders`; client `passed` forbidden
+- Checker reviews: `docs/reviews/mvp-m3-task-203-plan-checker.md` (initial + delta `b80ba08`)
 - Implementation **not started** — await Checker re-review and Master go
 
 ### Fixed (production — Vercel Prisma client)

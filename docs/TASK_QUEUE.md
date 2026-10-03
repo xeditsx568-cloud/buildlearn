@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-10-03 (MVP-M3 plan revised post-Checker B-M3-01/02/03 — re-review pending)  
+> **Last updated:** 2026-10-03 (MVP-M3 B-M3-02-delta — server grader on grader-event; Checker re-review pending)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -117,7 +117,7 @@ help per **ADR-023**, not generic chat or instant solutions. Teacher-not-builder
 | **API** | `POST /api/ai/mentor/help`, `GET /api/ai/mentor/quota` |
 | **Help policy** | ADR-023 levels 1–4; server-side `help-policy.ts`; stuck signals from player |
 | **Quota** | FR-9.6 enforced via Upstash; defaults 30/month (PRD §3), 10 RPM (ARCHITECTURE §3.6); prod Redis required |
-| **Struggle** | `POST /api/ai/mentor/grader-event` + Redis `MentorBlockState`; level 4 needs fails after L3 help |
+| **Struggle** | `grader-event` server-runs `html-lesson-graders`; no client `passed`; Redis state |
 | **Definition of done** | Founder golden path: “Label the page parts” completable with in-app mentor only; §16 smoke checklist |
 
 ---
@@ -1228,8 +1228,8 @@ TASK-ID: TASK-203
 Title: AI mentor backend — provider abstraction, context, policy, API (Lesson 1)
 Description: |
   MVP-M3 P2 work: AIService + OpenAI/mock providers, Redis MentorBlockState,
-  POST /api/ai/mentor/grader-event + /help + GET quota. Server-only help policy (§7.2).
-  Production requires Upstash (503 if missing). hints_used server-only increment.
+  grader-event: server-grade learnerCode via shared html-lesson-graders (no client passed).
+  POST /help + GET quota. Server-only help policy (§7.2). Production Upstash required.
   Lesson how-websites-work only. Spec: docs/plans/MVP-M3-TASK-203-ai-mentor.md
 Owner: Programmer 2
 Status: pending
@@ -1243,6 +1243,8 @@ Files:
   - src/lib/ai/mentor-contracts.ts
   - src/server/services/mentor-quota-service.ts
   - src/server/services/mentor-block-state-service.ts
+  - src/server/services/mentor-grader-service.ts
+  - src/lib/grading/html-lesson-graders.ts  # shared grader — minor refactor if needed
   - src/ai/mentor/fallback-copy.ts
   - src/env.ts
   - .env.example
@@ -1255,8 +1257,9 @@ Files:
 Acceptance Criteria:
   - AIService interface with OpenAIProvider + MockProvider; CI uses mock only
   - MentorHelpRequest/Response + grader-event Zod contracts shared with P1
-  - Help level from Redis MentorBlockState; need_more_help cannot reach 4 without server grader fails after L3
-  - grader-event authoritative for failedChecksSinceLastPass
+  - Help level from Redis MentorBlockState; need_more_help cannot reach 4 without server-verified fails after L3
+  - grader-event: server derives pass/fail; rejects client passed/counters; updates failedChecksSinceLastPass only on server fail
+  - Single grader module for player UX and grader-event (no duplicate rules)
   - Levels 1–2 do not return full L1 exercise solution (automated policy tests)
   - Auth + lesson access + valid blockIndex; IDOR tests pass; POST body max 32 KB
   - Production: Upstash required; 503 if Redis missing; no in-memory prod fallback
@@ -1265,11 +1268,11 @@ Acceptance Criteria:
   - Provider failure returns fallback-copy contract
   - Only lessonId how-websites-work accepted in M3
 Tests Required:
-  - help-policy truth table, block-state, grader-event, mentor API auth/quota/503, fallback-copy, mock policy tests
+  - grader-event trust matrix (§15 items 1–9), help-policy truth table, block-state, mentor API auth/quota/503/413, grader parity with tests/unit/grading, fallback-copy, mock policy
 Reviewer: Checker
 Notes: |
-  Coordinate Wave 0 contracts before TASK-203-UI integrates. Do not implement path
-  generation, project reviewer, or TASK-205. Optional ai_usage_logs migration out of M3 DoD.
+  Coordinate Wave 0 contracts before TASK-203-UI integrates. Shared html-lesson-graders only;
+  small refactor for server import OK in TASK-203. Do not fork grading rules.
 ```
 
 ### TASK-203-UI (MVP-M3 — lesson mentor UI)
@@ -1277,8 +1280,8 @@ Notes: |
 TASK-ID: TASK-203-UI
 Title: Lesson 1 AI mentor panel — UX, stuck detection, API client
 Description: |
-  MVP-M3 P1 work: AI mentor sidebar/FAB per UX_SPEC §5.10. POST grader-event after
-  each Run check; POST /help with client context only. Static fallback on 503.
+  MVP-M3 P1 work: AI mentor sidebar/FAB. POST grader-event with learnerCode/option only
+  after Run check; local grader for instant UX. POST /help with client context only.
   No PATCH hintsUsed. Spec: docs/plans/MVP-M3-TASK-203-ai-mentor.md
 Owner: Programmer 1
 Status: pending

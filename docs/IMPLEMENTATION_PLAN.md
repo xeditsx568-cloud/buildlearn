@@ -173,7 +173,7 @@ M1 blockers.
 
 **MVP-M3 planning (2026-10-03):** Formal task split and architecture in
 [`docs/plans/MVP-M3-TASK-203-ai-mentor.md`](plans/MVP-M3-TASK-203-ai-mentor.md).
-Lesson 1 only; grader-event + Redis mentor state; anti-bypass help policy; production Upstash required; no conversation DB in M3.
+Lesson 1 only; grader-event server-runs shared html-lesson-graders; Redis mentor state; production Upstash required; no conversation DB in M3.
 
 ### MVP-M3 implementation notes (active plan)
 

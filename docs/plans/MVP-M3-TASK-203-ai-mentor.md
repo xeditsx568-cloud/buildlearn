@@ -1,6 +1,6 @@
 # MVP-M3 — Context-Aware AI Mentor (TASK-203)
 
-> **Status:** Planning (revised post-Checker `f662d3b` — B-M3-01/02/03)  
+> **Status:** Planning (B-M3-02-delta — server grader on grader-event; Checker re-review pending)  
 > **Authoritative main at planning:** `7d09768`  
 > **Milestone:** MVP-M3 — one vertical slice on **Lesson 1 only** (`how-websites-work`)  
 > **Principles:** ADR-001 (teacher-not-builder), ADR-023 (Beginner Teaching Principle), ADR-006 (Vercel AI SDK abstraction)  
@@ -87,9 +87,10 @@ MVP-M3 is **one coherent vertical slice** delivered on a shared integration bran
 6. **Auth:** User cannot invoke mentor for another user’s lesson context (IDOR tests); valid `blockIndex` for lesson.
 7. **Fallback:** AI or Redis down → static/deterministic lesson help (§14); learner not stranded.
 8. **Hints accounting:** **`hints_used` incremented only by mentor route** (server); P1 does not PATCH `hintsUsed`.
-9. **Escalation:** Level 4 impossible without **server-recorded failed grader checks after level 3 help** (§7); `need_more_help` alone insufficient (B-M3-01).
-10. **Tests:** CI green — help-policy truth table, grader-event + state tests, auth/quota/fallback tests, P1 panel tests.
-11. **Production smoke:** §16 checklist passed on Vercel production after merge (separate ops step).
+9. **Escalation:** Level 4 impossible without **server-verified** failed grader checks after level 3 help (§5.3, §7); `need_more_help` alone insufficient (B-M3-01).
+10. **Grader trust:** `grader-event` derives pass/fail via shared `html-lesson-graders`; client cannot forge fails (B-M3-02-delta).
+11. **Tests:** CI green — §15 grader-trust matrix, help-policy truth table, auth/quota/fallback, P1 panel tests.
+12. **Production smoke:** §16 checklist passed on Vercel production after merge (separate ops step).
 
 ---
 
@@ -128,27 +129,67 @@ type MentorHelpRequest = {
 
 **Removed from client (B-M3-02):** `failedChecksSinceLastPass`, `lastHelpLevelDelivered`, `mentorTurnsOnBlock` — server Redis state replaces these.
 
-### 5.3 Grader activity (server struggle evidence)
+### 5.3 Grader activity (server-verified struggle evidence)
 
-P1 calls after every **Run check** / **Check my work** (same moment as client grader):
+P1 calls after every **Run check** / **Check my work** (same moment as client grader for **instant UI**). The client grader is **UX only** — mentor escalation **must not** trust client pass/fail (B-M3-02-delta).
 
 `POST /api/ai/mentor/grader-event`
+
+**Request — no authoritative `passed` field:**
 
 ```typescript
 type MentorGraderEventRequest = {
   lessonId: "how-websites-work";
   blockIndex: number;
-  passed: boolean;
-  message: string; // max 500 chars — grader feedback snapshot
+  /** Required for interact / exercise blocks (max 8 KB) */
+  learnerCode?: string;
+  /** Required for quiz blocks only */
+  selectedOptionId?: string;
 };
 ```
 
-Server updates Redis block state (§5.5):
+**Forbidden in request (reject with 400 if present):** `passed`, `failedChecksSinceLastPass`, `lastHelpLevelDelivered`, `helpTurnCount`, `failedChecksAtLastHelp`, or any escalation counter.
 
-- `passed === false` → increment `failedChecksSinceLastPass`
-- `passed === true` → reset `failedChecksSinceLastPass` to **0** (and optionally reset help progression for block per product choice: **reset only fail counter**, keep `lastLevelDelivered` for session continuity)
+**Server pipeline (grader-event route):**
 
-M3 choice: **on pass, reset fail counter only**; on block change, new Redis key → fresh state.
+1. Authenticate (Clerk) and authorize lesson + `pathAccess.canOpen`.
+2. Load authoritative lesson/block from DB; validate `blockIndex` and block type.
+3. Validate body size (**32 KB** total → **413** if exceeded); validate `learnerCode` length.
+4. Run **server-side deterministic grader** (§5.3.1) → `GraderResult { passed, message }`.
+5. Update **Redis `MentorBlockState` only from server `passed`:**
+   - `passed === false` → increment `failedChecksSinceLastPass`; store `lastGraderMessage`
+   - `passed === true` → reset `failedChecksSinceLastPass` to **0**; store message; **keep** `lastLevelDelivered` / help progression (fail counter only)
+6. Return server result to client for UI sync (optional — client may keep local grader for instant feedback).
+
+```typescript
+type MentorGraderEventResponse = {
+  passed: boolean; // SERVER-derived only
+  message: string;
+  blockState: Pick<
+    MentorBlockState,
+    "failedChecksSinceLastPass" | "lastLevelDelivered" | "helpTurnCount"
+  >;
+};
+```
+
+**Fabrication resistance:** Repeated POSTs with **`passed: false` in JSON cannot increment fails** — field rejected. Repeated POSTs with **passing `learnerCode`** cannot increment fails even if the client UI lied. Only **server grader fail** on submitted code counts.
+
+M3: **on pass, reset fail counter only**; block change → new Redis key → fresh state.
+
+**Quiz (L1):** `selectedOptionId` required; server calls `gradeQuizSelection` with block `correctOptionId` — same module as player.
+
+### 5.3.1 Shared deterministic grading (single source of truth)
+
+**Requirement:** One reusable grader implementation — **no duplicate rules** for player vs mentor.
+
+| Consumer | Module (M2 today) | M3 behaviour |
+| -------- | ----------------- | ------------ |
+| Lesson player (client UX) | `src/lib/grading/html-lesson-graders.ts` | Instant feedback (unchanged UX) |
+| `grader-event` (server) | **Same module** | Authoritative pass/fail for Redis |
+
+Implementation note (TASK-203, not this planning commit): if imports or bundling require a **small refactor** (e.g. ensure pure functions remain server-safe, shared types with `@/lib/lesson-player/contracts` `GraderResult`), do that in TASK-203 — **do not** fork grading logic into a second ruleset.
+
+**Contract test:** Golden L1 fixtures (interact, exercise, quiz) must produce **identical** `{ passed, message }` when run client-side in existing unit tests and server-side in `grader-event-route.test.ts`.
 
 ### 5.4 Server-enriched context (`MentorContext`)
 
@@ -164,7 +205,7 @@ Built in `src/ai/mentor/context-builder.ts`:
 | `learningGoalText` | Truncated profile goal for examples (optional, ≤120 chars) |
 | `effectiveHelpLevel` | From help policy (§7) + **MentorBlockState** |
 | `blockState` | Loaded from Redis (§5.5) |
-| `graderMessage` | Latest from server state or request snapshot |
+| `graderMessage` | Latest **server** grader message from Redis state |
 | `starterCode` | Block starter for diff hints |
 | `learnerCode` | Sanitized excerpt from request |
 | `isReplayMode` | When replay exists: reject billable calls |
@@ -184,7 +225,7 @@ TTL: **7 days** (refresh on write).
 type MentorBlockState = {
   lastLevelDelivered: 0 | 1 | 2 | 3 | 4;
   helpTurnCount: number; // billable mentor responses on this block
-  failedChecksSinceLastPass: number; // from grader-event only
+  failedChecksSinceLastPass: number; // server-verified grader-event only
   failedChecksAtLastHelp: number; // snapshot when last help was delivered
   lastGraderMessage: string | null;
   updatedAt: string; // ISO
@@ -214,7 +255,7 @@ Streaming variant: same fields in final chunk + token stream for `message`.
 
 | Method | Path | Owner | Purpose |
 | ------ | ---- | ----- | ------- |
-| `POST` | `/api/ai/mentor/grader-event` | P2 | Record pass/fail after client grader (authoritative struggle) |
+| `POST` | `/api/ai/mentor/grader-event` | P2 | **Server-grade** learner code; update Redis struggle state |
 | `POST` | `/api/ai/mentor/help` | P2 | Mentor invocation (stream or JSON); updates Redis state |
 | `GET` | `/api/ai/mentor/quota` | P2 | Remaining monthly quota + rate-limit headers |
 
@@ -328,7 +369,9 @@ Align with ARCHITECTURE.md §2.5, §3 and ADR-006.
 | `src/ai/prompts/lesson-mentor-v1.ts` | Versioned system + user templates |
 | `src/server/services/mentor-quota-service.ts` | Monthly + RPM limits (Upstash) |
 | `src/server/services/mentor-block-state-service.ts` | Redis get/set MentorBlockState |
-| `src/app/api/ai/mentor/grader-event/route.ts` | Authoritative fail/pass counts |
+| `src/server/services/mentor-grader-service.ts` | Load block + invoke shared graders |
+| `src/app/api/ai/mentor/grader-event/route.ts` | Server-grade + Redis update |
+| `src/lib/grading/html-lesson-graders.ts` | Shared deterministic rules (minor refactor if needed — TASK-203) |
 | `src/app/api/ai/mentor/help/route.ts` | HTTP + stream; hints_used ++ |
 | `src/app/api/ai/mentor/quota/route.ts` | Quota read |
 | `src/ai/mentor/fallback-copy.ts` | Deterministic static help (L1 blocks) |
@@ -351,7 +394,7 @@ Align with ARCHITECTURE.md §2.5, §3 and ADR-006.
 - Actions: **Get help**, **Explain my check result**, **Need more help** (disabled at level 4 until new block).
 - Show **help level indicator** (e.g. “Hint 2 of 4”) and **quota remaining**.
 - Display mentor messages (markdown-safe subset); optional line highlight when `editorFocus` returned (Monaco `revealLine` — best-effort).
-- After each grader run: **`POST /api/ai/mentor/grader-event`** then update local UX state.
+- After each grader run: **`POST /api/ai/mentor/grader-event`** with `learnerCode` or quiz `selectedOptionId` only (no `passed`); sync UI from **server response** optional (local grader may still give instant feedback).
 - **Do not** PATCH `hintsUsed` from P1 — server mentor route increments after billable help.
 - **No** always-visible free-text chat; optional single-line question (moderation §13).
 - On mentor **503** (Redis/AI down): show **static fallback** from panel (block hint / fallback-copy summary).
@@ -363,7 +406,8 @@ Align with ARCHITECTURE.md §2.5, §3 and ADR-006.
 
 - Implement AIService + OpenAI + mock providers.
 - Load lesson content server-side (reuse lesson service / Prisma `lessons` row — no client-only trust).
-- Load/update **MentorBlockState** via Redis; reject help in production if Redis unavailable (**503**).
+- **grader-event:** server-grade via `html-lesson-graders`; update Redis; reject forged counter fields.
+- Load/update **MentorBlockState** via Redis; reject help/grader-event in production if Redis unavailable (**503**).
 - Enforce help policy, quotas, rate limits before calling provider.
 - **`hints_used`:** increment in help route transaction with progress service (server-only).
 - Log structured JSON (user id hash, lesson, block, level, tokens) — no learner code in logs.
@@ -429,6 +473,7 @@ Document in `.env.example` (P2). Vercel Production secrets added during ops — 
 
 - **Auth + IDOR:** Clerk user id; lesson access gate matches `/api/lessons/[id]` rules.
 - **Escalation:** Help level from Redis **MentorBlockState** only; grader-event requires same auth as help.
+- **Grader forgery:** grader-event **rejects** client `passed`; struggle counts update only after **server** `html-lesson-graders` result on submitted code/option.
 - **PII in prompts:** Minimize; goal text truncated; no email.
 - **Prompt injection:** System rules; learner code quarantined; no tool calling from user input in M3.
 - **`learnerQuestion`:** Reject empty spam; at levels 1–2 block phrases like “write the full solution” → respond with `explain_task` level copy or 400.
@@ -457,9 +502,23 @@ Level 1 fallback template (no AI): use block `instructions` rewritten by static 
 
 ### P2 (TASK-203)
 
-- `help-policy.test.ts` — §7.2 truth table (incl. need_more_help cannot reach 4 without grader fails)
-- `mentor-block-state.test.ts` — Redis get/set, fail counter, failedChecksAtLastHelp snapshot
-- `grader-event-route.test.ts` — pass resets fail count; fail increments; auth
+**Grader trust (B-M3-02-delta — required):**
+
+1. Request body with client `passed: false` → **400**; fail count unchanged.
+2. Client cannot POST escalation counters → **400**.
+3. Failing `learnerCode` on exercise block → server fail → Redis **increments** `failedChecksSinceLastPass`.
+4. Passing `learnerCode` → server pass → fail counter **reset to 0**.
+5. Repeated grader-event with **passing** code → cannot reach Level 4 eligibility (integration with help-policy + state).
+6. Repeated grader-event with **genuinely failing** code → eligibility follows §7.2 table.
+7. **Parity:** same golden inputs as `tests/unit/grading/*` produce identical server grader-event results.
+8. Unauthorized lesson/block/user → **401/403**.
+9. Oversized body / `learnerCode` → **413** / validation error.
+
+**Other:**
+
+- `help-policy.test.ts` — §7.2 truth table
+- `mentor-block-state.test.ts` — Redis get/set, failedChecksAtLastHelp snapshot
+- `grader-event-route.test.ts` — implements items 1–9 above
 - `context-builder.test.ts` — L1 exercise block fields; invalid blockIndex
 - `mentor-route.test.ts` — 401, 403 IDOR, 413 body size, 429 quota, **503 prod without Redis**
 - `mentor-prompt-policy.test.ts` — L1 exercise: no full solution at levels 1–2
@@ -469,7 +528,7 @@ Level 1 fallback template (no AI): use block `instructions` rewritten by static 
 ### P1 (TASK-203-UI)
 
 - `stuck-detection.test.ts` — UX thresholds (local fails / secondsOnBlock)
-- `grader-event-client.test.ts` — called on pass/fail from player flows
+- `grader-event-client.test.ts` — sends `learnerCode` / quiz option after Run check (no `passed` in body)
 - `ai-mentor-panel.test.tsx` — loading, error, quota display, action buttons
 - Lesson player integration test with mocked `fetch` for mentor API
 
