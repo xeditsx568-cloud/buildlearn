@@ -358,3 +358,145 @@ Production Redis requirement **does not** depend on manually setting `MENTOR_REQ
 Wave 1 implementation is substantially on-plan and grader trust is sound, but **production AI provider selection**, **monthly quota atomicity**, and **typecheck** must be corrected before **APPROVED FOR WAVE 2 / P1**.
 
 Checker stops here — no code fixes, no P1, no merge, no infra changes.
+
+---
+
+# Delta Review — Wave 1 Blocker Fixes (`efcf455`)
+
+**Delta date:** 2026-10-03  
+**Reviewer:** Checker Agent (independent)  
+**Fix commit:** `efcf455` — `fix(MVP-M3): Wave 1 checker blockers B-W1-01/02/03 and prod Redis`  
+**Prior Wave 1 verdict (preserved above):** **CHANGES REQUIRED** @ `230f94d` / review `8f08e89`  
+
+This section records re-review of blocker fixes only. It does **not** replace or rewrite the original findings.
+
+---
+
+## Final verdict (post-delta)
+
+**APPROVED FOR WAVE 2 / P1**
+
+- **B-W1-01 RESOLVED**
+- **B-W1-02 RESOLVED**
+- **B-W1-03 RESOLVED**
+- **Production Redis invariant ACCEPTED**
+- Wave 1 backend contracts are stable for **TASK-203-UI**
+- **P1 may begin Wave 2** on `feature/MVP-M3-lesson-1-mentor` after this review commit
+- **No merge to `main`** is required before P1 unless Master directs otherwise
+
+---
+
+## Independent validation (`efcf455`)
+
+| Check | Result |
+| ----- | ------ |
+| `pnpm test` | **Pass (269/269)** |
+| `pnpm typecheck` | **Pass** |
+| `pnpm lint` | **Pass** |
+| `pnpm build` | **Pass** |
+
+---
+
+## B-W1-01 — Production MockProvider
+
+| Criterion | Result | Evidence |
+| --------- | ------ | -------- |
+| Prod + missing key → no MockProvider | **PASS** | `createAIService()` throws `MentorAIUnavailableError` when `isMentorProductionRuntime()` and no `OPENAI_API_KEY` |
+| Orchestrator → fallback | **PASS** | `resolveAIService()` catches unavailable → `null` → inner throw → catch sets `responseSource: "fallback"` |
+| Explicit `{ provider: "mock" }` blocked in prod | **PASS** | `assertMockAllowedInRuntime()` |
+| Dev/test MockProvider | **PASS** | Non-production default without key returns `MockProvider`; tests in `aiservice-production.test.ts`, `mock-provider.test.ts` |
+| Prod + valid key → OpenAI | **PASS** | Lines 39–43 `aiservice.ts` return `OpenAIProvider` (not live-tested; code path clear) |
+| No live OpenAI in CI | **PASS** | SDK mocked in `openai-provider.test.ts` |
+| No mock labelled `ai` in prod API path | **PASS** | Help route does not inject `deps.aiService`; unavailable → fallback source only |
+
+**Note (non-blocking):** Unit tests may inject `deps.aiService` (including mock) directly into `runMentorHelp`; production HTTP route does not. P1 must not wire mock through the client.
+
+**B-W1-01: RESOLVED**
+
+---
+
+## B-W1-02 — Atomic monthly quota
+
+| Criterion | Result | Evidence |
+| --------- | ------ | -------- |
+| Lifecycle reserve → AI commit / fallback release | **PASS** | `reserveMonthlyAiQuota` before provider; `monthlyQuotaCommitted` retains slot; catch calls `releaseMonthlyAiQuota` when not committed |
+| Redis atomicity | **PASS** | Lua `RESERVE_MONTHLY_QUOTA_SCRIPT` INCR + rollback; `RELEASE_MONTHLY_QUOTA_SCRIPT` guarded DECR |
+| 30 / 31st boundary | **PASS** | `mentor-quota-atomic.test.ts` |
+| Concurrent boundary | **PASS** | In-memory lock + atomic test (limit 1, two parallel reserves) |
+| User isolation | **PASS** | Key includes `userId` |
+| Month buckets | **PASS** | `monthQuotaKey(userId)` includes `yyyy-mm` |
+| Release restores capacity | **PASS** | Atomic test + orchestrator fallback test (`remainingThisMonth` stays 1 after failed AI with limit 1) |
+| No negative counters | **PASS** | In-memory `Math.max(0, used - 1)`; Redis release script skips DECR at ≤0 |
+| Fallback does not consume monthly AI quota | **PASS** | Release on fallback; orchestrator test |
+| Successful AI consumes one unit | **PASS** | Reservation retained; `getStatus` after commit; orchestrator AI test |
+| RPM intact | **PASS** | `assertCanRequestHelp` still uses Upstash limiter before reserve |
+| Redis missing in prod | **PASS** | Unchanged `createMentorQuotaService` → 503 |
+
+**Reservation leak on error paths:** Provider failures and `MentorAIUnavailableError` paths release in the AI `catch` before fallback delivery. Throws **after** a successful fallback release but **before** HTTP response (e.g. `stateStore.set` / DB hint increment) do not re-consume monthly quota; worst case is a 500 after fallback text was computed — acceptable. If `releaseMonthlyAiQuota` itself failed against Redis, a slot could theoretically stick until TTL; that is an infra failure mode, not a logic bypass under normal Redis behaviour.
+
+**Non-blocking:** A `try/finally` around post-reserve work would harden against future edits; not required for approval.
+
+**B-W1-02: RESOLVED**
+
+---
+
+## B-W1-03 — Typecheck
+
+| Criterion | Result |
+| --------- | ------ |
+| Discriminated union narrowing | **PASS** — `expect` + `if (ctx.block.type !== "exercise") throw` before `.title` |
+| No unsafe cast | **PASS** |
+| Full typecheck | **PASS** — Checker re-run |
+
+**B-W1-03: RESOLVED**
+
+---
+
+## Production Redis invariant
+
+| Criterion | Result |
+| --------- | ------ |
+| `NODE_ENV=production` always requires Redis backend | **PASS** — `mentorRequiresRedisBackend()` returns `true` regardless of `MENTOR_REQUIRE_REDIS=false` |
+| Missing Upstash → no in-memory | **PASS** — factory throws; test in `mentor-block-state-service.test.ts` |
+| Flag relaxes non-prod only | **PASS** — `MENTOR_REQUIRE_REDIS=true` optional in dev |
+| Dev/test unchanged | **PASS** — memory + warning when not production and no Upstash |
+
+**Production Redis invariant: ACCEPTED**
+
+---
+
+## P1 contract semantics (verified in code)
+
+| Mode | Header | Monthly AI quota | Help state / hints |
+| ---- | ------ | ---------------- | ------------------ |
+| **AI** | `X-Mentor-Response-Source: ai` | Reserved slot **kept** (`monthlyQuotaCommitted`) | Advanced + `incrementHintsUsedForMentorHelp` |
+| **Fallback** | `X-Mentor-Response-Source: fallback` | **Released** via `releaseMonthlyAiQuota` | Still advanced + hints incremented |
+
+**RPM:** Applied in `assertCanRequestHelp` **before** reserve, for both AI and fallback outcomes.
+
+---
+
+## Regression check (delta scope)
+
+No evidence that `efcf455` regressed:
+
+- Grader-event trust, strict schemas, shared grader
+- Help-level server authority, IDOR/access, body limits
+- R-W0-01 help-policy documentation alignment
+- `hints_used` server authority
+
+Grader routes and services were not modified in the fix commit.
+
+---
+
+## Residual non-blocking items (carry-forward from original review)
+
+Original recommendations R-W1-01, R-W1-02, R-W1-03, R-W1-05–R-W1-07 remain optional polish; **R-W1-04 is addressed** by production Redis hardening in `efcf455`.
+
+---
+
+## Delta sign-off
+
+Blocker fixes at **`efcf455`** satisfy the original Wave 1 checker requirements. **APPROVED FOR WAVE 2 / P1.**
+
+Checker stops here — no code fixes, no P1 implementation, no merge.
