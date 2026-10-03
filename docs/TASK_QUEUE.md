@@ -25,7 +25,7 @@ Build Mode. Build **vertical slices**, not isolated screen polish.
 until after **MVP-M2** functional slice (ADR-022: working loop before polish).
 
 **MVP-M2:** **Code merged to `main` (2026-09-29, `338b2af`)** — TASK-206/207 **done** (implementation).
-**Not yet operationally verified:** migration `20260929140000_lesson_progress` **not deployed**; MVP-M2 production smoke **pending**.
+**Migration `20260929140000_lesson_progress`:** applied Neon Migrate Deploy **#7**. **MVP-M2 production smoke** pending after Vercel deploy (`postinstall` fix merged `b734367`).
 
 **Next implementation track:** **MVP-M3** — **TASK-203** (when Master directs; after M2 prod verification).
 **Do not start** TASK-203 until Master directs. **Do not** patch TASK-211 to auto-create
@@ -58,8 +58,9 @@ lesson node unlocked** and navigable.
 | Item | Status |
 | ---- | ------ |
 | Code merge **`feature/MVP-M2-lesson-1` → `main`** | **Complete** — squash `338b2af` |
-| Migration **`20260929140000_lesson_progress`** on Neon | **Pending** — **not** run during merge |
-| MVP-M2 production smoke test | **Pending** — after migration + app deploy |
+| Migration **`20260929140000_lesson_progress`** on Neon | **Complete** — Migrate Deploy **#7** |
+| Vercel build (`postinstall` prisma generate) | **Merged** `b734367` / `c70a65d` — await auto-deploy |
+| MVP-M2 production smoke test | **Pending** — after successful Vercel deploy |
 | TASK-206 / TASK-207 implementation | **Merged** (`done` in queue) |
 | Non-blocking follow-ups | I-M2-01, I-M2-02, I-M2-05 — see `docs/reviews/MVP-M2-FINAL.md` |
 

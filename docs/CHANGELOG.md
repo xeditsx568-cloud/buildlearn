@@ -1,12 +1,23 @@
 ## [Unreleased]
 
+### Fixed (production — Vercel Prisma client)
+- **`postinstall`: `prisma generate`** — clean install on Vercel regenerates Prisma Client from `prisma/schema.prisma` (fixes missing `LessonProgressStatus` type error on build)
+- Checker review: `docs/reviews/fix-vercel-prisma-generate-postinstall.md` (APPROVED FOR MERGE)
+- Branch: `fix/vercel-prisma-generate-lifecycle` merged to `main` **2026-10-03** (`b734367`, review `c70a65d`)
+- **No migration** for this fix — `20260929140000_lesson_progress` already on Neon (Migrate Deploy **#7**)
+
+### Operational (MVP-M2 — post-merge ops)
+- **Neon `20260929140000_lesson_progress`:** applied via Database Migrate Deploy **#7** (do not re-run)
+- **Vercel:** failed build on `294d421` until postinstall fix; new deployment expected from `main` after push
+- **MVP-M2 production smoke:** pending after successful Vercel deploy
+
 ### Added (MVP-M2 — TASK-206 / TASK-207)
 - **Lesson 1 player:** block-based UI for `how-websites-work` (objective → bridge), Monaco + iframe preview, deterministic client graders, pass invalidation on edit (B1 fix)
 - **Progress API:** `GET`/`PATCH` `/api/lesson-progress/[lessonId]`, `GET` `/api/lessons/[lessonId]`, `POST` `/api/lessons/[lessonId]/complete` (auth-scoped; transactional path step complete + unlock next)
-- **Migration:** `20260929140000_lesson_progress` (**committed; not deployed to Neon during merge**)
+- **Migration:** `20260929140000_lesson_progress` (Neon Migrate Deploy **#7**)
 - Checker reviews: `docs/reviews/MVP-M2-WAVE1.md`, `docs/reviews/MVP-M2-FINAL.md` (APPROVED FOR MERGE, delta @ `9538bf0`)
 - Branch: `feature/MVP-M2-lesson-1` squash-merged to `main` **2026-09-29** (`338b2af`)
-- **Operational follow-up:** run **Database Migrate Deploy** for `20260929140000_lesson_progress` before production relies on lesson progress; then deploy app + **MVP-M2 production smoke** — **not run during merge**
+- **Operational follow-up:** MVP-M2 production smoke after Vercel deploy with postinstall fix — **pending**
 - **Non-blocking follow-ups (record only):** I-M2-01 (GET lesson path membership), I-M2-02 (server grader trust), I-M2-05 (back-nav editor reset vs pass flag); see `MVP-M2-FINAL.md`
 
 ### Added (MVP-M1 — TASK-204)
