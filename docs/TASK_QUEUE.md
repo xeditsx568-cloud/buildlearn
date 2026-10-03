@@ -1,7 +1,7 @@
 # Task Queue — BuildLearn
 
 > **Maintained by:** Master Agent  
-> **Last updated:** 2026-10-03 (MVP-M3 / TASK-203 planning defined — implementation not started)  
+> **Last updated:** 2026-10-03 (MVP-M3 plan revised post-Checker B-M3-01/02/03 — re-review pending)  
 > **Status key:** `pending` | `in_progress` | `review` | `done` | `blocked`
 
 ---
@@ -116,7 +116,8 @@ help per **ADR-023**, not generic chat or instant solutions. Teacher-not-builder
 | **Schema** | Reuse `lesson_progress.hints_used`; **no** `ai_conversations` / `ai_messages` for M3 |
 | **API** | `POST /api/ai/mentor/help`, `GET /api/ai/mentor/quota` |
 | **Help policy** | ADR-023 levels 1–4; server-side `help-policy.ts`; stuck signals from player |
-| **Quota** | 30 messages / user / month; 10 req / min (FR-9.6) |
+| **Quota** | FR-9.6 enforced via Upstash; defaults 30/month (PRD §3), 10 RPM (ARCHITECTURE §3.6); prod Redis required |
+| **Struggle** | `POST /api/ai/mentor/grader-event` + Redis `MentorBlockState`; level 4 needs fails after L3 help |
 | **Definition of done** | Founder golden path: “Label the page parts” completable with in-app mentor only; §16 smoke checklist |
 
 ---
@@ -1097,8 +1098,8 @@ Notes: |
 | **MVP-M1** | **TASK-205** | Roadmap UI (`/roadmap`) v1 | P1 | P1 | **deferred** | After MVP-M2; functional `/roadmap` OK for now |
 | **MVP-M2** | **TASK-206** | Lesson player | P1 | P0 | done | Merged `338b2af`; prod smoke pending |
 | **MVP-M2** | **TASK-207** | Monaco + iframe preview | P1 | P0 | done | Merged `338b2af`; migration pending |
-| **MVP-M3** | **TASK-203** | AI mentor backend (provider, API, policy, quota) | P2 | P0 | pending | Plan approved — await Master go |
-| **MVP-M3** | **TASK-203-UI** | Lesson 1 mentor panel + stuck detection | P1 | P0 | pending | Same branch as TASK-203 |
+| **MVP-M3** | **TASK-203** | AI mentor backend (provider, API, policy, quota) | P2 | P0 | pending | Plan revised — Checker re-review |
+| **MVP-M3** | **TASK-203-UI** | Lesson 1 mentor panel + grader-event client | P1 | P0 | pending | Same branch as TASK-203 |
 | **MVP-M4** | *(content)* | Lessons 2–3 seed + player | P2 | P0 | pending | Extend TASK-104 pattern |
 | **MVP-M4** | **TASK-210** | Project workspace v1 | P1 | P0 | pending | Multi-file; begin project after ~3 lessons |
 | *Post-MVP* | **TASK-208** | Challenge system | P2 | P0 | pending | After first MVP loop |
@@ -1226,11 +1227,10 @@ Notes: |
 TASK-ID: TASK-203
 Title: AI mentor backend — provider abstraction, context, policy, API (Lesson 1)
 Description: |
-  MVP-M3 P2 work: AIService + OpenAI/mock providers (Vercel AI SDK), mentor context
-  builder, ADR-023 help-level policy, POST /api/ai/mentor/help and GET quota.
-  Lesson how-websites-work only. Structured actions — not generic chat. FR-9.6 quotas
-  via Upstash (in-memory fallback in dev). Increment lesson_progress.hints_used.
-  No ai_conversations schema in M3. Full spec: docs/plans/MVP-M3-TASK-203-ai-mentor.md
+  MVP-M3 P2 work: AIService + OpenAI/mock providers, Redis MentorBlockState,
+  POST /api/ai/mentor/grader-event + /help + GET quota. Server-only help policy (§7.2).
+  Production requires Upstash (503 if missing). hints_used server-only increment.
+  Lesson how-websites-work only. Spec: docs/plans/MVP-M3-TASK-203-ai-mentor.md
 Owner: Programmer 2
 Status: pending
 Priority: P0
@@ -1242,23 +1242,30 @@ Files:
   - src/app/api/ai/mentor/**
   - src/lib/ai/mentor-contracts.ts
   - src/server/services/mentor-quota-service.ts
+  - src/server/services/mentor-block-state-service.ts
+  - src/ai/mentor/fallback-copy.ts
   - src/env.ts
   - .env.example
   - package.json  # ai + @ai-sdk/openai + optional @upstash/ratelimit — Master-coordinated
   - tests/unit/ai/**
   - tests/unit/mentor-route.test.ts
+  - tests/unit/grader-event-route.test.ts
+  - tests/unit/mentor-block-state.test.ts
+  - tests/unit/fallback-copy.test.ts
 Acceptance Criteria:
   - AIService interface with OpenAIProvider + MockProvider; CI uses mock only
-  - MentorHelpRequest/Response Zod contracts shared with P1
-  - Server computes effective help level 1–4; client signals not trusted alone
+  - MentorHelpRequest/Response + grader-event Zod contracts shared with P1
+  - Help level from Redis MentorBlockState; need_more_help cannot reach 4 without server grader fails after L3
+  - grader-event authoritative for failedChecksSinceLastPass
   - Levels 1–2 do not return full L1 exercise solution (automated policy tests)
-  - Auth + lesson access gate; IDOR tests pass
-  - Monthly quota 30 and RPM 10 enforced (429 + headers)
-  - Successful responses increment hints_used for authenticated user
-  - Provider failure returns fallback payload contract (static hint path)
+  - Auth + lesson access + valid blockIndex; IDOR tests pass; POST body max 32 KB
+  - Production: Upstash required; 503 if Redis missing; no in-memory prod fallback
+  - Quota defaults 30/month (PRD §3), 10 RPM (ARCHITECTURE); 429 when exceeded
+  - hints_used incremented server-only in help route (P1 does not PATCH)
+  - Provider failure returns fallback-copy contract
   - Only lessonId how-websites-work accepted in M3
 Tests Required:
-  - help-policy, context-builder, mentor API auth/quota, mock provider policy tests
+  - help-policy truth table, block-state, grader-event, mentor API auth/quota/503, fallback-copy, mock policy tests
 Reviewer: Checker
 Notes: |
   Coordinate Wave 0 contracts before TASK-203-UI integrates. Do not implement path
@@ -1270,11 +1277,9 @@ Notes: |
 TASK-ID: TASK-203-UI
 Title: Lesson 1 AI mentor panel — UX, stuck detection, API client
 Description: |
-  MVP-M3 P1 work: AI mentor sidebar/FAB per UX_SPEC §5.10 on lesson player for
-  how-websites-work. Wire grader feedback, editor code, and per-block attempt signals
-  to POST /api/ai/mentor/help. Actions: get_help, explain_task, explain_last_check,
-  need_more_help. Optional short question field — no unrestricted chat UI. Replay mode
-  disables billable mentor. Spec: docs/plans/MVP-M3-TASK-203-ai-mentor.md
+  MVP-M3 P1 work: AI mentor sidebar/FAB per UX_SPEC §5.10. POST grader-event after
+  each Run check; POST /help with client context only. Static fallback on 503.
+  No PATCH hintsUsed. Spec: docs/plans/MVP-M3-TASK-203-ai-mentor.md
 Owner: Programmer 1
 Status: pending
 Priority: P0
@@ -1286,14 +1291,16 @@ Files:
   - src/components/lesson-player/lesson-player.tsx
   - src/lib/lesson-player/mentor-client.ts
   - src/lib/lesson-player/stuck-detection.ts
+  - src/lib/lesson-player/grader-event-client.ts
   - tests/unit/lesson-player/stuck-detection.test.ts
+  - tests/unit/lesson-player/grader-event-client.test.ts
   - tests/unit/lesson-player/ai-mentor-panel.test.tsx
 Acceptance Criteria:
   - Desktop sidebar + mobile FAB/sheet for mentor
-  - Stuck UX when failedChecks >= 2 or 180s on block (configurable constants)
-  - Displays help level, quota remaining, mentor messages, errors, loading
-  - Integrates with existing Run check / Run check flows — explain_last_check uses graderFeedback
-  - Replay mode (?replay=true when supported) does not call billable mentor
+  - Stuck UX when server/local fail count >= 2 or 180s on block
+  - Displays help level, quota remaining, mentor messages, 503 fallback copy
+  - grader-event called on every graded check pass/fail before mentor help
+  - Does not PATCH hintsUsed; replay smoke N/A until replay mode exists
   - Layout aligns with UX_SPEC §5.10 (two-column desktop)
 Tests Required:
   - stuck-detection unit tests; panel RTL tests with mocked mentor API

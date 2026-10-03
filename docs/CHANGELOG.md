@@ -4,7 +4,9 @@
 - **Context-aware AI mentor** formal spec for Lesson 1 only — `docs/plans/MVP-M3-TASK-203-ai-mentor.md`
 - **TASK-203** (P2): AIService, mentor API, ADR-023 help policy, FR-9.6 quotas (Upstash; no conversation DB in M3)
 - **TASK-203-UI** (P1): lesson player mentor panel, stuck detection, structured actions (not generic chat)
-- Implementation **not started** — await Master review of planning branch
+- **Revision (post-Checker `f662d3b`):** server Redis mentor state, grader-event API, help-policy anti-bypass, production Upstash required (503 fail-closed)
+- Checker review: `docs/reviews/mvp-m3-task-203-plan-checker.md` (CHANGES REQUIRED — addressed in plan revision)
+- Implementation **not started** — await Checker re-review and Master go
 
 ### Fixed (production — Vercel Prisma client)
 - **`postinstall`: `prisma generate`** — clean install on Vercel regenerates Prisma Client from `prisma/schema.prisma` (fixes missing `LessonProgressStatus` type error on build)

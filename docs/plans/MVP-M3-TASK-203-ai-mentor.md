@@ -1,6 +1,6 @@
 # MVP-M3 — Context-Aware AI Mentor (TASK-203)
 
-> **Status:** Planning (Master-defined)  
+> **Status:** Planning (revised post-Checker `f662d3b` — B-M3-01/02/03)  
 > **Authoritative main at planning:** `7d09768`  
 > **Milestone:** MVP-M3 — one vertical slice on **Lesson 1 only** (`how-websites-work`)  
 > **Principles:** ADR-001 (teacher-not-builder), ADR-023 (Beginner Teaching Principle), ADR-006 (Vercel AI SDK abstraction)  
@@ -30,11 +30,12 @@ help progressively so a beginner can finish Lesson 1 without ChatGPT, Google, or
 | **Blocks** | `interact`, `exercise`, `quiz` (graded activities); optional read-only mentor on `explain` (concept questions only, same API) |
 | **Modes** | Structured mentor actions — not open-ended chat (see §6) |
 | **Help levels** | ADR-023 levels **1–4** (map to FR-4.6; FR-4.7 level 5 deferred post-M3) |
-| **Context** | Full mentor context payload (§5) assembled server-side from client signals + lesson content |
+| **Context** | Client context (§5.2) + **server-authoritative mentor state** (§5.5) + lesson DB |
 | **Provider** | OpenAI via Vercel AI SDK; mock provider for CI |
-| **Quotas** | FR-9.6 / ARCHITECTURE.md §3.6 — **30 mentor messages / user / calendar month**, **10 requests / user / minute** |
-| **Persistence** | Increment existing `lesson_progress.hints_used` on each billable mentor response; no new conversation tables for M3 |
-| **Replay** | Mentor disabled or read-only canned copy when `?replay=true` (no quota burn, no progress writes) |
+| **Quotas** | **FR-9.6** requires enforced limits; numeric defaults in §11 (30/month from PRD §3; 10 RPM from ARCHITECTURE — configurable) |
+| **Redis (prod)** | **Required** in production for mentor block state + quota/RPM; fail closed **503** if unavailable (§11, §14) |
+| **Persistence** | **`hints_used` server-only** increment on billable mentor response; no Prisma conversation tables in M3 |
+| **Replay** | UX_SPEC replay not implemented on main @ M2; M3 smoke **N/A** until replay ships (§16). Plan: disable billable mentor when replay added |
 
 ### 2.2 Explicitly out of scope
 
@@ -82,12 +83,13 @@ MVP-M3 is **one coherent vertical slice** delivered on a shared integration bran
 2. **Teaching policy:** Levels 1–2 never output complete exercise solution for `how-websites-work` exercise; level 3 uses partial patterns only; level 4 may include minimal rescue snippet per prompt contract — verified by unit tests on mock outputs + Checker spot-check.
 3. **ADR-023:** Mentor copy avoids assumed jargon; explains errors in plain language (FR-9.3).
 4. **Not generic chat:** API rejects or redirects off-topic / “write my code for me” prompts (FR-9.2 Socratic bias at low levels).
-5. **Quota:** 31st message in a month returns **429** with user-visible remaining quota on prior calls; rate limit returns **429** with retry guidance.
-6. **Auth:** User cannot invoke mentor for another user’s lesson context (IDOR tests).
-7. **Fallback:** If AI unavailable, UI shows static block hints + grader message + friendly degradation (§14).
-8. **Hints accounting:** `hints_used` increments on server after successful mentor response (synced via existing PATCH progress or server-side update in mentor route).
-9. **Tests:** CI green — mocked provider policy tests, API auth/quota tests, P1 component tests for panel states.
-10. **Production smoke:** §16 checklist passed on Vercel production after merge (separate ops step — not part of this planning commit).
+5. **Quota (FR-9.6):** Enforced monthly + RPM limits via Upstash in production; **429** when exceeded; **503** when Redis/quota store unavailable in production (UI static fallback).
+6. **Auth:** User cannot invoke mentor for another user’s lesson context (IDOR tests); valid `blockIndex` for lesson.
+7. **Fallback:** AI or Redis down → static/deterministic lesson help (§14); learner not stranded.
+8. **Hints accounting:** **`hints_used` incremented only by mentor route** (server); P1 does not PATCH `hintsUsed`.
+9. **Escalation:** Level 4 impossible without **server-recorded failed grader checks after level 3 help** (§7); `need_more_help` alone insufficient (B-M3-01).
+10. **Tests:** CI green — help-policy truth table, grader-event + state tests, auth/quota/fallback tests, P1 panel tests.
+11. **Production smoke:** §16 checklist passed on Vercel production after merge (separate ops step).
 
 ---
 
@@ -95,45 +97,60 @@ MVP-M3 is **one coherent vertical slice** delivered on a shared integration bran
 
 ### 5.1 Design goals
 
-- **Server is source of truth** for lesson content and effective help level.
-- **Client supplies ephemeral signals** (editor code, grader output, attempt counters).
-- **Minimal tokens:** cap editor excerpt (~8 KB), truncate instructions, no full roadmap/profile beyond experience level.
+- **Server is source of truth** for lesson content, **help level**, and **struggle evidence**.
+- **Client supplies context only** (editor code, last grader snapshot, UX timing) — not escalation authority.
+- **HTTP body cap:** **32 KB** max on all POST `/api/ai/mentor/*` (reject **413**).
+- **Minimal tokens:** learner code excerpt max **8 KB** inside body; truncate instructions.
 
-### 5.2 Request DTO (`MentorHelpRequest`)
+### 5.2 Client context (`MentorHelpRequest`)
 
 Shared Zod schema in `src/lib/ai/mentor-contracts.ts` (P2 defines; P1 imports types only).
 
 ```typescript
-// Conceptual shape — implement with Zod in TASK-203
+// CLIENT CONTEXT — does not authorize help level
 type MentorHelpRequest = {
-  /** Fixed for M3 */
   lessonId: "how-websites-work";
   blockIndex: number;
-  /** Client action — not free-form chat in M3 */
   action:
-    | "get_help"           // next help per policy
-    | "explain_task"       // force level-1 framing
-    | "explain_last_check" // interpret graderFeedback
-    | "need_more_help";    // user-initiated +1 level ( capped at 4 )
-  /** Current editor buffer for interact/exercise; omit for quiz */
+    | "get_help"
+    | "explain_task"
+    | "explain_last_check"
+    | "need_more_help";
   learnerCode?: string;
-  /** Last client grader result from html-lesson-graders */
+  /** Snapshot for prompt only; struggle counts come from server state */
   lastGraderResult?: { passed: boolean; message: string };
-  /** Client session signals (server validates ranges) */
-  signals: {
-    failedChecksSinceLastPass: number;
-    secondsOnBlock: number;
-    mentorTurnsOnBlock: number;
-    lastHelpLevelDelivered: 0 | 1 | 2 | 3 | 4;
-  };
-  /** Optional short learner question (max 280 chars), must pass moderation */
-  learnerQuestion?: string;
-  /** Last N turns (max 6) for continuity — roles user|assistant only */
-  recentTurns?: Array<{ role: "user" | "assistant"; content: string }>;
+  /** UX-only: stuck badge, not used for level cap */
+  clientUx?: { secondsOnBlock: number };
+  learnerQuestion?: string; // max 280 chars; moderation §13
+  recentTurns?: Array<{ role: "user" | "assistant"; content: string }>; // max 6
 };
 ```
 
-### 5.3 Server-enriched context (`MentorContext`)
+**Removed from client (B-M3-02):** `failedChecksSinceLastPass`, `lastHelpLevelDelivered`, `mentorTurnsOnBlock` — server Redis state replaces these.
+
+### 5.3 Grader activity (server struggle evidence)
+
+P1 calls after every **Run check** / **Check my work** (same moment as client grader):
+
+`POST /api/ai/mentor/grader-event`
+
+```typescript
+type MentorGraderEventRequest = {
+  lessonId: "how-websites-work";
+  blockIndex: number;
+  passed: boolean;
+  message: string; // max 500 chars — grader feedback snapshot
+};
+```
+
+Server updates Redis block state (§5.5):
+
+- `passed === false` → increment `failedChecksSinceLastPass`
+- `passed === true` → reset `failedChecksSinceLastPass` to **0** (and optionally reset help progression for block per product choice: **reset only fail counter**, keep `lastLevelDelivered` for session continuity)
+
+M3 choice: **on pass, reset fail counter only**; on block change, new Redis key → fresh state.
+
+### 5.4 Server-enriched context (`MentorContext`)
 
 Built in `src/ai/mentor/context-builder.ts`:
 
@@ -145,15 +162,38 @@ Built in `src/ai/mentor/context-builder.ts`:
 | `learningObjective` | First objective block bullets (plain text) |
 | `experienceLevel` | `profiles.experience_level` (optional; default beginner tone) |
 | `learningGoalText` | Truncated profile goal for examples (optional, ≤120 chars) |
-| `effectiveHelpLevel` | Computed by help policy (§7) — **not** trusted from client alone |
-| `graderMessage` | From request or default “not yet submitted” |
+| `effectiveHelpLevel` | From help policy (§7) + **MentorBlockState** |
+| `blockState` | Loaded from Redis (§5.5) |
+| `graderMessage` | Latest from server state or request snapshot |
 | `starterCode` | Block starter for diff hints |
 | `learnerCode` | Sanitized excerpt from request |
-| `isReplayMode` | From query or header — reject billable calls |
+| `isReplayMode` | When replay exists: reject billable calls |
+
+Validate **`blockIndex`** against lesson `blocks.length` (**400** if out of range).
 
 Do **not** include: Clerk IDs in prompts, other users’ data, API keys, full DATABASE rows.
 
-### 5.4 Response DTO (`MentorHelpResponse`)
+### 5.5 Server-authoritative mentor state (`MentorBlockState`)
+
+Stored in **Upstash Redis** (same dependency as quotas). Key:
+
+`mentor:state:{userId}:{lessonId}:{blockIndex}`  
+TTL: **7 days** (refresh on write).
+
+```typescript
+type MentorBlockState = {
+  lastLevelDelivered: 0 | 1 | 2 | 3 | 4;
+  helpTurnCount: number; // billable mentor responses on this block
+  failedChecksSinceLastPass: number; // from grader-event only
+  failedChecksAtLastHelp: number; // snapshot when last help was delivered
+  lastGraderMessage: string | null;
+  updatedAt: string; // ISO
+};
+```
+
+**CLIENT CONTEXT** (editor, question, turns) is merged into prompts but **never** used alone to set `effectiveHelpLevel`.
+
+### 5.6 Response DTO (`MentorHelpResponse`)
 
 ```typescript
 type MentorHelpResponse = {
@@ -174,12 +214,13 @@ Streaming variant: same fields in final chunk + token stream for `message`.
 
 | Method | Path | Owner | Purpose |
 | ------ | ---- | ----- | ------- |
-| `POST` | `/api/ai/mentor/help` | P2 | Primary mentor invocation (stream or JSON) |
+| `POST` | `/api/ai/mentor/grader-event` | P2 | Record pass/fail after client grader (authoritative struggle) |
+| `POST` | `/api/ai/mentor/help` | P2 | Mentor invocation (stream or JSON); updates Redis state |
 | `GET` | `/api/ai/mentor/quota` | P2 | Remaining monthly quota + rate-limit headers |
 
 **Auth:** Clerk session required; `lessonId` must match loaded lesson; verify user has `pathAccess.canOpen` for L1 (reuse learning-path/lesson access checks from lesson APIs).
 
-**Validation:** Zod on body; reject unknown `lessonId` (only `how-websites-work` in M3).
+**Validation:** Zod on body; reject unknown `lessonId` (only `how-websites-work` in M3); **max body 32 KB**.
 
 **Not exposed:** Generic `/api/ai/chat`, path generation, or reviewer endpoints.
 
@@ -196,20 +237,46 @@ Streaming variant: same fields in final chunk + token stream for `message`.
 | 3 | Guide the change | Partial pattern (e.g. `<!-- label -->` example for one section); learner completes rest |
 | 4 | Rescue | Direct enough to unblock (may show one full comment line example ×3 with explanation); explain meaning |
 
-### 7.2 Effective level algorithm (server)
+### 7.2 Effective level algorithm (server-only)
 
-Inputs: `signals.failedChecksSinceLastPass`, `signals.secondsOnBlock`, `signals.mentorTurnsOnBlock`, `action`, `lastHelpLevelDelivered`.
+Implement in `src/ai/mentor/help-policy.ts`. Inputs: **`action`**, **`MentorBlockState` `S`**.
 
-Baseline rules (implement in `src/ai/mentor/help-policy.ts`):
+Define **`maxEligibleLevel(S)`** — highest level policy allows **right now**:
 
-- **`explain_task`** → deliver level **1** (even if prior level higher).
-- **`get_help`** → `min(4, max(1, autoLevel))` where  
-  `autoLevel = 1 + floor(failedChecks / 2) + (mentorTurnsOnBlock > 0 ? 0 : 0)`  
-  plus: if `failedChecks >= 4` or `secondsOnBlock >= 600` → at least **3**; if `failedChecks >= 6` or `mentorTurnsOnBlock >= 3` → at least **4**.
-- **`need_more_help`** → `min(4, lastHelpLevelDelivered + 1)`.
-- **`explain_last_check`** → level **1–2** tone; must reference `graderMessage` verbatim concepts; no full solution unless already at level 4 session.
+| Max level | Condition (all server-side) |
+| --------- | --------------------------- |
+| **1** | Default (including first help on block) |
+| **2** | `S.failedChecksSinceLastPass >= 1` |
+| **3** | `S.failedChecksSinceLastPass >= 2` AND `S.helpTurnCount >= 1` |
+| **4** | `S.lastLevelDelivered >= 3` AND `S.helpTurnCount >= 2` AND `S.failedChecksSinceLastPass >= 2` AND **`S.failedChecksSinceLastPass > S.failedChecksAtLastHelp`** (≥1 new failed check **after** last mentor response) |
 
-Client **stuck** flag (UI badge): `failedChecksSinceLastPass >= 2` OR `secondsOnBlock >= 180` — prompts user to open mentor.
+Level **4** cannot be reached by repeated `need_more_help` without **new server-recorded grader failures** after level 3 help.
+
+Define **`requestedLevel(action, S)`**:
+
+| Action | Requested level |
+| ------ | ----------------- |
+| `explain_task` | **1** (re-clarify; still counts as help turn if billable) |
+| `explain_last_check` | **2** if `S.failedChecksSinceLastPass >= 1`, else **1**; capped by `maxEligibleLevel` |
+| `get_help` | If `S.helpTurnCount === 0` → **1**. Else → `min(maxEligibleLevel(S), max(S.lastLevelDelivered, 1))` (no jump &gt; eligible) |
+| `need_more_help` | `min(S.lastLevelDelivered + 1, maxEligibleLevel(S))` — if `lastLevelDelivered === 0`, treat as **1** |
+
+**Delivered level:** `effectiveLevel = requestedLevel`, then clamp to `maxEligibleLevel(S)`.
+
+After a billable response at level `L`: update Redis — `lastLevelDelivered = L`, `helpTurnCount++`, `failedChecksAtLastHelp = S.failedChecksSinceLastPass`.
+
+**Truth table (tests must cover):**
+
+| Scenario | Result |
+| -------- | ------ |
+| First `get_help`, 0 fails | Level **1** |
+| `need_more_help` ×3, 0 grader fails | Stays **1** (maxEligible = 1) |
+| 1 fail + `get_help` | Up to **2** |
+| 2 fails, 1 help turn, `need_more_help` | Up to **3** |
+| At level 3 help delivered, 0 new fails, `need_more_help` | **3** (not 4) |
+| At level 3 help delivered, ≥1 new grader fail, eligible | **4** allowed once |
+
+Client **stuck** UX (badge only): use **server fail count** from last grader-event response payload **or** local mirror ≥2 fails / `clientUx.secondsOnBlock >= 180`.
 
 ### 7.3 Prompt enforcement
 
@@ -230,23 +297,22 @@ Structured output optional: use `generateText` with post-validation regex/heuris
 Align with ARCHITECTURE.md §2.5, §3 and ADR-006.
 
 ```
-┌──────────────────┐     ┌─────────────────────┐     ┌──────────────────┐
-│ lesson-player    │────▶│ POST /api/ai/mentor │────▶│ MentorOrchestrator│
-│ (TASK-203-UI)    │     │ (TASK-203)          │     │ help-policy       │
-└──────────────────┘     └─────────────────────┘     │ context-builder   │
-                                                      │ prompt assembly   │
-                                                      └────────┬─────────┘
-                                                               │
-                      ┌────────────────────────────────────────┼────────────────────────┐
-                      ▼                                        ▼                        ▼
-               ┌─────────────┐                          ┌──────────────┐         ┌──────────────┐
-               │ AIService   │                          │ QuotaLimiter │         │ MockProvider │
-               │ interface   │                          │ (Upstash)    │         │ (CI/tests)   │
-               └──────┬──────┘                          └──────────────┘         └──────────────┘
-                      │
-               ┌──────▼──────┐
-               │ OpenAIProvider │  Vercel AI SDK @ai-sdk/openai
-               └─────────────┘
+┌──────────────────┐   grader-event    ┌──────────────────────────────┐
+│ lesson-player    │──────────────────▶│ Upstash Redis                 │
+│ (TASK-203-UI)    │   help / quota    │ mentor:state:* + quota keys   │
+└────────┬─────────┘──────────────────▶│ (required in production)      │
+         │                              └──────────────┬───────────────┘
+         │                                             │
+         ▼                                             ▼
+┌─────────────────────┐                    ┌──────────────────┐
+│ POST …/mentor/help  │───────────────────▶│ MentorOrchestrator│
+│ (TASK-203)          │                    │ help-policy       │
+└─────────────────────┘                    │ context-builder   │
+                                           └────────┬─────────┘
+                                                    ▼
+                                           ┌──────────────┐
+                                           │ AIService    │── OpenAI / Mock
+                                           └──────────────┘
 ```
 
 **Modules (P2):**
@@ -260,9 +326,12 @@ Align with ARCHITECTURE.md §2.5, §3 and ADR-006.
 | `src/ai/mentor/context-builder.ts` | Load lesson block + profile snippets |
 | `src/ai/mentor/help-policy.ts` | Level selection |
 | `src/ai/prompts/lesson-mentor-v1.ts` | Versioned system + user templates |
-| `src/server/services/mentor-quota-service.ts` | Monthly + RPM limits |
-| `src/app/api/ai/mentor/help/route.ts` | HTTP + stream |
+| `src/server/services/mentor-quota-service.ts` | Monthly + RPM limits (Upstash) |
+| `src/server/services/mentor-block-state-service.ts` | Redis get/set MentorBlockState |
+| `src/app/api/ai/mentor/grader-event/route.ts` | Authoritative fail/pass counts |
+| `src/app/api/ai/mentor/help/route.ts` | HTTP + stream; hints_used ++ |
 | `src/app/api/ai/mentor/quota/route.ts` | Quota read |
+| `src/ai/mentor/fallback-copy.ts` | Deterministic static help (L1 blocks) |
 
 **Modules (P1):**
 
@@ -270,7 +339,8 @@ Align with ARCHITECTURE.md §2.5, §3 and ADR-006.
 | ---- | ---------------- |
 | `src/components/lesson-player/ai-mentor-panel.tsx` | Sidebar / mobile sheet |
 | `src/lib/lesson-player/mentor-client.ts` | Fetch/stream wrapper |
-| `src/lib/lesson-player/stuck-detection.ts` | Pure functions for signals |
+| `src/lib/lesson-player/stuck-detection.ts` | UX stuck badge (local + server fail count) |
+| `src/lib/lesson-player/grader-event-client.ts` | POST grader-event after each check |
 | `src/components/lesson-player/lesson-player.tsx` | Layout integration (max-w → two-column per UX_SPEC) |
 
 ---
@@ -281,10 +351,11 @@ Align with ARCHITECTURE.md §2.5, §3 and ADR-006.
 - Actions: **Get help**, **Explain my check result**, **Need more help** (disabled at level 4 until new block).
 - Show **help level indicator** (e.g. “Hint 2 of 4”) and **quota remaining**.
 - Display mentor messages (markdown-safe subset); optional line highlight when `editorFocus` returned (Monaco `revealLine` — best-effort).
-- Track per-block session state in React (ref + state): failed checks increment on failed grader; reset on block change or pass.
-- Call `patchLessonProgress` with updated `hintsUsed` when API returns success (or rely on server PATCH in mentor route — pick one pattern in implementation; server increment preferred for integrity).
-- **No** always-visible free-text chat; optional single-line question field attached to `get_help`.
-- Replay mode: hide mentor or show “Review mode — AI help disabled.”
+- After each grader run: **`POST /api/ai/mentor/grader-event`** then update local UX state.
+- **Do not** PATCH `hintsUsed` from P1 — server mentor route increments after billable help.
+- **No** always-visible free-text chat; optional single-line question (moderation §13).
+- On mentor **503** (Redis/AI down): show **static fallback** from panel (block hint / fallback-copy summary).
+- Replay: when `?replay=true` exists in product, disable billable mentor (not in M2 player — no M3 smoke item).
 
 ---
 
@@ -292,7 +363,9 @@ Align with ARCHITECTURE.md §2.5, §3 and ADR-006.
 
 - Implement AIService + OpenAI + mock providers.
 - Load lesson content server-side (reuse lesson service / Prisma `lessons` row — no client-only trust).
+- Load/update **MentorBlockState** via Redis; reject help in production if Redis unavailable (**503**).
 - Enforce help policy, quotas, rate limits before calling provider.
+- **`hints_used`:** increment in help route transaction with progress service (server-only).
 - Log structured JSON (user id hash, lesson, block, level, tokens) — no learner code in logs.
 - Return safe errors (no stack traces to client).
 - Circuit breaker: if provider errors exceed threshold in process, short-circuit to fallback (§14).
@@ -301,16 +374,36 @@ Align with ARCHITECTURE.md §2.5, §3 and ADR-006.
 
 ## 11. Usage / rate limits (FR-9.6)
 
-| Control | M3 value | Implementation |
-| ------- | -------- | ---------------- |
-| Monthly messages | **30** / user | Upstash key `mentor:month:{userId}:{yyyy-mm}` INCR with TTL |
+**FR-9.6 requirement (PRODUCT_REQUIREMENTS.md):** “Rate limiting / usage quotas” — **does not specify numeric limits** in the FR table.
+
+**Authoritative product numbers elsewhere:**
+
+| Limit | Source | M3 treatment |
+| ----- | ------ | ------------ |
+| **30 AI tutor messages / month** | PRD §3 MVP feature list (item 11); PRD §9 free tier | **Default** for `AI_MENTOR_MONTHLY_LIMIT`; satisfies FR-9.6 intent for MVP tutor |
+| **10 requests / minute / user** | ARCHITECTURE.md §3.6 (not FR-9.6 row) | **Default** for `AI_MENTOR_RPM_LIMIT`; configurable env |
+
+P-011 (DECISIONS.md pending) recommends 30/month — aligned with PRD; no new limit invented beyond these docs.
+
+| Control | M3 default | Implementation |
+| ------- | ---------- | -------------- |
+| Monthly messages | **30** / user / calendar month | Upstash `mentor:month:{userId}:{yyyy-mm}` |
 | Burst rate | **10** / minute / user | Upstash sliding window |
-| Billable event | Successful model response | Failed validation / 429 does not decrement |
-| Response headers | `X-Mentor-Quota-Remaining`, `Retry-After` on 429 | |
+| Block state | Same Redis | `mentor:state:{userId}:{lessonId}:{blockIndex}` |
+| Billable event | Successful **help** model response | 429/503/413/validation do not decrement |
+| Headers | `X-Mentor-Quota-Remaining`, `Retry-After` on 429 | |
+
+**Production (`NODE_ENV=production` or `MENTOR_REQUIRE_REDIS=true`):**
+
+- **`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` required** for mentor endpoints.
+- If missing or Redis unhealthy → **503** on `/api/ai/mentor/help` and `/grader-event`.
+- **No in-memory quota or state fallback in production** (B-M3-03).
+
+**Development / CI / test:**
+
+- In-memory stub **allowed** with console warning; **MockProvider** for AI.
 
 **Free-text question:** counts as same quota as any mentor call.
-
-**Dev:** if Upstash env missing, use in-memory limiter with loud `console.warn` (CI uses mock + in-memory).
 
 Profile `experience_level` adjusts tone only — not quota.
 
@@ -322,10 +415,11 @@ Profile `experience_level` adjusts tone only — not quota.
 | -------- | -------- | ----- |
 | `OPENAI_API_KEY` | Production yes | Server-only; add to `src/env.ts` in TASK-203 |
 | `AI_MENTOR_MODEL` | No | Default `gpt-4o-mini` |
-| `UPSTASH_REDIS_REST_URL` | Prod recommended | Rate + monthly quota |
-| `UPSTASH_REDIS_REST_TOKEN` | Prod recommended | Pair with URL |
-| `AI_MENTOR_MONTHLY_LIMIT` | No | Default `30` |
-| `AI_MENTOR_RPM_LIMIT` | No | Default `10` |
+| `UPSTASH_REDIS_REST_URL` | **Production required** | Mentor state + quota |
+| `UPSTASH_REDIS_REST_TOKEN` | **Production required** | Pair with URL |
+| `AI_MENTOR_MONTHLY_LIMIT` | No | Default `30` (PRD §3) |
+| `AI_MENTOR_RPM_LIMIT` | No | Default `10` (ARCHITECTURE §3.6) |
+| `MENTOR_REQUIRE_REDIS` | No | Default `true` in production |
 
 Document in `.env.example` (P2). Vercel Production secrets added during ops — **not** in this planning step.
 
@@ -334,8 +428,10 @@ Document in `.env.example` (P2). Vercel Production secrets added during ops — 
 ## 13. Security and privacy
 
 - **Auth + IDOR:** Clerk user id; lesson access gate matches `/api/lessons/[id]` rules.
+- **Escalation:** Help level from Redis **MentorBlockState** only; grader-event requires same auth as help.
 - **PII in prompts:** Minimize; goal text truncated; no email.
 - **Prompt injection:** System rules; learner code quarantined; no tool calling from user input in M3.
+- **`learnerQuestion`:** Reject empty spam; at levels 1–2 block phrases like “write the full solution” → respond with `explain_task` level copy or 400.
 - **Output:** No secrets; sanitize markdown; no `<script` in assistant HTML examples (use fenced code blocks).
 - **Data retention:** No DB conversation storage in M3; `recentTurns` supplied by client — server truncates and drops on response.
 - **COPPA/age:** Same as app sign-up policy (P-009); mentor does not collect extra PII.
@@ -346,11 +442,12 @@ Document in `.env.example` (P2). Vercel Production secrets added during ops — 
 
 | Condition | User experience | System |
 | --------- | ----------------- | ------ |
-| Missing `OPENAI_API_KEY` in dev | Banner: “AI help isn’t configured” | 503 on API |
-| Provider timeout / 5xx | “Mentor is busy — try again in a moment.” | Retry once; then fallback |
+| Missing `OPENAI_API_KEY` in dev | Banner: “AI help isn’t configured” | 503 on help |
+| **Redis unavailable (production)** | Static/deterministic help in panel; “Live AI help temporarily unavailable” | **503** on help + grader-event |
+| Provider timeout / 5xx | “Mentor is busy — try again in a moment.” | Retry once; then **fallback-copy** |
 | Quota exceeded | Clear message + static hints | 429 |
 | Rate limited | Retry-after message | 429 |
-| **AI unavailable after retry** | Show block static `hint` / `solutionHint` + last grader message + link to re-read `explain` blocks | Log incident |
+| **AI unavailable after retry** | `fallback-copy.ts` + block `hint` / `solutionHint` + grader message | Log incident |
 
 Level 1 fallback template (no AI): use block `instructions` rewritten by static copy in `src/ai/mentor/fallback-copy.ts` for L1 blocks only.
 
@@ -360,15 +457,19 @@ Level 1 fallback template (no AI): use block `instructions` rewritten by static 
 
 ### P2 (TASK-203)
 
-- `help-policy.test.ts` — escalation table cases
-- `context-builder.test.ts` — L1 exercise block fields present
-- `mentor-route.test.ts` — 401 unauthenticated, 403 wrong lesson/wrong user, 429 quota
-- `mentor-prompt-policy.test.ts` — mock provider responses checked for forbidden full-solution patterns at levels 1–2
+- `help-policy.test.ts` — §7.2 truth table (incl. need_more_help cannot reach 4 without grader fails)
+- `mentor-block-state.test.ts` — Redis get/set, fail counter, failedChecksAtLastHelp snapshot
+- `grader-event-route.test.ts` — pass resets fail count; fail increments; auth
+- `context-builder.test.ts` — L1 exercise block fields; invalid blockIndex
+- `mentor-route.test.ts` — 401, 403 IDOR, 413 body size, 429 quota, **503 prod without Redis**
+- `mentor-prompt-policy.test.ts` — L1 exercise: no full solution at levels 1–2
+- `fallback-copy.test.ts` — deterministic strings for L1 blocks
 - `openai-provider.test.ts` — skipped in CI without key; mock provider used in CI
 
 ### P1 (TASK-203-UI)
 
-- `stuck-detection.test.ts` — signal thresholds
+- `stuck-detection.test.ts` — UX thresholds (local fails / secondsOnBlock)
+- `grader-event-client.test.ts` — called on pass/fail from player flows
 - `ai-mentor-panel.test.tsx` — loading, error, quota display, action buttons
 - Lesson player integration test with mocked `fetch` for mentor API
 
@@ -382,16 +483,17 @@ Level 1 fallback template (no AI): use block `instructions` rewritten by static 
 
 Execute on https://buildlearn-two.vercel.app as signed-in beginner-capable account:
 
-1. [ ] Open L1 → navigate to **Label the page parts**.
-2. [ ] Fail check twice; mentor suggests opening help (stuck UX).
-3. [ ] **Get help** returns on-topic level 1 — no full solution paste.
-4. [ ] **Need more help** escalates; level 2 references editor locations.
-5. [ ] **Explain my check result** references grader message text.
-6. [ ] Complete exercise without leaving BuildLearn.
-7. [ ] Quota decreases (inspect via GET quota or UI counter).
-8. [ ] Sign-out → mentor API returns 401.
-9. [ ] Replay mode (if enabled on completed lesson) does not burn quota / mutate progress.
-10. [ ] With invalid API key simulation in preview only — fallback static hint visible (optional staging test).
+1. [ ] Open L1 → **Label the page parts**.
+2. [ ] Fail **Run check** twice (grader-event recorded); stuck UX prompts mentor.
+3. [ ] **Get help** → level **1**; explains comments/task without full file paste.
+4. [ ] **Need more help** with 0 extra fails → stays **1** or **2** max per policy (not 4).
+5. [ ] After more fails + eligible progression, **Need more help** → level **2+** with editor locations.
+6. [ ] **Explain my check result** references server/grader message.
+7. [ ] Complete exercise without external tools.
+8. [ ] Quota decreases on billable help (GET quota or UI).
+9. [ ] Sign-out → mentor API **401**.
+10. [ ] **Replay:** **N/A for M3** until UX_SPEC replay ships; document skip in smoke report.
+11. [ ] **Fallback:** With AI disabled in Preview/staging OR simulated 503 — static help visible; learner can read next steps.
 
 ---
 
@@ -399,10 +501,10 @@ Execute on https://buildlearn-two.vercel.app as signed-in beginner-capable accou
 
 | Wave | Agent | Deliverable |
 | ---- | ----- | ----------- |
-| **0** | P2 | `mentor-contracts.ts`, env schema stubs, mock provider, help-policy tests |
-| **1** | P2 | Context builder, orchestrator, `/api/ai/mentor/*`, quota service |
-| **2** | P1 | Mentor panel + client; wire signals from existing grader flows |
-| **3** | P1 | Lesson player layout (sidebar / FAB); `hintsUsed` sync |
+| **0** | P2 | Contracts, mock provider, help-policy + block-state tests |
+| **1** | P2 | Redis state + grader-event + help/quota routes, orchestrator |
+| **2** | P1 | Grader-event client + mentor panel; wire grader flows |
+| **3** | P1 | Lesson player layout (sidebar / FAB); 503 fallback UX |
 | **4** | Checker | MVP-M3 review doc; prompt safety |
 | **5** | Master | Merge to main; Vercel env for OpenAI + Upstash; production smoke §16 |
 
@@ -425,6 +527,7 @@ Execute on https://buildlearn-two.vercel.app as signed-in beginner-capable accou
 | `src/env.ts`, `.env.example` | P2 |
 | `tests/unit/ai/**`, `tests/unit/mentor-*` | P2 |
 | `tests/unit/lesson-player/*mentor*` | P1 |
+| `src/lib/lesson-player/grader-event-client.ts` | P1 |
 
 ---
 

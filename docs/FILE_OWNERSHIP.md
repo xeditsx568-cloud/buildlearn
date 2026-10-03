@@ -1,7 +1,7 @@
 # File Ownership — BuildLearn
 
 > Prevent merge conflicts when Programmer 1 and Programmer 2 work in parallel.  
-> **Last updated:** 2026-08-05
+> **Last updated:** 2026-10-03
 
 ---
 
@@ -22,6 +22,7 @@
 | `src/middleware.ts` | Programmer 1 |
 | `src/app/api/`, `src/server/`, `src/ai/`, `src/env.ts` | Programmer 2 |
 | `src/lib/schemas/` | Programmer 2 |
+| `src/lib/ai/` | Programmer 2 |
 | `prisma/`, `content/` | Programmer 2 |
 | `.github/workflows/` | Programmer 2 |
 | `tests/unit/` | Code owner |
