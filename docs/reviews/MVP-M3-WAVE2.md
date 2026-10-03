@@ -348,3 +348,219 @@ When blockers are fixed, run human production-like smoke:
 - Review only; **no code**, merge, Upstash, `OPENAI_API_KEY`, Vercel, Neon, or Lessons 2–3 / TASK-205 changes.
 
 **Next step for implementer:** Fix B-W2-01 and B-W2-02 on `feature/MVP-M3-lesson-1-mentor`, add targeted tests, request Checker delta re-review.
+
+---
+
+# Checker Delta Review — Wave 2 Blocker Fixes (B-W2-01 / B-W2-02)
+
+**Verdict:** APPROVED FOR FOUNDER SMOKE  
+**Date:** 2026-10-03  
+**Reviewer:** Checker Agent (independent)  
+**Branch:** `feature/MVP-M3-lesson-1-mentor`  
+**Wave 2 baseline:** `f657068`  
+**Original Wave 2 review:** `0e2ed8f` — CHANGES REQUIRED (preserved above)  
+**Blocker-fix commit reviewed:** `c7bf4ea` — `fix(MVP-M3): TASK-203-UI Wave 2 block-scoped mentor races (B-W2-01/02)`  
+
+**Scope:** Delta review only — B-W2-01, B-W2-02, direct regressions from `c7bf4ea`, founder-smoke technical readiness. No code changes, merge, or infra.
+
+---
+
+## Executive summary
+
+Commit `c7bf4ea` addresses the two Wave 2 blockers with block-scope helpers, generation-guarded help handling, grader-event scope checks, panel reset on navigation, and jsdom regression tests.
+
+**B-W2-01 RESOLVED** and **B-W2-02 RESOLVED** for the practical async races that motivated the original review (slow help/grader responses after Back/Continue). The branch is **technically ready for founder smoke**.
+
+This is **not** authorization to merge MVP-M3 or final product acceptance. Non-blocking UX items from the original review remain for human smoke / follow-up.
+
+**Residual hardening (non-blocking):** `activeScopeRef`, `helpRequestGenerationRef`, and `mentorBlockScopeRef` are updated in `useEffect`, not during render. A theoretical sub-effect window exists (see §2). Recommend render-time ref sync before production merge; not required to proceed with founder smoke.
+
+---
+
+## Independent validation (`c7bf4ea`)
+
+| Check | Checker result |
+| ----- | -------------- |
+| `pnpm test tests/unit/lesson-player/mentor-block-scope-races.test.tsx` | **Pass (5/5)** |
+| `pnpm test tests/unit/lesson-player/grader-event-client.test.ts` | **Pass (3/3)** |
+| `pnpm test` (full) | **Pass (286/286)** |
+| `pnpm typecheck` | **Pass** |
+| `pnpm lint` | **Pass** |
+| `pnpm build` | **Pass** |
+
+---
+
+## 1. B-W2-01 — Block-scoped mentor UI
+
+| Mechanism | Present | Evidence |
+| --------- | ------- | -------- |
+| `activeScopeRef` | **Yes** | Updated in `[lessonId, blockIndex]` effect |
+| `helpRequestGenerationRef` | **Yes** | Incremented on scope change; captured per request |
+| Reset effect | **Yes** | Clears `message`, `statusText`, `loadingAction` on scope change |
+| `applyBlockResult()` | **Yes** | Generation match + `isSameMentorBlockScope(requestScope, activeScopeRef.current)` |
+| Stale success path | **Blocked** | No `setMessage`, quota from stale body, or `onEditorFocus` when guard fails |
+| Stale error path | **Blocked** | `catch` re-checks guard before `statusText` / `quotaBlocked` |
+| Stale `finally` loading | **Blocked** | Clears `loadingAction` only when `requestGeneration === helpRequestGenerationRef.current` |
+
+**Invariant (practical):** Help initiated for `(lessonId, blockIndex) = (A, X)` does not populate mentor UI for block Y after navigation + effect flush, nor after generation bump invalidates an in-flight request.
+
+**Continue / Back / rapid navigation:** Parent `blockIndex` change drives panel props; reset effect clears prior-block content. In-flight requests from block X fail generation or scope check once block Y effect runs.
+
+**Multiple sequential requests:** `loadingAction` prevents parallel clicks; new scope change bumps generation and invalidates prior request handlers.
+
+---
+
+## 2. Request generation safety & render/effect timing
+
+**Generation behaviour:**
+
+- Increments once per `lessonId`/`blockIndex` change (in effect).
+- Request captures `requestGeneration` at start; stale handlers fail `applyBlockResult()` after increment.
+- Stale `finally` cannot clear loading for a newer generation when generations differ.
+
+**Render → effect timing analysis:**
+
+On block navigation, React renders with new `blockIndex` **before** the scope `useEffect` runs. In that window, `activeScopeRef` and `helpRequestGenerationRef` may still describe the **previous** block. A help promise resolving in that window could pass scope + generation checks for the **old** block while props already show the new block.
+
+**Mitigations in `c7bf4ea`:**
+
+1. Real `/help` latency is overwhelmingly slower than React’s post-commit effect flush (macrotask vs microtask ordering in practice).
+2. The same navigation effect clears `message`/`loadingAction` and bumps generation—correcting stray message state even if a rare accept occurred.
+3. **`onEditorFocus` is not reverted** if fired in the theoretical window—see non-blocking R-W2-09.
+
+**Checker conclusion:** The **dominant production race** (navigate, then network response) is **fixed**. The **effect-only ref sync** leaves a **theoretical** pre-effect window; documented as **non-blocking** for founder smoke, **recommended hardening before merge**.
+
+Tests use `act()` around navigation, which **flushes effects before assertions**—they validate post-effect behaviour, not the pre-effect microtask window (see §8).
+
+---
+
+## 3. Editor focus safety
+
+`onEditorFocus` is invoked only after successful `applyBlockResult()` on the success path (`ai-mentor-panel.tsx`). Stale help after block change (test: block 3 → 5, deferred resolve) does **not** call `onEditorFocus`. Same-block test confirms focus still fires with `editorFocus.startLine`.
+
+---
+
+## 4. Mentor state reset
+
+On `lessonId`/`blockIndex` change, panel resets: `message`, `statusText`, `loadingAction`. Response-derived UI (`need_more_help`, source label, `try_again` hint) clears with `message`. Quota display persists (lesson-wide)—**correct**.
+
+Reset does not erase a response for the **new** block unless the user had navigated away and back; a new block starts with empty message until a new request completes—**correct**.
+
+---
+
+## 5. B-W2-02 — Grader-event block scope
+
+| Piece | Role |
+| ----- | ---- |
+| `mentor-block-scope.ts` | `isSameMentorBlockScope` |
+| `grader-event-client.ts` | Captures `requestScope` from input; compares to `getActiveScope()` before `onSuccess` |
+| `lesson-player.tsx` | `mentorBlockScopeRef` + `getActiveScope: () => mentorBlockScopeRef.current` |
+
+Stale grader-event (block A → navigate B → A response): **ignored** when active scope is B.
+
+Same-block: **updates** `serverFailCount` via `vi.waitFor` test.
+
+Trust model preserved: no client `passed`, fire-and-forget, local grader unchanged.
+
+---
+
+## 6. Grader ref / render timing
+
+`mentorBlockScopeRef` updates in `useEffect` after render—same theoretical gap as §2.
+
+**Additional mitigation:** `lesson-player` `useEffect` on `[blockIndex]` resets `serverFailCount` to `0` on navigation. A stale callback that incorrectly applied a high fail count **before** ref update can still be **zeroed** by the navigation effect if ordering interleaves; callback **after** ref update is **scope-blocked**.
+
+**Checker conclusion:** B-W2-02 **resolved** for realistic grader-event latency; same non-blocking render-sync recommendation as help (R-W2-09).
+
+---
+
+## 7. Stuck state reset
+
+On `blockIndex` change (`lesson-player.tsx` effect): `localFailCount`, `serverFailCount`, `blockEnteredAt`, `editorRevealLine`, `mobileMentorOpen` reset; editor/grader feedback cleared via `syncEditorToBlock`. New block does not inherit “Want a hint?” from prior failures once effect runs.
+
+Harness test mirrors navigation reset pattern; **LessonPlayer** itself uses the same effect structure.
+
+---
+
+## 8. Test quality
+
+| Test | Exercises |
+| ---- | --------- |
+| Stale help message | **Real `AiMentorPanel`** + deferred `postMentorHelp`, block 3→4 |
+| Stale `onEditorFocus` | **Real panel** + mock callback |
+| Message reset | **Real panel** after successful help then block change |
+| Same-block help + focus | **Real panel** |
+| Stuck reset harness | Component with **same reset effect** as LessonPlayer (not full LessonPlayer) |
+| Stale grader | **`syncMentorGraderEvent`** + mutable active scope (integration at client boundary used by player) |
+| Same-block grader | **`syncMentorGraderEvent`** + `waitFor` |
+
+**Gap (non-blocking):** No test forces promise resolution **between** render(new block) and scope `useEffect` without `act` flushing effects. Acceptable for founder smoke gate; add if pursuing render-sync hardening.
+
+**jsdom@24.1.3:** File-level `@vitest-environment jsdom`; default Vitest env remains `node`. No conflict observed; only mentor race tests use jsdom. Node engine constraint noted at install time; CI must satisfy jsdom 24 engines.
+
+---
+
+## 9. Direct regression check (`c7bf4ea`)
+
+No regressions identified in:
+
+- Structured help actions, response-source header handling, quota UI
+- Grader-event body (no client `passed`)
+- Immediate local grader, Monaco, preview, navigation, progress, completion
+
+Original non-blocking UX items **not reopened** (offline copy, quota visibility, 503 depth, golden-path mock limitation).
+
+---
+
+## Blocker disposition
+
+| ID | Status |
+| -- | ------ |
+| **B-W2-01** | **RESOLVED** (practical async + navigation; see §2 residual note) |
+| **B-W2-02** | **RESOLVED** (practical async + navigation; see §6 residual note) |
+
+No new blockers from `c7bf4ea`.
+
+---
+
+## Non-blocking follow-up (delta)
+
+| ID | Note |
+| -- | ---- |
+| R-W2-09 | Sync `activeScopeRef`, `helpRequestGenerationRef`, and `mentorBlockScopeRef` during render (or `useLayoutEffect`) to close pre-effect window; optional test without full `act` flush |
+| R-W2-06 (original) | Partially addressed by `mentor-block-scope-races.test.tsx`; full LessonPlayer E2E still optional |
+
+---
+
+## Founder smoke readiness
+
+**Branch is technically ready for founder smoke** with live or staging mentor backend configured.
+
+Founder smoke should evaluate (human, not Checker):
+
+- Help discoverability and plain-language explanations
+- “Label the page parts” completable without external help
+- Progressive assistance (`need_more_help`, line focus)
+- Quota copy hesitation, fallback/error wording, layout/editor width, integrated feel
+
+**This is NOT authorization to merge** MVP-M3 to main or enable production infra (Upstash, `OPENAI_API_KEY`, etc.).
+
+---
+
+## Explicit delta conclusions
+
+- **B-W2-01 RESOLVED**
+- **B-W2-02 RESOLVED**
+- **Stale mentor responses** cannot affect a new block under normal async timing; generation + reset enforce the invariant after navigation effects run
+- **Stale grader responses** cannot persist wrong-block stuck state under normal async timing; scope guard + `serverFailCount` reset on navigation
+- **Same-block behaviour** remains functional (tests + code inspection)
+- **No direct regression** from `c7bf4ea` identified
+- **Branch is technically ready for founder smoke**
+- **NOT authorization to merge**
+
+---
+
+## Checker actions
+
+- Appended delta to this document; original CHANGES REQUIRED review preserved.
+- No code fixes, merge, or production configuration performed.
