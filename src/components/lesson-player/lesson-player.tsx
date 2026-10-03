@@ -4,10 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import {
+  AiMentorFab,
+  AiMentorPanel,
+} from "@/components/lesson-player/ai-mentor-panel";
 import { Button } from "@/components/ui/button";
 import { ExplainBody } from "@/components/lesson-player/explain-body";
 import { HtmlPreview } from "@/components/lesson-player/html-preview";
 import { MonacoHtmlEditor } from "@/components/lesson-player/monaco-html-editor";
+import { M3_MENTOR_LESSON_ID } from "@/lib/ai/mentor-contracts";
+import { syncMentorGraderEvent } from "@/lib/lesson-player/grader-event-client";
+import {
+  shouldShowStuckHelpPrompt,
+  stuckPromptCopy,
+} from "@/lib/lesson-player/stuck-detection";
 import {
   gradeExerciseBlock,
   gradeInteractBlock,
@@ -63,6 +73,15 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
   const [hasMarkedStarted, setHasMarkedStarted] = useState(
     () => initialData.progress?.status === "started",
   );
+  const [localFailCount, setLocalFailCount] = useState(0);
+  const [serverFailCount, setServerFailCount] = useState(0);
+  const [blockEnteredAt, setBlockEnteredAt] = useState(() => Date.now());
+  const [editorRevealLine, setEditorRevealLine] = useState<number | null>(
+    null,
+  );
+  const [mobileMentorOpen, setMobileMentorOpen] = useState(false);
+
+  const mentorLessonEnabled = lesson.id === M3_MENTOR_LESSON_ID;
 
   const currentBlock = blocks[blockIndex] as LessonBlock | undefined;
   const totalBlocks = blocks.length;
@@ -81,7 +100,66 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
 
   useEffect(() => {
     syncEditorToBlock(blockIndex);
+    setLocalFailCount(0);
+    setServerFailCount(0);
+    setBlockEnteredAt(Date.now());
+    setEditorRevealLine(null);
+    setMobileMentorOpen(false);
   }, [blockIndex, syncEditorToBlock]);
+
+  const mentorBlockActive =
+    mentorLessonEnabled &&
+    currentBlock != null &&
+    (currentBlock.type === "interact" ||
+      currentBlock.type === "exercise" ||
+      currentBlock.type === "quiz" ||
+      currentBlock.type === "explain");
+
+  const secondsOnBlock = Math.floor((Date.now() - blockEnteredAt) / 1000);
+
+  const showStuckPrompt =
+    mentorBlockActive &&
+    shouldShowStuckHelpPrompt({
+      localFailCount,
+      serverFailCount,
+      secondsOnBlock,
+      helpTurnsOnBlock: 0,
+    });
+
+  const syncServerGraderEvent = useCallback(
+    (payload: { learnerCode?: string; selectedOptionId?: string }) => {
+      if (!mentorLessonEnabled) {
+        return;
+      }
+
+      syncMentorGraderEvent(
+        {
+          lessonId: M3_MENTOR_LESSON_ID,
+          blockIndex,
+          ...payload,
+        },
+        (result) => {
+          setServerFailCount(result.blockState.failedChecksSinceLastPass);
+        },
+      );
+    },
+    [blockIndex, mentorLessonEnabled],
+  );
+
+  const applyGraderResult = useCallback(
+    (result: GraderResult, syncPayload?: Parameters<typeof syncServerGraderEvent>[0]) => {
+      setGraderFeedback(result);
+      if (result.passed) {
+        setLocalFailCount(0);
+      } else {
+        setLocalFailCount((count) => count + 1);
+      }
+      if (syncPayload) {
+        syncServerGraderEvent(syncPayload);
+      }
+    },
+    [syncServerGraderEvent],
+  );
 
   useEffect(() => {
     if (hasMarkedStarted) {
@@ -198,7 +276,7 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
     }
 
     const result = gradeInteractBlock(editorCode, block.starterCode);
-    setGraderFeedback(result);
+    applyGraderResult(result, { learnerCode: editorCode });
     if (result.passed) {
       void markBlockPassed(blockIndex);
     }
@@ -211,7 +289,7 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
     }
 
     const result = gradeExerciseBlock(editorCode);
-    setGraderFeedback(result);
+    applyGraderResult(result, { learnerCode: editorCode });
     if (result.passed) {
       void markBlockPassed(blockIndex);
     }
@@ -231,7 +309,7 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
       selectedQuizOption,
       block.correctOptionId,
     );
-    setGraderFeedback(result);
+    applyGraderResult(result, { selectedOptionId: selectedQuizOption });
     if (result.passed) {
       void markBlockPassed(blockIndex, 1);
     }
@@ -284,7 +362,9 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
   };
 
   return (
-    <section className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+    <div className="mx-auto w-full max-w-6xl">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <section className="flex min-w-0 flex-1 flex-col gap-6">
       <header className="space-y-2 border-b border-input pb-4">
         <Link
           href="/roadmap"
@@ -359,6 +439,7 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
               value={editorCode}
               onChange={handleEditorChange}
               ariaLabel="HTML editor for interact activity"
+              revealLine={editorRevealLine}
             />
             <HtmlPreview html={editorCode} />
             <div className="flex flex-wrap items-center gap-3">
@@ -382,6 +463,7 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
               value={editorCode}
               onChange={handleEditorChange}
               ariaLabel="HTML editor for exercise"
+              revealLine={editorRevealLine}
             />
             <HtmlPreview html={editorCode} />
             <div className="flex flex-wrap items-center gap-3">
@@ -453,6 +535,12 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
           </>
         ) : null}
 
+        {showStuckPrompt && mentorBlockActive ? (
+          <p className="rounded-md border border-primary/25 bg-primary/5 px-3 py-2 text-sm">
+            {stuckPromptCopy()}
+          </p>
+        ) : null}
+
         {graderFeedback ? (
           <p
             className={cn(
@@ -489,6 +577,63 @@ export function LessonPlayer({ initialData }: LessonPlayerProps) {
           </Button>
         ) : null}
       </footer>
-    </section>
+        </section>
+
+        {mentorBlockActive ? (
+          <div className="hidden lg:block">
+            <AiMentorPanel
+              lessonId={lesson.id}
+              blockIndex={blockIndex}
+              learnerCode={
+                currentBlock?.type === "interact" ||
+                currentBlock?.type === "exercise"
+                  ? editorCode
+                  : undefined
+              }
+              lastGraderMessage={graderFeedback?.message ?? null}
+              lastGraderPassed={graderFeedback?.passed ?? null}
+              showStuckPrompt={showStuckPrompt}
+              onEditorFocus={(line) => setEditorRevealLine(line)}
+              variant="sidebar"
+            />
+          </div>
+        ) : null}
+      </div>
+
+      {mentorBlockActive ? (
+        <>
+          <AiMentorFab
+            visible={!mobileMentorOpen}
+            onOpen={() => setMobileMentorOpen(true)}
+          />
+          {mobileMentorOpen ? (
+            <>
+              <button
+                type="button"
+                className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+                aria-label="Close help panel"
+                onClick={() => setMobileMentorOpen(false)}
+              />
+              <AiMentorPanel
+                lessonId={lesson.id}
+                blockIndex={blockIndex}
+                learnerCode={
+                  currentBlock?.type === "interact" ||
+                  currentBlock?.type === "exercise"
+                    ? editorCode
+                    : undefined
+                }
+                lastGraderMessage={graderFeedback?.message ?? null}
+                lastGraderPassed={graderFeedback?.passed ?? null}
+                showStuckPrompt={showStuckPrompt}
+                onEditorFocus={(line) => setEditorRevealLine(line)}
+                variant="sheet"
+                onCloseSheet={() => setMobileMentorOpen(false)}
+              />
+            </>
+          ) : null}
+        </>
+      ) : null}
+    </div>
   );
 }
