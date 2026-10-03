@@ -244,3 +244,140 @@ Checker does **not** merge.
 ## Re-review trigger
 
 Update plan commit on same or follow-up docs branch; Checker re-run checklist items **2**, **7**, and **10** only.
+
+---
+
+# Delta re-review — revised plan (2026-10-03)
+
+**Verdict:** CHANGES REQUIRED  
+**Reviewer:** Checker Agent (independent)  
+**Branch:** `docs/mvp-m3-task-203-plan`  
+**Revised planning commit reviewed:** `11d0ba6`  
+**Prior review:** `f662d3b` (CHANGES REQUIRED — preserved above)  
+**Scope:** Delta only — no product code, no merge
+
+---
+
+## Executive summary (delta)
+
+Revision `11d0ba6` **fully resolves B-M3-01** (help progression / `need_more_help` bypass) and **B-M3-03** (production Upstash fail-closed, FR-9.6 sourcing). **B-M3-02 is partially resolved:** escalation fields moved off the help request into Redis, but **struggle evidence still trusts client-reported `passed` on `grader-event`**, so a authenticated client can **fabricate failed checks** and satisfy Level 4 eligibility without honest Run check struggle. One **remaining plan blocker** before **APPROVED FOR IMPLEMENTATION**.
+
+---
+
+## B-M3-01 — Help progression — RESOLVED
+
+| Criterion | Result |
+| --------- | ------ |
+| Repeated `need_more_help` alone cannot reach Level 4 | **PASS** — `maxEligibleLevel` caps at **1** when `failedChecksSinceLastPass === 0`; truth table row: `need_more_help` ×3, 0 fails → stays **1** |
+| Level 4 requires server-observed struggle | **PASS (policy logic)** — requires `failedChecksSinceLastPass > failedChecksAtLastHelp` plus L3 prior |
+| Level 4 requires prior Level 3 help | **PASS** — `lastLevelDelivered >= 3` |
+| Fails after previous help before rescue | **PASS** — strict inequality vs `failedChecksAtLastHelp` |
+| Client help payload cannot force escalation | **PASS** — removed from `MentorHelpRequest` |
+| Genuinely stuck beginner can reach rescue | **PASS** — documented path: fails → L1 help → escalation to L2/L3 → new fail after L3 → L4 |
+
+**Beginner friction (L2/L3):** Level **2** after **one** server-recorded fail; Level **3** after **two** fails and **one** help turn — reasonable for “Label the page parts” (not over-gated). No accidental lock-out of L2/L3 identified.
+
+**B-M3-01:** **Resolved** in plan `11d0ba6`.
+
+---
+
+## B-M3-02 — Server-authoritative state — PARTIAL (one blocker remains)
+
+| Criterion | Result |
+| --------- | ------ |
+| Escalation state in Redis (`MentorBlockState`) | **PASS** |
+| Client cannot set `lastLevelDelivered`, `helpTurnCount`, counters in help request | **PASS** |
+| `grader-event` authenticated + lesson/block scoped | **PASS (specified)** — same auth as help; blockIndex validation |
+| `hints_used` server-only | **PASS** — DoD + TASK-203 |
+| Pass resets fail counter | **PASS** — §5.3 |
+| Replay mode | **PASS (deferred)** — smoke N/A until replay exists |
+
+### Remaining issue — fabricated grader events (BLOCKER)
+
+§5.3 `MentorGraderEventRequest` accepts **`passed: boolean` from the client** and increments `failedChecksSinceLastPass` without requiring the server to **re-run** L1 graders (`gradeInteractBlock`, `gradeExerciseBlock`, etc.) on submitted code.
+
+**Attack:** Authenticated user POSTs `grader-event` with `passed: false` repeatedly (no UI), then walks help policy to **Level 4** — undermining B-M3-01’s intent for anyone scripting the API (and weakening “server-observed struggle” claims).
+
+This is **not** fixed by moving counters off the help request alone. The original B-M3-02 correction is **incomplete** until struggle evidence is **server-verified**.
+
+### B-M3-02-delta — Server must verify grader outcomes on `grader-event`
+
+| Field | Detail |
+| ----- | ------ |
+| **Severity** | Major (blocks APPROVED FOR IMPLEMENTATION) |
+| **Affected** | `docs/plans/MVP-M3-TASK-203-ai-mentor.md` §5.3, §6, §10, §15; `docs/TASK_QUEUE.md` TASK-203 acceptance criteria |
+| **Why it matters** | Level 4 eligibility can be manufactured without genuine failed Run checks; “server-authoritative” struggle is illusory. |
+| **Required correction (plan only)** | (1) **`learnerCode` required** on `grader-event` for `interact` / `exercise` blocks (quiz: server compares selected option if/when quiz events are recorded). (2) Server loads block metadata and runs **the same shared grading functions** as the player (`src/lib/grading/html-lesson-graders.ts`). (3) **Increment fail counter only when server grader fails**; on pass, reset per §5.3. (4) Ignore or overwrite client `passed` with server result (client `message` optional hint only). (5) Add tests: forged `passed: false` with passing code does not increment fails; failing code does. (6) Optional defense-in-depth: rate-limit `grader-event` per user/block (non-substitute for server grade). |
+
+**B-M3-02:** **Not fully resolved** until **B-M3-02-delta** is documented.
+
+---
+
+## B-M3-03 — Production Redis / quotas — RESOLVED
+
+| Criterion | Result |
+| --------- | ------ |
+| Production requires Upstash | **PASS** — §11, §12, `MENTOR_REQUIRE_REDIS` |
+| No production in-memory fallback | **PASS** |
+| Missing/unhealthy Redis → fail closed | **PASS** — **503** on help + grader-event |
+| UI 503 + static/deterministic help | **PASS** — §14, `fallback-copy.ts`, TASK-203-UI |
+| Dev/CI isolated from prod | **PASS** — in-memory/mock explicit |
+| Quota/RPM shared across instances | **PASS** — Upstash keys |
+
+**FR-9.6 clarification (§11):**
+
+| Item | Assessment |
+| ---- | ---------- |
+| FR-9.6 row has no numeric limits | **Correctly stated** |
+| 30/month from PRD §3 / §9 / P-011 context | **Correctly labeled as default env** |
+| 10 RPM from ARCHITECTURE §3.6 | **Correctly not attributed to FR-9.6 row** |
+| Internal consistency | **PASS** across plan + TASK_QUEUE |
+
+**B-M3-03:** **Resolved** in plan `11d0ba6`.
+
+---
+
+## Non-blocking cleanup (revision `11d0ba6`) — verified
+
+| Item | Status |
+| ---- | ------ |
+| Server-only `hints_used` | **Done** |
+| `FILE_OWNERSHIP` `src/lib/ai/` | **Done** |
+| `fallback-copy.test.ts` in plan | **Done** |
+| Replay smoke N/A | **Done** (§16 item 10) |
+| 32 KB body / 413 | **Done** |
+| Dead autoLevel wording removed | **Done** |
+| Tracking “Checker re-review pending” | **Done** (TASK_QUEUE header) |
+
+**Remaining non-blocking (carry to implementation):**
+
+- **R-M3-08** — `learnerQuestion` moderation rules (plan §13 mentions; expand in TASK-203 if needed).
+- **R-M3-09** — Optional explicit P-006 cross-ref in plan env section.
+- **Streaming** — still optional for M3; prefer before production polish.
+- **I-M2-02 alignment** — server grader verification on grader-event satisfies related trust gap for mentor slice.
+
+---
+
+## Scope / complexity (delta) — PASS
+
+Revision does not expand beyond Lesson 1 mentor slice; no new Prisma tables; no TASK-205 / L2–3 / M4 / generic chat. Added `grader-event` + Redis state is proportional to M3.
+
+---
+
+## Delta verdict
+
+**CHANGES REQUIRED**
+
+| Blocker | Status |
+| ------- | ------ |
+| B-M3-01 | **Resolved** (`11d0ba6`) |
+| B-M3-02 | **Open** — **B-M3-02-delta** (server-verify grader on `grader-event`) |
+| B-M3-03 | **Resolved** (`11d0ba6`) |
+
+Master must **not** merge the docs branch or authorize `feature/MVP-M3-lesson-1-mentor` until the plan (and TASK-203 acceptance criteria) include **B-M3-02-delta** corrections. Checker does **not** merge and does **not** edit the plan in this pass.
+
+---
+
+## Re-review trigger (second delta)
+
+After plan commit addressing **B-M3-02-delta** only; Checker re-run §5.3, §15 tests list, and TASK-203 YAML.
