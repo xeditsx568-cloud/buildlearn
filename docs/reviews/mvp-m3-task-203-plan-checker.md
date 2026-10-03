@@ -381,3 +381,99 @@ Master must **not** merge the docs branch or authorize `feature/MVP-M3-lesson-1-
 ## Re-review trigger (second delta)
 
 After plan commit addressing **B-M3-02-delta** only; Checker re-run §5.3, §15 tests list, and TASK-203 YAML.
+
+---
+
+# Second delta re-review — B-M3-02-delta only (2026-10-03)
+
+**Verdict:** APPROVED FOR IMPLEMENTATION  
+**Reviewer:** Checker Agent (independent)  
+**Branch:** `docs/mvp-m3-task-203-plan`  
+**Planning commit reviewed:** `d529d18`  
+**Prior reviews preserved:** `f662d3b`, delta `b80ba08` (above)  
+**Scope:** B-M3-02-delta trust boundary only — no product code, no merge
+
+---
+
+## Grader-event trust boundary — PASS
+
+Plan §5.3 matches the required pipeline:
+
+| Step | Plan coverage |
+| ---- | ------------- |
+| 1–2 Authenticate / authorize | Clerk + `pathAccess.canOpen`; same as help |
+| 3 Authoritative block from DB | Load lesson; validate `blockIndex` / type |
+| 4 Body limits | 32 KB → **413**; `learnerCode` max 8 KB |
+| 5 Learner input only | `learnerCode` / `selectedOptionId`; **no client pass/fail authority** |
+| 6–7 Server grader → derived result | §5.3.1 `html-lesson-graders` |
+| 8 Redis update from server result only | Increment fail on server fail; reset on server pass |
+| 9 Response for optional UI sync | `MentorGraderEventResponse` |
+
+**Forbidden authoritative fields:** §5.3 explicitly rejects `passed`, escalation counters, and related fields with **400**. Implementation should use **strict Zod** (`.strict()`) so unknown keys (e.g. a client `failed` alias) are rejected — not documented as a separate key but covered by “unexpected authoritative fields” when strict parsing is applied (non-blocking implementation note).
+
+Client-side player grading remains **UX-only**; mentor escalation does not trust it.
+
+---
+
+## Shared grader — PASS
+
+§5.3.1 requires **one** module: `src/lib/grading/html-lesson-graders.ts` for player and `grader-event`. Small TASK-203 refactor allowed; **second ruleset forbidden**. Parity with golden fixtures / `tests/unit/grading/*` required in §15 item 7.
+
+---
+
+## Forged-failure protection — PASS
+
+§15 items 1–9 cover:
+
+- Forged `passed: false` → **400**, no state change  
+- Counter injection → **400**  
+- Real failing / passing code → increment / reset  
+- Passing code repeated → cannot manufacture L4 eligibility (item 5 + §7.2)  
+- Genuine failing attempts → §7.2 progression (item 6)  
+- Auth / 413 as documented  
+
+**Repeated identical failing `learnerCode`:** Each POST is a **separate server-verified Run attempt**; fail counter increments per server fail. This is **explicit**, consistent with §5.3 step 5, and acceptable for M3: the learner cannot fabricate pass/fail without code that **actually fails** the deterministic grader. ADR-023 “genuine struggle” is satisfied for honest UI use; scripted spam with unchanged failing code still reflects real failed checks, not forged outcomes. **No new anti-abuse system required** for this review.
+
+---
+
+## Cross-check: B-M3-01 and B-M3-03 unchanged — PASS
+
+| Prior resolution | Contradiction check |
+| ---------------- | ------------------- |
+| **B-M3-01** §7.2 `maxEligibleLevel`, L4 after L3 + new fails vs `failedChecksAtLastHelp` | **Intact** — grader-event feeds the same Redis fields §7.2 already uses |
+| **B-M3-03** prod Upstash, 503, no in-memory prod fallback, static UI fallback | **Intact** — §11, §14 unchanged by `d529d18` |
+
+No scope expansion (Lesson 1 only; no Prisma conversation tables).
+
+---
+
+## Blocker status (final)
+
+| ID | Status |
+| -- | ------ |
+| **B-M3-01** | **Resolved** (`11d0ba6`, confirmed at `d529d18`) |
+| **B-M3-02 / B-M3-02-delta** | **Resolved** (`d529d18`) |
+| **B-M3-03** | **Resolved** (`11d0ba6`, confirmed at `d529d18`) |
+
+---
+
+## Non-blocking recommendations (implementation)
+
+- Use **Zod `.strict()`** on `MentorGraderEventRequest` so `failed` and other alias keys are rejected.
+- **Interact blocks:** server must pass block `starterCode` from DB into `gradeInteractBlock` (implied by shared grader; document in TASK-203 if not obvious).
+- **R-M3-08 / R-M3-09 / streaming** — unchanged from prior delta.
+
+---
+
+## Second delta verdict
+
+**APPROVED FOR IMPLEMENTATION**
+
+- **B-M3-02-delta:** **RESOLVED** (`d529d18`)
+- **B-M3-01:** **Remains RESOLVED**
+- **B-M3-03:** **Remains RESOLVED**
+- **Complete MVP-M3 / TASK-203 planning:** **APPROVED**
+- **`docs/mvp-m3-task-203-plan` may be merged to `main`** when Master directs
+- **After merge, Master may authorize:** `feature/MVP-M3-lesson-1-mentor` (TASK-203 Wave 0 → TASK-203-UI)
+
+Checker does **not** merge and does **not** create the implementation branch.
